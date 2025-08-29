@@ -2056,7 +2056,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <MenuItem 
                                         itemId="users"
                                         description="Manage user accounts and their access permissions"
-                                        onClick={() => console.log('Users clicked')}
+                                        onClick={() => {
+                                          navigate('/users');
+                                          setIsLogoDropdownOpen(false);
+                                        }}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -2071,7 +2074,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <MenuItem 
                                         itemId="groups"
                                         description="Create and manage user groups and group-based permissions"
-                                        onClick={() => console.log('Groups clicked')}
+                                        onClick={() => {
+                                          navigate('/groups');
+                                          setIsLogoDropdownOpen(false);
+                                        }}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}

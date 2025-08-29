@@ -13,6 +13,8 @@ import { MyUserAccess } from '@app/MyUserAccess/MyUserAccess';
 import { ServiceAccounts } from '@app/ServiceAccounts/ServiceAccounts';
 import { UserAccess } from '@app/UserAccess/UserAccess';
 import { Support } from '@app/Support/Support';
+import { Users } from '@app/Users/Users';
+import { Groups } from '@app/Groups/Groups';
 import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
 import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { NotFound } from '@app/NotFound/NotFound';
@@ -135,6 +137,18 @@ const routes: AppRouteConfig[] = [
     exact: true,
     path: '/learning-resources-iam',
     title: 'IAM Learning Resources | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <Users />,
+    exact: true,
+    path: '/users',
+    title: 'Users | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <Groups />,
+    exact: true,
+    path: '/groups',
+    title: 'Groups | Red Hat Hybrid Cloud Console',
   },
 ];
 
