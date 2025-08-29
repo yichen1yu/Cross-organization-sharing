@@ -1883,109 +1883,73 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     </div>
                   </SplitItem>
 
-                  {/* Detail Side - Application Launcher Format */}
+                  {/* Detail Side */}
                   <SplitItem isFilled>
                     <div style={{ padding: '24px', height: '100%', overflow: 'auto' }}>
                       {(() => {
-                        // Application launcher apps based on selected service category
-                        const getApplicationsForService = (serviceId: string) => {
-                          switch (serviceId) {
-                            case 'my-favorite-services':
-                              return [
-                                { name: 'Alert Manager', icon: <BellIcon />, description: 'Manage alerts and notifications', href: '/alert-manager' },
-                                { name: 'User Access', icon: <UsersIcon />, description: 'Identity and access management', href: '/my-user-access' },
-                                { name: 'Event Log', icon: <ListIcon />, description: 'System events and logs', href: '/event-log' },
-                                { name: 'Data Integration', icon: <DatabaseIcon />, description: 'Connect data sources', href: '/data-integration' },
-                                { name: 'All Services', icon: <CubeIcon />, description: 'Browse all available services', href: '/all-services' },
-                                { name: 'Support', icon: <HelpIcon />, description: 'Get help and documentation', href: '/support' }
-                              ];
-                            case 'ai-ml':
-                              return [
-                                { name: 'Model Training', icon: <BrainIcon />, description: 'Train ML models', href: '#' },
-                                { name: 'Data Science', icon: <ChartLineIcon />, description: 'Analytics workbench', href: '#' },
-                                { name: 'GPU Computing', icon: <ServerIcon />, description: 'High-performance computing', href: '#' },
-                                { name: 'MLOps Pipeline', icon: <RocketIcon />, description: 'Deploy and manage models', href: '#' }
-                              ];
-                            case 'security':
-                              return [
-                                { name: 'Vulnerability Scan', icon: <ShieldAltIcon />, description: 'Security scanning', href: '#' },
-                                { name: 'Threat Detection', icon: <ExclamationTriangleIcon />, description: 'Monitor threats', href: '#' },
-                                { name: 'Policy Manager', icon: <BookOpenIcon />, description: 'Security policies', href: '#' },
-                                { name: 'Compliance', icon: <UsersIcon />, description: 'Compliance monitoring', href: '#' }
-                              ];
-                            default:
-                              return [
-                                { name: 'Getting Started', icon: <BookOpenIcon />, description: 'Learn the basics', href: '#' },
-                                { name: 'Documentation', icon: <HelpIcon />, description: 'Complete guides', href: '#' },
-                                { name: 'API Reference', icon: <CodeIcon />, description: 'Developer resources', href: '#' },
-                                { name: 'Support Center', icon: <QuestionCircleIcon />, description: 'Get assistance', href: '#' }
-                              ];
+                        // Find the selected menu item only among non-link items
+                        let currentMenuItem: MenuItem | null = null;
+                        for (const groupItems of Object.values(menuGroupsData)) {
+                          const found = groupItems.find(item => item.id === selectedMenuItem && !item.isLink);
+                          if (found) {
+                            currentMenuItem = found;
+                            break;
                           }
-                        };
-
-                        const applications = getApplicationsForService(selectedMenuItem);
+                        }
+                        if (!currentMenuItem) return null;
                         
                         return (
-                          <div>
-                            <Title headingLevel="h3" size="lg" style={{ marginBottom: '24px' }}>
-                              Quick Access
-                            </Title>
-                            <div style={{
-                              display: 'grid',
-                              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                              gap: '16px',
-                              padding: '0'
-                            }}>
-                              {applications.map((app, index) => (
-                                <Card
-                                  key={index}
-                                  isClickable={app.href !== '#'}
-                                  onClick={() => {
-                                    if (app.href !== '#') {
-                                      if (app.href.startsWith('/')) {
-                                        navigate(app.href);
-                                        setIsLogoDropdownOpen(false);
-                                      } else {
-                                        window.open(app.href, '_blank');
-                                      }
-                                    }
-                                  }}
-                                  style={{
-                                    height: '120px',
-                                    cursor: app.href !== '#' ? 'pointer' : 'default',
-                                    opacity: app.href === '#' ? 0.6 : 1
-                                  }}
-                                >
-                                  <CardBody style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    textAlign: 'center',
-                                    padding: '16px 12px'
-                                  }}>
-                                    <div style={{
-                                      fontSize: '28px',
-                                      marginBottom: '8px',
-                                      color: 'var(--pf-v6-global--primary-color--100)'
-                                    }}>
-                                      {app.icon}
-                                    </div>
-                                    <Title headingLevel="h4" size="md" style={{ marginBottom: '4px' }}>
-                                      {app.name}
-                                    </Title>
-                                    <div style={{
-                                      fontSize: '12px',
-                                      color: 'var(--pf-v6-global--Color--200)',
-                                      lineHeight: '1.3'
-                                    }}>
-                                      {app.description}
-                                    </div>
-                                  </CardBody>
-                                </Card>
-                              ))}
-                            </div>
-                          </div>
+                          <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsLg' }}>
+                            <FlexItem>
+                              <Title headingLevel="h3" size="xl">
+                                {currentMenuItem.name}
+                              </Title>
+                            </FlexItem>
+                            
+                            <FlexItem>
+                              <Content>
+                                <p style={{ fontSize: '16px', lineHeight: '1.5' }}>
+                                  {currentMenuItem.details}
+                                </p>
+                              </Content>
+                            </FlexItem>
+
+                            <FlexItem>
+                              <Title headingLevel="h4" size="lg" style={{ marginBottom: '12px' }}>
+                                Key Features
+                              </Title>
+                              <DataList aria-label="Features list" isCompact>
+                                {currentMenuItem.features.map((feature, index) => (
+                                  <DataListItem key={index}>
+                                    <DataListItemRow>
+                                      <DataListItemCells
+                                        dataListCells={[
+                                          <DataListCell key="feature">
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                              <span style={{ 
+                                                width: '6px', 
+                                                height: '6px', 
+                                                backgroundColor: '#0066cc', 
+                                                borderRadius: '50%', 
+                                                marginRight: '12px' 
+                                              }}></span>
+                                              {feature}
+                                            </div>
+                                          </DataListCell>
+                                        ]}
+                                      />
+                                    </DataListItemRow>
+                                  </DataListItem>
+                                ))}
+                              </DataList>
+                            </FlexItem>
+
+                            <FlexItem style={{ marginTop: 'auto' }}>
+                              <Button variant="primary" size="lg">
+                                Open {currentMenuItem.name}
+                              </Button>
+                            </FlexItem>
+                          </Flex>
                         );
                       })()}
                     </div>
