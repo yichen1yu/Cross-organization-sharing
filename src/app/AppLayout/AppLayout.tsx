@@ -414,6 +414,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     if (isLogoDropdownOpen) {
       const firstItemId = getFirstMenuItemId();
       setSelectedMenuItem(firstItemId);
+      // Force re-render with a small delay to ensure Menu component applies selection
+      setTimeout(() => {
+        setSelectedMenuItem(firstItemId);
+      }, 10);
     }
   }, [isLogoDropdownOpen]);
 
@@ -1728,6 +1732,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   }}>
                     <div style={{ height: '100%' }}>
                       <Menu 
+                        key={`menu-${isLogoDropdownOpen}-${selectedMenuItem}`}
                         aria-label="Services menu"
                         activeItemId={selectedMenuItem}
                         selected={selectedMenuItem}
@@ -1789,7 +1794,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       data-item-id={item.id}
                                       data-selected={!item.isLink && selectedMenuItem === item.id ? "true" : "false"}
                                       data-is-link={item.isLink ? "true" : "false"}
-                                      className={item.isLink ? 'custom-link-menu-item' : ''}
+                                      className={`${item.isLink ? 'custom-link-menu-item' : ''} ${!item.isLink && selectedMenuItem === item.id ? 'pf-m-selected' : ''}`.trim()}
                                       style={item.isLink ? { 
                                         color: '#0066cc', 
                                         cursor: 'pointer',
@@ -1816,7 +1821,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       data-item-id={item.id}
                                       data-selected={!item.isLink && selectedMenuItem === item.id ? "true" : "false"}
                                       data-is-link={item.isLink ? "true" : "false"}
-                                      className={item.isLink ? 'custom-link-menu-item' : ''}
+                                      className={`${item.isLink ? 'custom-link-menu-item' : ''} ${!item.isLink && selectedMenuItem === item.id ? 'pf-m-selected' : ''}`.trim()}
                                       style={item.isLink ? { 
                                         color: '#0066cc', 
                                         cursor: 'pointer',
