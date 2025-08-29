@@ -40,7 +40,7 @@ const EventLog: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem to="/">Settings</BreadcrumbItem>
+          <BreadcrumbItem to="/overview">Settings</BreadcrumbItem>
           <BreadcrumbItem isActive>Event Log</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>

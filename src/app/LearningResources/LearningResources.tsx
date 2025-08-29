@@ -27,7 +27,7 @@ const LearningResources: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem to="/">Settings</BreadcrumbItem>
+          <BreadcrumbItem to="/overview">Settings</BreadcrumbItem>
           <BreadcrumbItem isActive>Learning Resources</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
@@ -69,24 +69,23 @@ const LearningResources: React.FunctionComponent = () => {
       
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
-          <Tab eventKey={0} title={<TabTitleText>Resources</TabTitleText>}>
+          <Tab eventKey={0} title={<TabTitleText>Tutorials</TabTitleText>}>
             <PageSection>
               <Card>
                 <CardBody>
                   <Content>
-                    <Title headingLevel="h2" size="xl">Available Learning Resources</Title>
+                    <Title headingLevel="h2" size="xl">Interactive Tutorials</Title>
                     <p>
-                      Access comprehensive learning materials, tutorials, and training resources 
-                      to enhance your skills with the Red Hat Hybrid Cloud Console.
+                      Step-by-step interactive tutorials covering console features, 
+                      cloud services, and best practices for hybrid cloud management.
                     </p>
                     
-                    <h3>Available Resources:</h3>
+                    <h3>Available Tutorials:</h3>
                     <ul>
-                      <li><strong>Interactive Tutorials:</strong> Step-by-step guided experiences</li>
-                      <li><strong>Video Training:</strong> On-demand video content and webinars</li>
-                      <li><strong>Documentation:</strong> Comprehensive guides and API references</li>
-                      <li><strong>Best Practices:</strong> Industry-standard implementation patterns</li>
-                      <li><strong>Certification Paths:</strong> Structured learning programs</li>
+                      <li><strong>Getting Started:</strong> Introduction to the Red Hat Hybrid Cloud Console</li>
+                      <li><strong>Service Management:</strong> How to deploy and manage services</li>
+                      <li><strong>Monitoring & Alerts:</strong> Setting up monitoring and alert configurations</li>
+                      <li><strong>Security Best Practices:</strong> Implementing security across your infrastructure</li>
                     </ul>
                   </Content>
                 </CardBody>
@@ -98,8 +97,8 @@ const LearningResources: React.FunctionComponent = () => {
               <Card>
                 <CardBody>
                   <Content>
-                    <Title headingLevel="h2" size="xl">Documentation Hub</Title>
-                    <p>Browse comprehensive documentation and technical guides.</p>
+                    <Title headingLevel="h2" size="xl">Documentation Library</Title>
+                    <p>Comprehensive documentation and guides for all console features and services.</p>
                   </Content>
                 </CardBody>
               </Card>

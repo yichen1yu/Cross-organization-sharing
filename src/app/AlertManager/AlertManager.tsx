@@ -30,7 +30,7 @@ const AlertManager: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem to="/">Settings</BreadcrumbItem>
+          <BreadcrumbItem to="/overview">Settings</BreadcrumbItem>
           <BreadcrumbItem isActive>Alert Manager</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
