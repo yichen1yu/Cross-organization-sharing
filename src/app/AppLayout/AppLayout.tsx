@@ -1262,7 +1262,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 <DropdownItem>
                   <HelpIcon /> Help & Support
                 </DropdownItem>
-                <DropdownItem component="hr" />
+                <Divider />
                 <DropdownItem>
                   <SignOutAltIcon /> Sign Out
                 </DropdownItem>
