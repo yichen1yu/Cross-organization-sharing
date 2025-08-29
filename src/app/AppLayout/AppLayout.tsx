@@ -1946,6 +1946,74 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                     </MenuList>
                                   </MenuGroup>
                                 </Menu>
+                              ) : currentMenuItem.id === 'alerting-data-integrations' ? (
+                                <Menu>
+                                  <MenuGroup label="Console Settings" labelHeadingLevel="h2">
+                                    <Divider />
+                                    <MenuList>
+                                      <MenuItem 
+                                        itemId="alert-manager-settings"
+                                        description="Mary to add a description here eventually"
+                                        onClick={() => console.log('Alert Manager | Settings clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Alert Manager | Settings
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="data-integration-settings"
+                                        description="Mary to add a description here eventually"
+                                        onClick={() => console.log('Data Integration | Settings clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Data Integration | Settings
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="event-log-settings"
+                                        description="Mary to add a description here eventually"
+                                        onClick={() => console.log('Event Log | Settings clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Event Log | Settings
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="overview-settings"
+                                        description="Mary to add a description here evenually"
+                                        onClick={() => console.log('Overview | Settings clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Overview | Settings
+                                      </MenuItem>
+                                    </MenuList>
+                                  </MenuGroup>
+                                </Menu>
                               ) : (
                                 <Menu>
                                   <MenuGroup label="Red Hat Enterprise Linux" labelHeadingLevel="h2">
