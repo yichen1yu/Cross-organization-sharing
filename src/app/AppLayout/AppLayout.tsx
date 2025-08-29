@@ -1260,16 +1260,16 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 <div style={{ padding: '16px' }}>
                   <DescriptionList isCompact>
                     <DescriptionListGroup>
-                      <DescriptionListTerm>User</DescriptionListTerm>
+                      <DescriptionListTerm>Username:</DescriptionListTerm>
                       <DescriptionListDescription>Ned Username</DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
-                      <DescriptionListTerm>Role</DescriptionListTerm>
-                      <DescriptionListDescription>Organization Admin</DescriptionListDescription>
+                      <DescriptionListTerm>Account number:</DescriptionListTerm>
+                      <DescriptionListDescription>12345678</DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
-                      <DescriptionListTerm>Account</DescriptionListTerm>
-                      <DescriptionListDescription>12345678</DescriptionListDescription>
+                      <DescriptionListTerm>Org ID:</DescriptionListTerm>
+                      <DescriptionListDescription>987654321</DescriptionListDescription>
                     </DescriptionListGroup>
                   </DescriptionList>
                 </div>
