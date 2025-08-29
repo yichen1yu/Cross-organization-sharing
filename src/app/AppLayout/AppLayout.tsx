@@ -2267,7 +2267,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         <MenuItem 
                                           itemId="console-alert-manager"
                                           description="Configure and manage system alerts, notifications, and escalation policies"
-                                          onClick={() => console.log('Console Alert Manager clicked')}
+                                          onClick={() => {
+                                            navigate('/alert-manager');
+                                            setIsLogoDropdownOpen(false);
+                                          }}
                                           actions={
                                             <MenuItemAction
                                               icon={<StarIcon />}
@@ -2282,7 +2285,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         <MenuItem 
                                           itemId="console-data-integration"
                                           description="Manage data integration workflows, connectors, and synchronization settings"
-                                          onClick={() => console.log('Console Data Integration clicked')}
+                                          onClick={() => {
+                                            navigate('/data-integrations');
+                                            setIsLogoDropdownOpen(false);
+                                          }}
                                           actions={
                                             <MenuItemAction
                                               icon={<StarIcon />}
