@@ -1976,7 +1976,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <MenuItem 
                                         itemId="alert-manager-settings"
                                         description="Mary to add a description here eventually"
-                                        onClick={() => console.log('Alert Manager | Settings clicked')}
+                                        onClick={() => navigate('/alert-manager')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -1991,7 +1991,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <MenuItem 
                                         itemId="data-integration-settings"
                                         description="Mary to add a description here eventually"
-                                        onClick={() => console.log('Data Integration | Settings clicked')}
+                                        onClick={() => navigate('/data-integrations')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -2006,7 +2006,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <MenuItem 
                                         itemId="event-log-settings"
                                         description="Mary to add a description here eventually"
-                                        onClick={() => console.log('Event Log | Settings clicked')}
+                                        onClick={() => navigate('/event-log')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -2021,7 +2021,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <MenuItem 
                                         itemId="overview-settings"
                                         description="Mary to add a description here evenually"
-                                        onClick={() => console.log('Overview | Settings clicked')}
+                                        onClick={() => navigate('/overview')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}

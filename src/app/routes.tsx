@@ -68,6 +68,12 @@ const routes: AppRouteConfig[] = [
     title: 'Data Integration | Red Hat Hybrid Cloud Console',
   },
   {
+    element: <DataIntegration />,
+    exact: true,
+    path: '/data-integrations',
+    title: 'Data Integration | Red Hat Hybrid Cloud Console',
+  },
+  {
     element: <EventLog />,
     exact: true,
     label: 'Event Log',
