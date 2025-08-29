@@ -1361,14 +1361,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const navigationType = getNavigationType();
 
   // Primary navigation structure (current navigation)
-  const primaryNavRoutes = routes.filter(route => {
-    if (route.routes) {
-      // This is a route group (Learning Resources)
-      return route.label === 'Learning Resources';
-    } else {
-      // Individual routes
-      return route.label && ['Overview', 'Alert Manager', 'Data Integration', 'Event Log'].includes(route.label);
-    }
+  const primaryNavRoutes = routes.filter((route): route is IAppRoute => {
+    // Only individual routes, no expandable groups
+    return !route.routes && !!route.label && ['Overview', 'Alert Manager', 'Data Integration', 'Event Log', 'Learning Resources'].includes(route.label);
   });
 
   // Secondary navigation structure (IAM bundle)
@@ -1386,7 +1381,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         {navigationType === 'primary' ? (
           // Show primary navigation
           primaryNavRoutes.map((route, idx) => 
-            route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx))
+            route.label && renderNavItem(route, idx)
           )
         ) : (
           // Show secondary navigation (IAM bundle)

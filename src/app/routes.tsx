@@ -75,23 +75,11 @@ const routes: AppRouteConfig[] = [
     title: 'Event Log | Red Hat Hybrid Cloud Console',
   },
   {
+    element: <LearningResources />,
+    exact: true,
     label: 'Learning Resources',
-    routes: [
-      {
-        element: <LearningResources />,
-        exact: true,
-        label: 'Learning Resources',
-        path: '/learning-resources',
-        title: 'Learning Resources | Red Hat Hybrid Cloud Console',
-      },
-      {
-        element: <LearningResourcesIAM />,
-        exact: true,
-        label: 'IAM Learning',
-        path: '/learning-resources-iam',
-        title: 'IAM Learning Resources | Red Hat Hybrid Cloud Console',
-      },
-    ],
+    path: '/learning-resources',
+    title: 'Learning Resources | Red Hat Hybrid Cloud Console',
   },
   // Routes without labels (accessible via URL but not shown in navigation)
   {
@@ -135,6 +123,12 @@ const routes: AppRouteConfig[] = [
     exact: true,
     path: '/support',
     title: 'Support | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <LearningResourcesIAM />,
+    exact: true,
+    path: '/learning-resources-iam',
+    title: 'IAM Learning Resources | Red Hat Hybrid Cloud Console',
   },
 ];
 
