@@ -1273,7 +1273,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     </DescriptionListGroup>
                   </DescriptionList>
                 </div>
-                <Divider />
+                <div style={{ paddingBottom: '8px' }}>
+                  <Divider />
+                </div>
                 <DropdownItem
                   component="a"
                   href="https://console.redhat.com/settings/profile"
@@ -1298,7 +1300,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 >
                   My Alert Preferences
                 </DropdownItem>
-                <Divider />
+                <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+                  <Divider />
+                </div>
                 <DropdownItem>
                   Logout
                 </DropdownItem>
