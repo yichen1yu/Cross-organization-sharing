@@ -317,13 +317,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   
   // Get the first menu item ID from the first non-link group (Services)
   const getFirstMenuItemId = () => {
-    for (const groupItems of Object.values(menuGroupsData)) {
-      const firstNonLinkItem = groupItems.find(item => !item.isLink);
-      if (firstNonLinkItem) {
-        return firstNonLinkItem.id;
-      }
-    }
-    return 'ai-ml'; // fallback
+    // Default to "My Favorite Services" as the first selected item
+    return 'my-favorite-services';
   };
   
   // Service dropdown primary-detail state
