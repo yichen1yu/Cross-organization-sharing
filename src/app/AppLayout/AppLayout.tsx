@@ -214,7 +214,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         description: 'Quick access to your most-used services',
         details: 'Access your frequently used and bookmarked services in one convenient location. Customize your dashboard with the services you use most often to improve your workflow efficiency.',
         features: ['Quick Access', 'Custom Dashboard', 'Service Bookmarks', 'Usage Analytics'],
-        icon: <StarIcon />
+        icon: <StarIcon style={{ color: 'var(--pf-v6-c-button--m-favorited--hover__icon--Color, #f39200)' }} />
       },
       {
         id: 'ai-ml',
@@ -1654,10 +1654,19 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 background-color: transparent !important;
                 color: var(--pf-v6-global--Color--100) !important;
               }
-              /* Customize star icon color in My Favorite Services */
-              .pf-v6-c-menu .pf-v6-c-menu__list .pf-v6-c-menu__item[data-item-id="my-favorite-services"] .pf-v6-c-menu__item-icon svg {
-                color: var(--pf-v6-c-button--m-favorited--hover__icon--Color) !important;
-                fill: var(--pf-v6-c-button--m-favorited--hover__icon--Color) !important;
+              /* Customize star icon color in My Favorite Services - Multiple targeting approaches */
+              .pf-v6-c-menu .pf-v6-c-menu__list .pf-v6-c-menu__item[data-item-id="my-favorite-services"] .pf-v6-c-menu__item-icon svg,
+              .pf-v6-c-menu__item[data-item-id="my-favorite-services"] .pf-v6-c-menu__item-icon svg,
+              .pf-v6-c-menu__item[data-item-id="my-favorite-services"] svg,
+              .pf-v6-c-menu__item[data-item-id="my-favorite-services"] .pf-v6-c-menu__item-icon,
+              [data-item-id="my-favorite-services"] svg {
+                color: #f39200 !important;
+                fill: #f39200 !important;
+              }
+              /* Try with PatternFly variable as fallback */
+              .pf-v6-c-menu__item[data-item-id="my-favorite-services"] svg {
+                color: var(--pf-v6-c-button--m-favorited--hover__icon--Color, #f39200) !important;
+                fill: var(--pf-v6-c-button--m-favorited--hover__icon--Color, #f39200) !important;
               }
               /* Style link items differently - increased specificity */
               .pf-v6-c-menu__item[data-is-link="true"] .pf-v6-c-menu__item-main {
