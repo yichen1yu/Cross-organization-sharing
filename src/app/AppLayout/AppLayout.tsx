@@ -1622,6 +1622,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               .pf-v6-c-menu__item[data-selected="true"]:hover {
                 background-color: var(--pf-v6-global--BackgroundColor--200) !important;
               }
+              /* Explicit styling for My Favorite Services when selected */
+              .pf-v6-c-menu__item[data-item-id="my-favorite-services"][data-selected="true"],
+              .pf-v6-c-menu__item[itemid="my-favorite-services"].pf-m-selected,
+              .pf-v6-c-menu__item[itemid="my-favorite-services"][aria-selected="true"] {
+                background-color: var(--pf-v6-global--BackgroundColor--200) !important;
+                color: var(--pf-v6-global--Color--100) !important;
+              }
               /* Style link items differently - increased specificity */
               .pf-v6-c-menu__item[data-is-link="true"] .pf-v6-c-menu__item-main {
                 color: var(--pf-v6-global--link--Color) !important;
@@ -1789,7 +1796,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         ['--pf-v6-c-menu__item--Color' as any]: '#0066cc',
                                         ['--pf-v6-c-menu__item--m-current--Color' as any]: '#0066cc',
                                         ['--pf-v6-c-menu__item--hover--Color' as any]: '#004080'
-                                      } : undefined}
+                                      } : (!item.isLink && selectedMenuItem === item.id ? {
+                                        backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)',
+                                        color: 'var(--pf-v6-global--Color--100)'
+                                      } : undefined)}
                                     >
                                       {item.name}
                                     </MenuItem>
@@ -1813,7 +1823,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         ['--pf-v6-c-menu__item--Color' as any]: '#0066cc',
                                         ['--pf-v6-c-menu__item--m-current--Color' as any]: '#0066cc',
                                         ['--pf-v6-c-menu__item--hover--Color' as any]: '#004080'
-                                      } : undefined}
+                                      } : (!item.isLink && selectedMenuItem === item.id ? {
+                                        backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)',
+                                        color: 'var(--pf-v6-global--Color--100)'
+                                      } : undefined)}
                                     >
                                       {item.name}
                                     </MenuItem>
