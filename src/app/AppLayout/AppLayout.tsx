@@ -1906,14 +1906,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                 {currentMenuItem.name}
                               </Title>
                             </FlexItem>
-                            
-                            <FlexItem>
-                              <Content>
-                                <p style={{ fontSize: '16px', lineHeight: '1.5' }}>
-                                  {currentMenuItem.details}
-                                </p>
-                              </Content>
-                            </FlexItem>
 
                             <FlexItem>
                               <Menu>
