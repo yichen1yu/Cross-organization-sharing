@@ -1908,51 +1908,15 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                             </FlexItem>
 
                             <FlexItem>
-                              <Menu>
-                                <MenuGroup label="Red Hat Enterprise Linux" labelHeadingLevel="h2">
-                                  <Divider />
-                                  <MenuList>
-                                    <MenuItem 
-                                      itemId="rhel-insights"
-                                      description="Proactive identification and remediation of threats to security, performance, availability, and stability"
-                                      onClick={() => console.log('Red Hat Insights clicked')}
-                                      actions={
-                                        <MenuItemAction
-                                          icon={<StarIcon />}
-                                          actionId="favorite"
-                                          onClick={() => console.log('Favorite clicked')}
-                                          aria-label="Favorite"
-                                        />
-                                      }
-                                    >
-                                      Red Hat Insights
-                                    </MenuItem>
-                                    <MenuItem 
-                                      itemId="rhel-patch"
-                                      description="Automated patching and system updates for Red Hat Enterprise Linux environments"
-                                      onClick={() => console.log('Patch Management clicked')}
-                                      actions={
-                                        <MenuItemAction
-                                          icon={<StarIcon />}
-                                          actionId="favorite"
-                                          onClick={() => console.log('Favorite clicked')}
-                                          aria-label="Favorite"
-                                        />
-                                      }
-                                    >
-                                      Patch Management
-                                    </MenuItem>
-                                  </MenuList>
-                                </MenuGroup>
-                                
-                                <div style={{ marginTop: '24px' }}>
+                              {currentMenuItem.id === 'ai-ml' ? (
+                                <Menu>
                                   <MenuGroup label="Red Hat OpenShift" labelHeadingLevel="h2">
                                     <Divider />
                                     <MenuList>
                                       <MenuItem 
-                                        itemId="openshift-clusters"
-                                        description="Manage and monitor your OpenShift Kubernetes clusters across hybrid cloud environments"
-                                        onClick={() => console.log('OpenShift Clusters clicked')}
+                                        itemId="60day-trial-openshift-ai"
+                                        description="Create, train, and service artificial intelligence and machine learning (AI/ML) models."
+                                        onClick={() => console.log('60-Day Product Trial | OpenShift AI clicked')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -1962,12 +1926,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           />
                                         }
                                       >
-                                        OpenShift Clusters
+                                        60-Day Product Trial | OpenShift AI
                                       </MenuItem>
                                       <MenuItem 
-                                        itemId="container-registry"
-                                        description="Secure container image registry for storing, managing, and deploying container images"
-                                        onClick={() => console.log('Container Registry clicked')}
+                                        itemId="developer-sandbox-openshift-ai"
+                                        description="Create, train, and service artificial intelligence and machine learning (AI/ML) models."
+                                        onClick={() => console.log('Developer Sandbox | OpenShift AI clicked')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -1977,20 +1941,20 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           />
                                         }
                                       >
-                                        Container Registry
+                                        Developer Sandbox | OpenShift AI
                                       </MenuItem>
                                     </MenuList>
                                   </MenuGroup>
-                                </div>
-                                
-                                <div style={{ marginTop: '24px' }}>
-                                  <MenuGroup label="Red Hat Ansible Automation Platform" labelHeadingLevel="h2">
+                                </Menu>
+                              ) : (
+                                <Menu>
+                                  <MenuGroup label="Red Hat Enterprise Linux" labelHeadingLevel="h2">
                                     <Divider />
                                     <MenuList>
                                       <MenuItem 
-                                        itemId="automation-hub"
-                                        description="Centralized repository for discovering, downloading, and sharing Ansible content collections"
-                                        onClick={() => console.log('Automation Hub clicked')}
+                                        itemId="rhel-insights"
+                                        description="Proactive identification and remediation of threats to security, performance, availability, and stability"
+                                        onClick={() => console.log('Red Hat Insights clicked')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -2000,12 +1964,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           />
                                         }
                                       >
-                                        Automation Hub
+                                        Red Hat Insights
                                       </MenuItem>
                                       <MenuItem 
-                                        itemId="automation-controller"
-                                        description="Enterprise automation control plane for scheduling, scaling, and managing Ansible playbooks"
-                                        onClick={() => console.log('Automation Controller clicked')}
+                                        itemId="rhel-patch"
+                                        description="Automated patching and system updates for Red Hat Enterprise Linux environments"
+                                        onClick={() => console.log('Patch Management clicked')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -2015,164 +1979,240 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           />
                                         }
                                       >
-                                        Automation Controller
+                                        Patch Management
                                       </MenuItem>
                                     </MenuList>
                                   </MenuGroup>
-                                </div>
-                                
-                                <div style={{ marginTop: '24px' }}>
-                                  <MenuGroup label="Identity & Access Management (IAM)" labelHeadingLevel="h2">
-                                    <Divider />
-                                    <MenuList>
-                                      <MenuItem 
-                                        itemId="user-access"
-                                        description="Manage user permissions, roles, and access controls across Red Hat services"
-                                        onClick={() => console.log('User Access clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        User Access
-                                      </MenuItem>
-                                      <MenuItem 
-                                        itemId="service-accounts"
-                                        description="Create and manage service accounts for automated systems and application integrations"
-                                        onClick={() => console.log('Service Accounts clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        Service Accounts
-                                      </MenuItem>
-                                    </MenuList>
-                                  </MenuGroup>
-                                </div>
-                                
-                                <div style={{ marginTop: '24px' }}>
-                                  <MenuGroup label="Console Settings" labelHeadingLevel="h2">
-                                    <Divider />
-                                    <MenuList>
-                                      <MenuItem 
-                                        itemId="preferences"
-                                        description="Customize your console experience, themes, and personal settings"
-                                        onClick={() => console.log('Preferences clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        Preferences
-                                      </MenuItem>
-                                      <MenuItem 
-                                        itemId="notifications"
-                                        description="Configure alert preferences and notification settings for system events"
-                                        onClick={() => console.log('Notifications clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        Notifications
-                                      </MenuItem>
-                                    </MenuList>
-                                  </MenuGroup>
-                                </div>
-                                
-                                <div style={{ marginTop: '24px' }}>
-                                  <MenuGroup label="Subscription Services" labelHeadingLevel="h2">
-                                    <Divider />
-                                    <MenuList>
-                                      <MenuItem 
-                                        itemId="subscriptions"
-                                        description="View and manage your Red Hat product subscriptions and entitlements"
-                                        onClick={() => console.log('Subscriptions clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        Subscriptions
-                                      </MenuItem>
-                                      <MenuItem 
-                                        itemId="billing"
-                                        description="Access billing information, invoices, and payment methods for Red Hat services"
-                                        onClick={() => console.log('Billing clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        Billing
-                                      </MenuItem>
-                                    </MenuList>
-                                  </MenuGroup>
-                                </div>
-                                
-                                <div style={{ marginTop: '24px' }}>
-                                  <MenuGroup label="Other" labelHeadingLevel="h2">
-                                    <Divider />
-                                    <MenuList>
-                                      <MenuItem 
-                                        itemId="documentation"
-                                        description="Access comprehensive guides, tutorials, and technical documentation for Red Hat products"
-                                        onClick={() => console.log('Documentation clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        Documentation
-                                      </MenuItem>
-                                      <MenuItem 
-                                        itemId="support"
-                                        description="Get help from Red Hat support team, submit cases, and access community resources"
-                                        onClick={() => console.log('Support clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        Support
-                                      </MenuItem>
-                                    </MenuList>
-                                  </MenuGroup>
-                                </div>
-                              </Menu>
+                                  
+                                  <div style={{ marginTop: '24px' }}>
+                                    <MenuGroup label="Red Hat OpenShift" labelHeadingLevel="h2">
+                                      <Divider />
+                                      <MenuList>
+                                        <MenuItem 
+                                          itemId="openshift-clusters"
+                                          description="Manage and monitor your OpenShift Kubernetes clusters across hybrid cloud environments"
+                                          onClick={() => console.log('OpenShift Clusters clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          OpenShift Clusters
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="container-registry"
+                                          description="Secure container image registry for storing, managing, and deploying container images"
+                                          onClick={() => console.log('Container Registry clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Container Registry
+                                        </MenuItem>
+                                      </MenuList>
+                                    </MenuGroup>
+                                  </div>
+                                  
+                                  <div style={{ marginTop: '24px' }}>
+                                    <MenuGroup label="Red Hat Ansible Automation Platform" labelHeadingLevel="h2">
+                                      <Divider />
+                                      <MenuList>
+                                        <MenuItem 
+                                          itemId="automation-hub"
+                                          description="Centralized repository for discovering, downloading, and sharing Ansible content collections"
+                                          onClick={() => console.log('Automation Hub clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Automation Hub
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="automation-controller"
+                                          description="Enterprise automation control plane for scheduling, scaling, and managing Ansible playbooks"
+                                          onClick={() => console.log('Automation Controller clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Automation Controller
+                                        </MenuItem>
+                                      </MenuList>
+                                    </MenuGroup>
+                                  </div>
+                                  
+                                  <div style={{ marginTop: '24px' }}>
+                                    <MenuGroup label="Identity & Access Management (IAM)" labelHeadingLevel="h2">
+                                      <Divider />
+                                      <MenuList>
+                                        <MenuItem 
+                                          itemId="user-access"
+                                          description="Manage user permissions, roles, and access controls across Red Hat services"
+                                          onClick={() => console.log('User Access clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          User Access
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="service-accounts"
+                                          description="Create and manage service accounts for automated systems and application integrations"
+                                          onClick={() => console.log('Service Accounts clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Service Accounts
+                                        </MenuItem>
+                                      </MenuList>
+                                    </MenuGroup>
+                                  </div>
+                                  
+                                  <div style={{ marginTop: '24px' }}>
+                                    <MenuGroup label="Console Settings" labelHeadingLevel="h2">
+                                      <Divider />
+                                      <MenuList>
+                                        <MenuItem 
+                                          itemId="preferences"
+                                          description="Customize your console experience, themes, and personal settings"
+                                          onClick={() => console.log('Preferences clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Preferences
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="notifications"
+                                          description="Configure alert preferences and notification settings for system events"
+                                          onClick={() => console.log('Notifications clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Notifications
+                                        </MenuItem>
+                                      </MenuList>
+                                    </MenuGroup>
+                                  </div>
+                                  
+                                  <div style={{ marginTop: '24px' }}>
+                                    <MenuGroup label="Subscription Services" labelHeadingLevel="h2">
+                                      <Divider />
+                                      <MenuList>
+                                        <MenuItem 
+                                          itemId="subscriptions"
+                                          description="View and manage your Red Hat product subscriptions and entitlements"
+                                          onClick={() => console.log('Subscriptions clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Subscriptions
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="billing"
+                                          description="Access billing information, invoices, and payment methods for Red Hat services"
+                                          onClick={() => console.log('Billing clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Billing
+                                        </MenuItem>
+                                      </MenuList>
+                                    </MenuGroup>
+                                  </div>
+                                  
+                                  <div style={{ marginTop: '24px' }}>
+                                    <MenuGroup label="Other" labelHeadingLevel="h2">
+                                      <Divider />
+                                      <MenuList>
+                                        <MenuItem 
+                                          itemId="documentation"
+                                          description="Access comprehensive guides, tutorials, and technical documentation for Red Hat products"
+                                          onClick={() => console.log('Documentation clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Documentation
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="support"
+                                          description="Get help from Red Hat support team, submit cases, and access community resources"
+                                          onClick={() => console.log('Support clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Support
+                                        </MenuItem>
+                                      </MenuList>
+                                    </MenuGroup>
+                                  </div>
+                                </Menu>
+                              )}
                             </FlexItem>
                           </Flex>
                         );
