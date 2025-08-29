@@ -17,7 +17,7 @@ import {
   PageSidebar,
   PageSidebarBody,
   SkipToContent,
-  Drawer,ti
+      Drawer,
   DrawerActions,
   DrawerCloseButton,
   DrawerContent,
@@ -2170,6 +2170,66 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       >
                                         Patch Management
                                       </MenuItem>
+                                      <MenuItem 
+                                        itemId="rhel-rhc"
+                                        description="Configure and manage remote host connections and system configurations"
+                                        onClick={() => console.log('Remote Host Configuration (RHC) clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Remote Host Configuration (RHC)
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="rhel-activation-keys"
+                                        description="Manage activation keys for system registration and subscription management"
+                                        onClick={() => console.log('Activation Keys clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Activation Keys
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="rhel-registration-assistant"
+                                        description="Step-by-step guidance for registering systems to Red Hat services"
+                                        onClick={() => console.log('Registration Assistant clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Registration Assistant
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="rhel-staleness-deletion"
+                                        description="Configure system staleness detection and automated deletion policies"
+                                        onClick={() => console.log('Staleness & Deletion clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Staleness & Deletion
+                                      </MenuItem>
                                     </MenuList>
                                   </MenuGroup>
                                   
@@ -2206,6 +2266,21 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           }
                                         >
                                           Automation Controller
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="ansible-registration-assistant"
+                                          description="Guided setup for registering and configuring Ansible automation workflows"
+                                          onClick={() => console.log('Ansible Registration Assistant clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Registration Assistant
                                         </MenuItem>
                                       </MenuList>
                                     </MenuGroup>
@@ -2244,6 +2319,36 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           }
                                         >
                                           Notifications
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="console-alert-manager"
+                                          description="Configure and manage system alerts, notifications, and escalation policies"
+                                          onClick={() => console.log('Console Alert Manager clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Alert Manager
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="console-data-integration"
+                                          description="Manage data integration workflows, connectors, and synchronization settings"
+                                          onClick={() => console.log('Console Data Integration clicked')}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={() => console.log('Favorite clicked')}
+                                              aria-label="Favorite"
+                                            />
+                                          }
+                                        >
+                                          Data Integration
                                         </MenuItem>
                                       </MenuList>
                                     </MenuGroup>
