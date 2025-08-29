@@ -75,39 +75,6 @@ const routes: AppRouteConfig[] = [
     title: 'Event Log | Red Hat Hybrid Cloud Console',
   },
   {
-    label: 'Identity & Access Management',
-    routes: [
-      {
-        element: <MyUserAccess />,
-        exact: true,
-        label: 'My User Access',
-        path: '/my-user-access',
-        title: 'My User Access | Red Hat Hybrid Cloud Console',
-      },
-      {
-        element: <UserAccess />,
-        exact: true,
-        label: 'User Access',
-        path: '/user-access',
-        title: 'User Access | Red Hat Hybrid Cloud Console',
-      },
-      {
-        element: <AuthenticationPolicy />,
-        exact: true,
-        label: 'Authentication Policy',
-        path: '/authentication-policy',
-        title: 'Authentication Policy | Red Hat Hybrid Cloud Console',
-      },
-      {
-        element: <ServiceAccounts />,
-        exact: true,
-        label: 'Service Accounts',
-        path: '/service-accounts',
-        title: 'Service Accounts | Red Hat Hybrid Cloud Console',
-      },
-    ],
-  },
-  {
     label: 'Learning Resources',
     routes: [
       {
@@ -126,29 +93,46 @@ const routes: AppRouteConfig[] = [
       },
     ],
   },
+  // Routes without labels (accessible via URL but not shown in navigation)
   {
-    label: 'Settings',
-    routes: [
-      {
-        element: <GeneralSettings />,
-        exact: true,
-        label: 'General',
-        path: '/settings/general',
-        title: 'General Settings | Red Hat Hybrid Cloud Console',
-      },
-      {
-        element: <ProfileSettings />,
-        exact: true,
-        label: 'Profile',
-        path: '/settings/profile',
-        title: 'Profile Settings | Red Hat Hybrid Cloud Console',
-      },
-    ],
+    element: <MyUserAccess />,
+    exact: true,
+    path: '/my-user-access',
+    title: 'My User Access | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <UserAccess />,
+    exact: true,
+    path: '/user-access',
+    title: 'User Access | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <AuthenticationPolicy />,
+    exact: true,
+    path: '/authentication-policy',
+    title: 'Authentication Policy | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <ServiceAccounts />,
+    exact: true,
+    path: '/service-accounts',
+    title: 'Service Accounts | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <GeneralSettings />,
+    exact: true,
+    path: '/settings/general',
+    title: 'General Settings | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <ProfileSettings />,
+    exact: true,
+    path: '/settings/profile',
+    title: 'Profile Settings | Red Hat Hybrid Cloud Console',
   },
   {
     element: <Support />,
     exact: true,
-    label: 'Support',
     path: '/support',
     title: 'Support | Red Hat Hybrid Cloud Console',
   },
