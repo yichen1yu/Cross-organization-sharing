@@ -1371,13 +1371,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     }
   });
 
-  // Secondary navigation structure (lorem ipsum for now)
+  // Secondary navigation structure (IAM bundle)
   const secondaryNavItems = [
-    { label: 'Lorem Dashboard', path: '#', isActive: false },
-    { label: 'Ipsum Analytics', path: '#', isActive: false },
-    { label: 'Dolor Settings', path: '#', isActive: false },
-    { label: 'Sit Amet Reports', path: '#', isActive: false },
-    { label: 'Consectetur Tools', path: '#', isActive: false },
+    { label: 'My User Access', path: '/my-user-access', isActive: location.pathname === '/my-user-access' },
+    { label: 'User Access', path: '/user-access', isActive: location.pathname === '/user-access' },
+    { label: 'Authentication Policy', path: '/authentication-policy', isActive: location.pathname === '/authentication-policy' },
+    { label: 'Service Accounts', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
+    { label: 'IAM Learning', path: '/learning-resources-iam', isActive: location.pathname === '/learning-resources-iam' },
   ];
 
   const Navigation = (
@@ -1389,12 +1389,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx))
           )
         ) : (
-          // Show secondary navigation (lorem ipsum)
+          // Show secondary navigation (IAM bundle)
           secondaryNavItems.map((item, idx) => (
             <NavItem key={`secondary-${idx}`} id={`secondary-${idx}`} isActive={item.isActive}>
-              <a href={item.path} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <NavLink to={item.path}>
                 {item.label}
-              </a>
+              </NavLink>
             </NavItem>
           ))
         )}
