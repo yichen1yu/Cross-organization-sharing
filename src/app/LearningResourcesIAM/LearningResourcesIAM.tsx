@@ -28,7 +28,7 @@ const LearningResourcesIAM: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem component={NavLink} to="/my-user-access">Identity & Access</BreadcrumbItem>
+          <BreadcrumbItem>IAM</BreadcrumbItem>
           <BreadcrumbItem isActive>Learning Resources</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
@@ -70,37 +70,36 @@ const LearningResourcesIAM: React.FunctionComponent = () => {
       
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
-          <Tab eventKey={0} title={<TabTitleText>IAM Training</TabTitleText>}>
+          <Tab eventKey={0} title={<TabTitleText>Documentation</TabTitleText>}>
             <PageSection>
               <Card>
                 <CardBody>
                   <Content>
-                    <Title headingLevel="h2" size="xl">Identity & Access Management Training</Title>
+                    <Title headingLevel="h2" size="xl">IAM Documentation</Title>
                     <p>
-                      Learn best practices for identity and access management, security policies, 
-                      and user administration within the Red Hat Hybrid Cloud Console.
+                      Comprehensive guides and documentation for identity and access management, 
+                      security best practices, and user administration.
                     </p>
                     
-                    <h3>Available Training Topics:</h3>
+                    <h3>Available Resources:</h3>
                     <ul>
+                      <li><strong>Getting Started:</strong> Introduction to IAM concepts and setup</li>
                       <li><strong>User Management:</strong> Creating and managing user accounts</li>
-                      <li><strong>Role-Based Access:</strong> Implementing RBAC strategies</li>
-                      <li><strong>Security Policies:</strong> Configuring authentication policies</li>
-                      <li><strong>Service Accounts:</strong> Managing automated system access</li>
-                      <li><strong>Compliance:</strong> Meeting security and regulatory requirements</li>
+                      <li><strong>Authentication:</strong> Setting up multi-factor authentication</li>
+                      <li><strong>Authorization:</strong> Role-based access control implementation</li>
                     </ul>
                   </Content>
                 </CardBody>
               </Card>
             </PageSection>
           </Tab>
-          <Tab eventKey={1} title={<TabTitleText>Security Guidelines</TabTitleText>}>
+          <Tab eventKey={1} title={<TabTitleText>Training Videos</TabTitleText>}>
             <PageSection>
               <Card>
                 <CardBody>
                   <Content>
-                    <Title headingLevel="h2" size="xl">Security Best Practices</Title>
-                    <p>Learn about security best practices for identity and access management.</p>
+                    <Title headingLevel="h2" size="xl">Video Training Library</Title>
+                    <p>Step-by-step video tutorials covering IAM administration and best practices.</p>
                   </Content>
                 </CardBody>
               </Card>

@@ -28,7 +28,7 @@ const MyUserAccess: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem>Identity & Access</BreadcrumbItem>
+          <BreadcrumbItem>IAM</BreadcrumbItem>
           <BreadcrumbItem isActive>My User Access</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
@@ -75,17 +75,18 @@ const MyUserAccess: React.FunctionComponent = () => {
               <Card>
                 <CardBody>
                   <Content>
-                    <Title headingLevel="h2" size="xl">Your Current Permissions</Title>
+                    <Title headingLevel="h2" size="xl">Current Permissions</Title>
                     <p>
-                      Review your current access permissions and roles within the Red Hat Hybrid Cloud Console.
+                      View your current roles, permissions, and access levels across Red Hat services 
+                      and resources.
                     </p>
                     
-                    <h3>Current Access:</h3>
+                    <h3>Permission Categories:</h3>
                     <ul>
-                      <li><strong>Account Administrator:</strong> Full administrative access</li>
-                      <li><strong>Settings Management:</strong> Manage console settings and configurations</li>
-                      <li><strong>User Management:</strong> Create and manage user accounts</li>
-                      <li><strong>Resource Access:</strong> View and manage cloud resources</li>
+                      <li><strong>Account Access:</strong> View account details and billing information</li>
+                      <li><strong>Resource Management:</strong> Create, modify, and delete resources</li>
+                      <li><strong>User Administration:</strong> Manage other users and their permissions</li>
+                      <li><strong>System Configuration:</strong> Access to system settings and configurations</li>
                     </ul>
                   </Content>
                 </CardBody>
@@ -97,8 +98,8 @@ const MyUserAccess: React.FunctionComponent = () => {
               <Card>
                 <CardBody>
                   <Content>
-                    <Title headingLevel="h2" size="xl">Account Configuration</Title>
-                    <p>Manage your personal account settings and preferences.</p>
+                    <Title headingLevel="h2" size="xl">Personal Account Settings</Title>
+                    <p>Manage your personal account preferences and security settings.</p>
                   </Content>
                 </CardBody>
               </Card>

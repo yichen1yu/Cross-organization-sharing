@@ -28,7 +28,7 @@ const AuthenticationPolicy: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem component={NavLink} to="/my-user-access">Identity & Access</BreadcrumbItem>
+          <BreadcrumbItem>IAM</BreadcrumbItem>
           <BreadcrumbItem isActive>Authentication Policy</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
