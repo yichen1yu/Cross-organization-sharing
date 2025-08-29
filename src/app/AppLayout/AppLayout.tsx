@@ -1756,7 +1756,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           <div style={{ maxWidth: '1200px', margin: '0 auto', height: '800px' }}>
             <Card style={{ height: '100%' }}>
               <CardBody style={{ padding: 0, height: '100%' }}>
-                <Split hasGutter style={{ height: '100%' }}>
+                <Split style={{ height: '100%' }}>
                   {/* Primary (Menu) Side */}
                   <SplitItem style={{ 
                     width: '450px', 
