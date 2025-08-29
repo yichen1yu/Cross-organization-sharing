@@ -413,13 +413,20 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   React.useEffect(() => {
     if (isLogoDropdownOpen) {
       const firstItemId = getFirstMenuItemId();
+      console.log('Setting selectedMenuItem to:', firstItemId);
       setSelectedMenuItem(firstItemId);
       // Force re-render with a small delay to ensure Menu component applies selection
       setTimeout(() => {
         setSelectedMenuItem(firstItemId);
+        console.log('Re-setting selectedMenuItem to:', firstItemId);
       }, 10);
     }
   }, [isLogoDropdownOpen]);
+
+  // Debug effect to log selectedMenuItem changes
+  React.useEffect(() => {
+    console.log('selectedMenuItem changed to:', selectedMenuItem);
+  }, [selectedMenuItem]);
 
   const handleTabClick = (
     event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
@@ -1631,6 +1638,20 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               .pf-v6-c-menu__item[itemid="my-favorite-services"].pf-m-selected,
               .pf-v6-c-menu__item[itemid="my-favorite-services"][aria-selected="true"] {
                 background-color: var(--pf-v6-global--BackgroundColor--200) !important;
+                color: var(--pf-v6-global--Color--100) !important;
+              }
+              /* Force My Favorite Services to show default selected background - HIGHEST PRIORITY */
+              .pf-v6-c-menu .pf-v6-c-menu__list .pf-v6-c-menu__item[data-item-id="my-favorite-services"] {
+                background-color: #f0f0f0 !important;
+                color: #151515 !important;
+              }
+              .pf-v6-c-menu .pf-v6-c-menu__list .pf-v6-c-menu__item[data-item-id="my-favorite-services"]:hover {
+                background-color: #e7e7e7 !important;
+                color: #151515 !important;
+              }
+              /* Override when other items are selected */
+              .pf-v6-c-menu .pf-v6-c-menu__list .pf-v6-c-menu__item[data-item-id="my-favorite-services"][data-selected="false"] {
+                background-color: transparent !important;
                 color: var(--pf-v6-global--Color--100) !important;
               }
               /* Style link items differently - increased specificity */
