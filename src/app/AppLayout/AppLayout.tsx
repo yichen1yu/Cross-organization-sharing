@@ -1342,34 +1342,61 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </NavExpandable>
   );
 
-  // Determine which navigation group to show based on current route
-  const getCurrentRouteGroup = (): IAppRouteGroup | null => {
+  // Define navigation groups
+  const primaryNavPages = ['/overview', '/alert-manager', '/data-integration', '/event-log', '/learning-resources'];
+  const secondaryNavPages = ['/my-user-access', '/user-access', '/authentication-policy', '/service-accounts', '/learning-resources-iam'];
+
+  // Determine which navigation structure to show
+  const getNavigationType = () => {
     const currentPath = location.pathname;
     
-    for (const route of routes) {
-      if (route.routes) {
-        // This is a route group, check if current path belongs to it
-        if (route.routes.some(r => r.path === currentPath)) {
-          return route as IAppRouteGroup;
-        }
-      }
+    if (primaryNavPages.includes(currentPath)) {
+      return 'primary';
+    } else if (secondaryNavPages.includes(currentPath)) {
+      return 'secondary';
     }
-    return null;
+    return 'primary'; // default fallback
   };
 
-  const currentRouteGroup = getCurrentRouteGroup();
+  const navigationType = getNavigationType();
+
+  // Primary navigation structure (current navigation)
+  const primaryNavRoutes = routes.filter(route => {
+    if (route.routes) {
+      // This is a route group (Learning Resources)
+      return route.label === 'Learning Resources';
+    } else {
+      // Individual routes
+      return route.label && ['Overview', 'Alert Manager', 'Data Integration', 'Event Log'].includes(route.label);
+    }
+  });
+
+  // Secondary navigation structure (lorem ipsum for now)
+  const secondaryNavItems = [
+    { label: 'Lorem Dashboard', path: '#', isActive: false },
+    { label: 'Ipsum Analytics', path: '#', isActive: false },
+    { label: 'Dolor Settings', path: '#', isActive: false },
+    { label: 'Sit Amet Reports', path: '#', isActive: false },
+    { label: 'Consectetur Tools', path: '#', isActive: false },
+  ];
 
   const Navigation = (
     <Nav id="nav-primary-simple">
       <NavList id="nav-list-simple">
-        {currentRouteGroup ? (
-          // Show navigation items for the current group
-          currentRouteGroup.routes.map((route, idx) => route.label && renderNavItem(route, idx))
-        ) : (
-          // Fallback: show all routes if no group is matched (shouldn't happen with new structure)
-          routes.map(
-            (route, idx) => route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx)),
+        {navigationType === 'primary' ? (
+          // Show primary navigation
+          primaryNavRoutes.map((route, idx) => 
+            route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx))
           )
+        ) : (
+          // Show secondary navigation (lorem ipsum)
+          secondaryNavItems.map((item, idx) => (
+            <NavItem key={`secondary-${idx}`} id={`secondary-${idx}`} isActive={item.isActive}>
+              <a href={item.path} style={{ textDecoration: 'none', color: 'inherit' }}>
+                {item.label}
+              </a>
+            </NavItem>
+          ))
         )}
       </NavList>
     </Nav>
