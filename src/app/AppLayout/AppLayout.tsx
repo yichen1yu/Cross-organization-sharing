@@ -2141,36 +2141,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                     <Divider />
                                     <MenuList>
                                       <MenuItem 
-                                        itemId="rhel-insights"
-                                        description="Proactive identification and remediation of threats to security, performance, availability, and stability"
-                                        onClick={() => console.log('Red Hat Insights clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        Red Hat Insights
-                                      </MenuItem>
-                                      <MenuItem 
-                                        itemId="rhel-patch"
-                                        description="Automated patching and system updates for Red Hat Enterprise Linux environments"
-                                        onClick={() => console.log('Patch Management clicked')}
-                                        actions={
-                                          <MenuItemAction
-                                            icon={<StarIcon />}
-                                            actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
-                                          />
-                                        }
-                                      >
-                                        Patch Management
-                                      </MenuItem>
-                                      <MenuItem 
                                         itemId="rhel-rhc"
                                         description="Configure and manage remote host connections and system configurations"
                                         onClick={() => console.log('Remote Host Configuration (RHC) clicked')}
@@ -2238,36 +2208,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <Divider />
                                       <MenuList>
                                         <MenuItem 
-                                          itemId="automation-hub"
-                                          description="Centralized repository for discovering, downloading, and sharing Ansible content collections"
-                                          onClick={() => console.log('Automation Hub clicked')}
-                                          actions={
-                                            <MenuItemAction
-                                              icon={<StarIcon />}
-                                              actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
-                                            />
-                                          }
-                                        >
-                                          Automation Hub
-                                        </MenuItem>
-                                        <MenuItem 
-                                          itemId="automation-controller"
-                                          description="Enterprise automation control plane for scheduling, scaling, and managing Ansible playbooks"
-                                          onClick={() => console.log('Automation Controller clicked')}
-                                          actions={
-                                            <MenuItemAction
-                                              icon={<StarIcon />}
-                                              actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
-                                            />
-                                          }
-                                        >
-                                          Automation Controller
-                                        </MenuItem>
-                                        <MenuItem 
                                           itemId="ansible-registration-assistant"
                                           description="Guided setup for registering and configuring Ansible automation workflows"
                                           onClick={() => console.log('Ansible Registration Assistant clicked')}
@@ -2290,36 +2230,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                     <MenuGroup label="Console Settings" labelHeadingLevel="h2">
                                       <Divider />
                                       <MenuList>
-                                        <MenuItem 
-                                          itemId="preferences"
-                                          description="Customize your console experience, themes, and personal settings"
-                                          onClick={() => console.log('Preferences clicked')}
-                                          actions={
-                                            <MenuItemAction
-                                              icon={<StarIcon />}
-                                              actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
-                                            />
-                                          }
-                                        >
-                                          Preferences
-                                        </MenuItem>
-                                        <MenuItem 
-                                          itemId="notifications"
-                                          description="Configure alert preferences and notification settings for system events"
-                                          onClick={() => console.log('Notifications clicked')}
-                                          actions={
-                                            <MenuItemAction
-                                              icon={<StarIcon />}
-                                              actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
-                                            />
-                                          }
-                                        >
-                                          Notifications
-                                        </MenuItem>
                                         <MenuItem 
                                           itemId="console-alert-manager"
                                           description="Configure and manage system alerts, notifications, and escalation policies"
