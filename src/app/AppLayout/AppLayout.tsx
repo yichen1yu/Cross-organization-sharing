@@ -1257,7 +1257,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 shouldFocusToggleOnSelect
               >
               <DropdownList>
-                <div style={{ padding: '16px', borderBottom: '1px solid var(--pf-v6-global--BorderColor--100)' }}>
+                <div style={{ padding: '16px' }}>
                   <DescriptionList isCompact>
                     <DescriptionListGroup>
                       <DescriptionListTerm>User</DescriptionListTerm>
@@ -1273,13 +1273,14 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     </DescriptionListGroup>
                   </DescriptionList>
                 </div>
+                <Divider />
                 <DropdownItem
                   component="a"
                   href="https://console.redhat.com/settings/profile"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <UserIcon /> My profile
+                  My profile
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => {
@@ -1287,7 +1288,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     setIsUserDropdownOpen(false);
                   }}
                 >
-                  <UsersIcon /> My User Access
+                  My User Access
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => {
@@ -1295,11 +1296,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     setIsUserDropdownOpen(false);
                   }}
                 >
-                  <BellIcon /> My Alert Preferences
+                  My Alert Preferences
                 </DropdownItem>
                 <Divider />
                 <DropdownItem>
-                  <SignOutAltIcon /> Logout
+                  Logout
                 </DropdownItem>
               </DropdownList>
               </Dropdown>
