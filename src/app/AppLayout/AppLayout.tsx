@@ -2064,6 +2064,51 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       >
                                         Authentication Factors
                                       </MenuItem>
+                                      <MenuItem 
+                                        itemId="service-accounts"
+                                        description="Create and manage service accounts for automated systems and application integrations"
+                                        onClick={() => console.log('Service Accounts clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Service Accounts
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="identity-provider-information"
+                                        description="Configure and manage external identity providers and federation settings"
+                                        onClick={() => console.log('Identity Provider Information clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Identity Provider Information
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="workspaces"
+                                        description="Manage organizational workspaces and their access controls"
+                                        onClick={() => console.log('Workspaces clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Workspaces
+                                      </MenuItem>
                                     </MenuList>
                                   </MenuGroup>
                                   
