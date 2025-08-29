@@ -1915,39 +1915,109 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                             </FlexItem>
 
                             <FlexItem>
-                              <Title headingLevel="h4" size="lg" style={{ marginBottom: '12px' }}>
-                                Key Features
-                              </Title>
-                              <DataList aria-label="Features list" isCompact>
-                                {currentMenuItem.features.map((feature, index) => (
-                                  <DataListItem key={index}>
-                                    <DataListItemRow>
-                                      <DataListItemCells
-                                        dataListCells={[
-                                          <DataListCell key="feature">
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                              <span style={{ 
-                                                width: '6px', 
-                                                height: '6px', 
-                                                backgroundColor: '#0066cc', 
-                                                borderRadius: '50%', 
-                                                marginRight: '12px' 
-                                              }}></span>
-                                              {feature}
-                                            </div>
-                                          </DataListCell>
-                                        ]}
-                                      />
-                                    </DataListItemRow>
-                                  </DataListItem>
-                                ))}
-                              </DataList>
-                            </FlexItem>
-
-                            <FlexItem style={{ marginTop: 'auto' }}>
-                              <Button variant="primary" size="lg">
-                                Open {currentMenuItem.name}
-                              </Button>
+                              <div className="pf-v6-c-menu__content">
+                                <section className="pf-v6-c-menu__group">
+                                  <h1 className="pf-v6-c-menu__group-title">Group 1</h1>
+                                  <ul role="menu" className="pf-v6-c-menu__list">
+                                    <li className="pf-v6-c-menu__list-item" role="none">
+                                      <button id="0" tabIndex={0} className="pf-v6-c-menu__item" role="menuitem" type="button">
+                                        <span className="pf-v6-c-menu__item-main">
+                                          <span className="pf-v6-c-menu__item-text">Application 1</span>
+                                        </span>
+                                      </button>
+                                      <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
+                                        <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
+                                          <span className="pf-v6-c-button__icon">
+                                            <StarIcon />
+                                          </span>
+                                        </button>
+                                      </div>
+                                    </li>
+                                    <li className="pf-v6-c-menu__list-item" role="none">
+                                      <a id="1" tabIndex={-1} className="pf-v6-c-menu__item" role="menuitem" href="#default-link2">
+                                        <span className="pf-v6-c-menu__item-main">
+                                          <span className="pf-v6-c-menu__item-text">Application 2</span>
+                                        </span>
+                                      </a>
+                                      <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
+                                        <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
+                                          <span className="pf-v6-c-button__icon">
+                                            <StarIcon />
+                                          </span>
+                                        </button>
+                                      </div>
+                                    </li>
+                                  </ul>
+                                </section>
+                                <hr className="pf-v6-c-divider" />
+                                <section className="pf-v6-c-menu__group">
+                                  <h1 className="pf-v6-c-menu__group-title">Group 2</h1>
+                                  <ul role="menu" className="pf-v6-c-menu__list">
+                                    <li className="pf-v6-c-menu__list-item" role="none">
+                                      <a href="#router-link" id="2" tabIndex={-1} className="pf-v6-c-menu__item" role="menuitem">
+                                        <span className="pf-v6-c-menu__item-main">
+                                          <span className="pf-v6-c-menu__item-text">Custom component (such as @reach/router Link)</span>
+                                        </span>
+                                      </a>
+                                      <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
+                                        <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
+                                          <span className="pf-v6-c-button__icon">
+                                            <StarIcon />
+                                          </span>
+                                        </button>
+                                      </div>
+                                    </li>
+                                    <li className="pf-v6-c-menu__list-item" role="none">
+                                      <a href="#router-link2" id="3" tabIndex={-1} className="pf-v6-c-menu__item" role="menuitem">
+                                        <span className="pf-v6-c-menu__item-main">
+                                          <span className="pf-v6-c-menu__item-icon">
+                                            <img src="/images/2ada0972.svg" alt="" width="25" height="25" />
+                                          </span>
+                                          <span className="pf-v6-c-menu__item-text">Custom component with icon</span>
+                                          <span className="pf-v6-c-menu__item-external-icon">
+                                            <ExternalLinkAltIcon />
+                                          </span>
+                                        </span>
+                                      </a>
+                                      <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
+                                        <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
+                                          <span className="pf-v6-c-button__icon">
+                                            <StarIcon />
+                                          </span>
+                                        </button>
+                                      </div>
+                                    </li>
+                                  </ul>
+                                </section>
+                                <hr className="pf-v6-c-divider" />
+                                <ul role="menu" className="pf-v6-c-menu__list">
+                                  <li className="pf-v6-c-menu__list-item" role="none">
+                                    <button id="4" tabIndex={-1} className="pf-v6-c-menu__item" role="menuitem" type="button">
+                                      <span className="pf-v6-c-menu__item-main">
+                                        <span className="pf-v6-c-menu__item-text">
+                                          <div style={{ display: 'contents' }}>
+                                            <span>Application 3 with tooltip</span>
+                                          </div>
+                                        </span>
+                                      </span>
+                                    </button>
+                                    <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
+                                      <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
+                                        <span className="pf-v6-c-button__icon">
+                                          <StarIcon />
+                                        </span>
+                                      </button>
+                                    </div>
+                                  </li>
+                                  <li className="pf-v6-c-menu__list-item pf-m-disabled" role="none">
+                                    <button id="5" tabIndex={-1} className="pf-v6-c-menu__item" disabled role="menuitem" type="button">
+                                      <span className="pf-v6-c-menu__item-main">
+                                        <span className="pf-v6-c-menu__item-text">Unavailable Application</span>
+                                      </span>
+                                    </button>
+                                  </li>
+                                </ul>
+                              </div>
                             </FlexItem>
                           </Flex>
                         );
