@@ -1253,18 +1253,33 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 shouldFocusToggleOnSelect
               >
               <DropdownList>
-                <DropdownItem>
-                  <UserIcon /> My Profile
+                <DropdownItem
+                  component="a"
+                  href="https://console.redhat.com/settings/profile"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <UserIcon /> My profile
                 </DropdownItem>
-                <DropdownItem>
-                  <CogIcon /> Account Settings
+                <DropdownItem
+                  onClick={() => {
+                    navigate('/my-user-access');
+                    setIsUserDropdownOpen(false);
+                  }}
+                >
+                  <UsersIcon /> My User Access
                 </DropdownItem>
-                <DropdownItem>
-                  <HelpIcon /> Help & Support
+                <DropdownItem
+                  onClick={() => {
+                    navigate('/alert-manager');
+                    setIsUserDropdownOpen(false);
+                  }}
+                >
+                  <BellIcon /> My Alert Preferences
                 </DropdownItem>
                 <Divider />
                 <DropdownItem>
-                  <SignOutAltIcon /> Sign Out
+                  <SignOutAltIcon /> Logout
                 </DropdownItem>
               </DropdownList>
               </Dropdown>
