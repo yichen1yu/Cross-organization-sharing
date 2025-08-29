@@ -17,7 +17,7 @@ import {
   PageSidebar,
   PageSidebarBody,
   SkipToContent,
-  Drawer, 
+  Drawer,
   DrawerActions,
   DrawerCloseButton,
   DrawerContent,
@@ -2020,9 +2020,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                     <Divider />
                                     <MenuList>
                                       <MenuItem 
-                                        itemId="user-access"
-                                        description="Manage user permissions, roles, and access controls across Red Hat services"
-                                        onClick={() => console.log('User Access clicked')}
+                                        itemId="users"
+                                        description="Manage user accounts and their access permissions"
+                                        onClick={() => console.log('Users clicked')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -2032,12 +2032,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           />
                                         }
                                       >
-                                        User Access
+                                        Users
                                       </MenuItem>
                                       <MenuItem 
-                                        itemId="service-accounts"
-                                        description="Create and manage service accounts for automated systems and application integrations"
-                                        onClick={() => console.log('Service Accounts clicked')}
+                                        itemId="groups"
+                                        description="Create and manage user groups and group-based permissions"
+                                        onClick={() => console.log('Groups clicked')}
                                         actions={
                                           <MenuItemAction
                                             icon={<StarIcon />}
@@ -2047,7 +2047,22 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           />
                                         }
                                       >
-                                        Service Accounts
+                                        Groups
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="authentication-factors"
+                                        description="Configure multi-factor authentication and security settings"
+                                        onClick={() => console.log('Authentication Factors clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Authentication Factors
                                       </MenuItem>
                                     </MenuList>
                                   </MenuGroup>
