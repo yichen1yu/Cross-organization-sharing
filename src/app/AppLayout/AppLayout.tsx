@@ -1435,9 +1435,30 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             shouldFocusToggleOnSelect
           >
             <DropdownList>
-              <DropdownItem>Event log</DropdownItem>
-              <DropdownItem>My alert preferences</DropdownItem>
-              <DropdownItem>Organization alerts settings</DropdownItem>
+              <DropdownItem
+                onClick={() => {
+                  navigate('/event-log');
+                  setIsNotificationActionsOpen(false);
+                }}
+              >
+                Event log
+              </DropdownItem>
+              <DropdownItem
+                onClick={() => {
+                  navigate('/alert-manager');
+                  setIsNotificationActionsOpen(false);
+                }}
+              >
+                My alert preferences
+              </DropdownItem>
+              <DropdownItem
+                onClick={() => {
+                  navigate('/alert-manager');
+                  setIsNotificationActionsOpen(false);
+                }}
+              >
+                Organization defaults
+              </DropdownItem>
             </DropdownList>
           </Dropdown>
           <DrawerCloseButton onClick={onNotificationDrawerClose} />
