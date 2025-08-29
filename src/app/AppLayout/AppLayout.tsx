@@ -1344,7 +1344,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   // Define navigation groups
   const primaryNavPages = ['/overview', '/alert-manager', '/data-integration', '/event-log', '/learning-resources'];
-  const secondaryNavPages = ['/my-user-access', '/user-access', '/authentication-policy', '/service-accounts', '/learning-resources-iam'];
+  const secondaryNavPages = ['/my-user-access', '/user-access', '/users', '/groups', '/authentication-policy', '/service-accounts', '/learning-resources-iam'];
 
   // Determine which navigation structure to show
   const getNavigationType = () => {
@@ -1369,7 +1369,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   // Secondary navigation structure (IAM bundle)
   const secondaryNavItems = [
     { label: 'My User Access', path: '/my-user-access', isActive: location.pathname === '/my-user-access' },
-    { label: 'User Access', path: '/user-access', isActive: location.pathname === '/user-access' },
+    { 
+      label: 'User Access', 
+      path: '/user-access', 
+      isActive: ['/user-access', '/users', '/groups'].includes(location.pathname),
+      isExpandable: true,
+      subItems: [
+        { label: 'Overview', path: '/user-access', isActive: location.pathname === '/user-access' },
+        { label: 'Users', path: '/users', isActive: location.pathname === '/users' },
+        { label: 'Groups', path: '/groups', isActive: location.pathname === '/groups' },
+      ]
+    },
     { label: 'Authentication Policy', path: '/authentication-policy', isActive: location.pathname === '/authentication-policy' },
     { label: 'Service Accounts', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
     { label: 'IAM Learning', path: '/learning-resources-iam', isActive: location.pathname === '/learning-resources-iam' },
@@ -1386,11 +1396,28 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         ) : (
           // Show secondary navigation (IAM bundle)
           secondaryNavItems.map((item, idx) => (
-            <NavItem key={`secondary-${idx}`} id={`secondary-${idx}`} isActive={item.isActive}>
-              <NavLink to={item.path}>
-                {item.label}
-              </NavLink>
-            </NavItem>
+            item.isExpandable ? (
+              <NavExpandable
+                key={`secondary-expandable-${idx}`}
+                id={`secondary-expandable-${idx}`}
+                title={item.label}
+                isActive={item.isActive}
+              >
+                {item.subItems?.map((subItem, subIdx) => (
+                  <NavItem key={`secondary-sub-${idx}-${subIdx}`} id={`secondary-sub-${idx}-${subIdx}`} isActive={subItem.isActive}>
+                    <NavLink to={subItem.path}>
+                      {subItem.label}
+                    </NavLink>
+                  </NavItem>
+                ))}
+              </NavExpandable>
+            ) : (
+              <NavItem key={`secondary-${idx}`} id={`secondary-${idx}`} isActive={item.isActive}>
+                <NavLink to={item.path}>
+                  {item.label}
+                </NavLink>
+              </NavItem>
+            )
           ))
         )}
       </NavList>
