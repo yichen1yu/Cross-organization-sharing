@@ -59,7 +59,11 @@ import {
   FlexItem,
   NotificationDrawerListItemHeader,
   NotificationDrawerListItemBody,
-  Divider
+  Divider,
+  DescriptionList,
+  DescriptionListGroup,
+  DescriptionListTerm,
+  DescriptionListDescription
 } from '@patternfly/react-core';
 import { 
   Chatbot, 
@@ -1253,6 +1257,22 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 shouldFocusToggleOnSelect
               >
               <DropdownList>
+                <div style={{ padding: '16px', borderBottom: '1px solid var(--pf-v6-global--BorderColor--100)' }}>
+                  <DescriptionList isCompact>
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>User</DescriptionListTerm>
+                      <DescriptionListDescription>Ned Username</DescriptionListDescription>
+                    </DescriptionListGroup>
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>Role</DescriptionListTerm>
+                      <DescriptionListDescription>Organization Admin</DescriptionListDescription>
+                    </DescriptionListGroup>
+                    <DescriptionListGroup>
+                      <DescriptionListTerm>Account</DescriptionListTerm>
+                      <DescriptionListDescription>12345678</DescriptionListDescription>
+                    </DescriptionListGroup>
+                  </DescriptionList>
+                </div>
                 <DropdownItem
                   component="a"
                   href="https://console.redhat.com/settings/profile"
