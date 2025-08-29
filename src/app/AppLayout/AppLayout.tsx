@@ -2,6 +2,8 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { routes, IAppRoute, IAppRouteGroup } from '@app/routes';
 import {
+  Breadcrumb,
+  BreadcrumbItem,
   Button,
   Masthead,
   MastheadBrand,
@@ -1397,6 +1399,55 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </Nav>
   );
 
+  // Breadcrumb logic
+  const getBreadcrumb = () => {
+    const currentPath = location.pathname;
+    
+    // Settings bundle pages get "Settings > Current Page" breadcrumb
+    if (primaryNavPages.includes(currentPath)) {
+      // Find the current route to get the page title
+      const currentRoute = routes.find((route): route is IAppRoute => !route.routes && route.path === currentPath);
+      const pageTitle = currentRoute?.label || 'Page';
+      
+      // Don't show breadcrumb for the overview page (it's the parent)
+      if (currentPath === '/overview') {
+        return null;
+      }
+      
+      return (
+        <Breadcrumb>
+          <BreadcrumbItem>
+            <NavLink to="/overview">Settings</NavLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem isActive>
+            {pageTitle}
+          </BreadcrumbItem>
+        </Breadcrumb>
+      );
+    }
+    
+    // IAM bundle pages get "Identity & Access Management > Current Page" breadcrumb
+    if (secondaryNavPages.includes(currentPath)) {
+      const currentItem = secondaryNavItems.find(item => item.path === currentPath);
+      const pageTitle = currentItem?.label || 'Page';
+      
+      return (
+        <Breadcrumb>
+          <BreadcrumbItem>
+            Identity & Access Management
+          </BreadcrumbItem>
+          <BreadcrumbItem isActive>
+            {pageTitle}
+          </BreadcrumbItem>
+        </Breadcrumb>
+      );
+    }
+    
+    return null;
+  };
+
+  const breadcrumb = getBreadcrumb();
+
   const Sidebar = (
     <PageSidebar>
       <PageSidebarBody>{Navigation}</PageSidebarBody>
@@ -1566,6 +1617,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         masthead={masthead}
         sidebar={sidebarOpen && !isPageWithoutNav && Sidebar}
         skipToContent={PageSkipToContent}
+        breadcrumb={breadcrumb}
       >
         {/* Notification Drawer (outer, right-side) */}
         <Drawer isExpanded={isNotificationDrawerOpen} isInline position="right">
