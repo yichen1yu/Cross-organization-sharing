@@ -1909,11 +1909,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
                             <FlexItem>
                               <Menu>
-                                <MenuGroup label="Group 1" labelHeadingLevel="h2">
+                                <MenuGroup label="Red Hat Enterprise Linux" labelHeadingLevel="h2">
                                   <MenuList>
                                     <MenuItem 
-                                      itemId="app1"
-                                      onClick={() => console.log('Application 1 clicked')}
+                                      itemId="rhel-insights"
+                                      onClick={() => console.log('Red Hat Insights clicked')}
                                       actions={
                                         <MenuItemAction
                                           icon={<StarIcon />}
@@ -1923,11 +1923,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         />
                                       }
                                     >
-                                      Application 1
+                                      Red Hat Insights
                                     </MenuItem>
                                     <MenuItem 
-                                      itemId="app2"
-                                      to="#default-link2"
+                                      itemId="rhel-patch"
+                                      onClick={() => console.log('Patch Management clicked')}
                                       actions={
                                         <MenuItemAction
                                           icon={<StarIcon />}
@@ -1937,18 +1937,18 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         />
                                       }
                                     >
-                                      Application 2
+                                      Patch Management
                                     </MenuItem>
                                   </MenuList>
                                 </MenuGroup>
                                 
                                 <Divider />
                                 
-                                <MenuGroup label="Group 2" labelHeadingLevel="h2">
+                                <MenuGroup label="Red Hat OpenShift" labelHeadingLevel="h2">
                                   <MenuList>
                                     <MenuItem 
-                                      itemId="router-link"
-                                      to="#router-link"
+                                      itemId="openshift-clusters"
+                                      onClick={() => console.log('OpenShift Clusters clicked')}
                                       actions={
                                         <MenuItemAction
                                           icon={<StarIcon />}
@@ -1958,13 +1958,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         />
                                       }
                                     >
-                                      Custom component (such as @reach/router Link)
+                                      OpenShift Clusters
                                     </MenuItem>
                                     <MenuItem 
-                                      itemId="router-link2"
-                                      to="#router-link2"
-                                      isExternalLink
-                                      icon={<img src="/images/2ada0972.svg" alt="" width="25" height="25" />}
+                                      itemId="container-registry"
+                                      onClick={() => console.log('Container Registry clicked')}
                                       actions={
                                         <MenuItemAction
                                           icon={<StarIcon />}
@@ -1974,35 +1972,185 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         />
                                       }
                                     >
-                                      Custom component with icon
+                                      Container Registry
                                     </MenuItem>
                                   </MenuList>
                                 </MenuGroup>
                                 
                                 <Divider />
                                 
-                                <MenuList>
-                                  <MenuItem 
-                                    itemId="app3"
-                                    onClick={() => console.log('Application 3 clicked')}
-                                    actions={
-                                      <MenuItemAction
-                                        icon={<StarIcon />}
-                                        actionId="favorite"
-                                        onClick={() => console.log('Favorite clicked')}
-                                        aria-label="Favorite"
-                                      />
-                                    }
-                                  >
-                                    Application 3 with tooltip
-                                  </MenuItem>
-                                  <MenuItem 
-                                    itemId="unavailable"
-                                    isDisabled
-                                  >
-                                    Unavailable Application
-                                  </MenuItem>
-                                </MenuList>
+                                <MenuGroup label="Red Hat Ansible Automation Platform" labelHeadingLevel="h2">
+                                  <MenuList>
+                                    <MenuItem 
+                                      itemId="automation-hub"
+                                      onClick={() => console.log('Automation Hub clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Automation Hub
+                                    </MenuItem>
+                                    <MenuItem 
+                                      itemId="automation-controller"
+                                      onClick={() => console.log('Automation Controller clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Automation Controller
+                                    </MenuItem>
+                                  </MenuList>
+                                </MenuGroup>
+                                
+                                <Divider />
+                                
+                                <MenuGroup label="Identity & Access Management (IAM)" labelHeadingLevel="h2">
+                                  <MenuList>
+                                    <MenuItem 
+                                      itemId="user-access"
+                                      onClick={() => console.log('User Access clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      User Access
+                                    </MenuItem>
+                                    <MenuItem 
+                                      itemId="service-accounts"
+                                      onClick={() => console.log('Service Accounts clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Service Accounts
+                                    </MenuItem>
+                                  </MenuList>
+                                </MenuGroup>
+                                
+                                <Divider />
+                                
+                                <MenuGroup label="Console Settings" labelHeadingLevel="h2">
+                                  <MenuList>
+                                    <MenuItem 
+                                      itemId="preferences"
+                                      onClick={() => console.log('Preferences clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Preferences
+                                    </MenuItem>
+                                    <MenuItem 
+                                      itemId="notifications"
+                                      onClick={() => console.log('Notifications clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Notifications
+                                    </MenuItem>
+                                  </MenuList>
+                                </MenuGroup>
+                                
+                                <Divider />
+                                
+                                <MenuGroup label="Subscription Services" labelHeadingLevel="h2">
+                                  <MenuList>
+                                    <MenuItem 
+                                      itemId="subscriptions"
+                                      onClick={() => console.log('Subscriptions clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Subscriptions
+                                    </MenuItem>
+                                    <MenuItem 
+                                      itemId="billing"
+                                      onClick={() => console.log('Billing clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Billing
+                                    </MenuItem>
+                                  </MenuList>
+                                </MenuGroup>
+                                
+                                <Divider />
+                                
+                                <MenuGroup label="Other" labelHeadingLevel="h2">
+                                  <MenuList>
+                                    <MenuItem 
+                                      itemId="documentation"
+                                      onClick={() => console.log('Documentation clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Documentation
+                                    </MenuItem>
+                                    <MenuItem 
+                                      itemId="support"
+                                      onClick={() => console.log('Support clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Support
+                                    </MenuItem>
+                                  </MenuList>
+                                </MenuGroup>
                               </Menu>
                             </FlexItem>
                           </Flex>
