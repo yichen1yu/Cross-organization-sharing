@@ -42,6 +42,7 @@ import {
   Menu,
   MenuList,
   MenuItem,
+  MenuItemAction,
   MenuGroup,
   NotificationDrawer,
   NotificationDrawerBody,
@@ -1915,109 +1916,102 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                             </FlexItem>
 
                             <FlexItem>
-                              <div className="pf-v6-c-menu__content">
-                                <section className="pf-v6-c-menu__group">
-                                  <h1 className="pf-v6-c-menu__group-title">Group 1</h1>
-                                  <ul role="menu" className="pf-v6-c-menu__list">
-                                    <li className="pf-v6-c-menu__list-item" role="none">
-                                      <button id="0" tabIndex={0} className="pf-v6-c-menu__item" role="menuitem" type="button">
-                                        <span className="pf-v6-c-menu__item-main">
-                                          <span className="pf-v6-c-menu__item-text">Application 1</span>
-                                        </span>
-                                      </button>
-                                      <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
-                                        <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
-                                          <span className="pf-v6-c-button__icon">
-                                            <StarIcon />
-                                          </span>
-                                        </button>
-                                      </div>
-                                    </li>
-                                    <li className="pf-v6-c-menu__list-item" role="none">
-                                      <a id="1" tabIndex={-1} className="pf-v6-c-menu__item" role="menuitem" href="#default-link2">
-                                        <span className="pf-v6-c-menu__item-main">
-                                          <span className="pf-v6-c-menu__item-text">Application 2</span>
-                                        </span>
-                                      </a>
-                                      <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
-                                        <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
-                                          <span className="pf-v6-c-button__icon">
-                                            <StarIcon />
-                                          </span>
-                                        </button>
-                                      </div>
-                                    </li>
-                                  </ul>
-                                </section>
-                                <hr className="pf-v6-c-divider" />
-                                <section className="pf-v6-c-menu__group">
-                                  <h1 className="pf-v6-c-menu__group-title">Group 2</h1>
-                                  <ul role="menu" className="pf-v6-c-menu__list">
-                                    <li className="pf-v6-c-menu__list-item" role="none">
-                                      <a href="#router-link" id="2" tabIndex={-1} className="pf-v6-c-menu__item" role="menuitem">
-                                        <span className="pf-v6-c-menu__item-main">
-                                          <span className="pf-v6-c-menu__item-text">Custom component (such as @reach/router Link)</span>
-                                        </span>
-                                      </a>
-                                      <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
-                                        <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
-                                          <span className="pf-v6-c-button__icon">
-                                            <StarIcon />
-                                          </span>
-                                        </button>
-                                      </div>
-                                    </li>
-                                    <li className="pf-v6-c-menu__list-item" role="none">
-                                      <a href="#router-link2" id="3" tabIndex={-1} className="pf-v6-c-menu__item" role="menuitem">
-                                        <span className="pf-v6-c-menu__item-main">
-                                          <span className="pf-v6-c-menu__item-icon">
-                                            <img src="/images/2ada0972.svg" alt="" width="25" height="25" />
-                                          </span>
-                                          <span className="pf-v6-c-menu__item-text">Custom component with icon</span>
-                                          <span className="pf-v6-c-menu__item-external-icon">
-                                            <ExternalLinkAltIcon />
-                                          </span>
-                                        </span>
-                                      </a>
-                                      <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
-                                        <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
-                                          <span className="pf-v6-c-button__icon">
-                                            <StarIcon />
-                                          </span>
-                                        </button>
-                                      </div>
-                                    </li>
-                                  </ul>
-                                </section>
-                                <hr className="pf-v6-c-divider" />
-                                <ul role="menu" className="pf-v6-c-menu__list">
-                                  <li className="pf-v6-c-menu__list-item" role="none">
-                                    <button id="4" tabIndex={-1} className="pf-v6-c-menu__item" role="menuitem" type="button">
-                                      <span className="pf-v6-c-menu__item-main">
-                                        <span className="pf-v6-c-menu__item-text">
-                                          <div style={{ display: 'contents' }}>
-                                            <span>Application 3 with tooltip</span>
-                                          </div>
-                                        </span>
-                                      </span>
-                                    </button>
-                                    <div className="pf-v6-c-menu__item-action pf-m-favorite" tabIndex={-1}>
-                                      <button aria-label="not starred" className="pf-v6-c-button pf-m-plain" tabIndex={-1} type="button" role="menuitem">
-                                        <span className="pf-v6-c-button__icon">
-                                          <StarIcon />
-                                        </span>
-                                      </button>
-                                    </div>
-                                  </li>
-                                  <li className="pf-v6-c-menu__list-item pf-m-disabled" role="none">
-                                    <button id="5" tabIndex={-1} className="pf-v6-c-menu__item" disabled role="menuitem" type="button">
-                                      <span className="pf-v6-c-menu__item-main">
-                                        <span className="pf-v6-c-menu__item-text">Unavailable Application</span>
-                                      </span>
-                                    </button>
-                                  </li>
-                                </ul>
-                              </div>
+                              <Menu>
+                                <MenuGroup label="Group 1" labelHeadingLevel="h2">
+                                  <MenuList>
+                                    <MenuItem 
+                                      itemId="app1"
+                                      onClick={() => console.log('Application 1 clicked')}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Application 1
+                                    </MenuItem>
+                                    <MenuItem 
+                                      itemId="app2"
+                                      to="#default-link2"
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Application 2
+                                    </MenuItem>
+                                  </MenuList>
+                                </MenuGroup>
+                                
+                                <Divider />
+                                
+                                <MenuGroup label="Group 2" labelHeadingLevel="h2">
+                                  <MenuList>
+                                    <MenuItem 
+                                      itemId="router-link"
+                                      to="#router-link"
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Custom component (such as @reach/router Link)
+                                    </MenuItem>
+                                    <MenuItem 
+                                      itemId="router-link2"
+                                      to="#router-link2"
+                                      isExternalLink
+                                      icon={<img src="/images/2ada0972.svg" alt="" width="25" height="25" />}
+                                      actions={
+                                        <MenuItemAction
+                                          icon={<StarIcon />}
+                                          actionId="favorite"
+                                          onClick={() => console.log('Favorite clicked')}
+                                          aria-label="Favorite"
+                                        />
+                                      }
+                                    >
+                                      Custom component with icon
+                                    </MenuItem>
+                                  </MenuList>
+                                </MenuGroup>
+                                
+                                <Divider />
+                                
+                                <MenuList>
+                                  <MenuItem 
+                                    itemId="app3"
+                                    onClick={() => console.log('Application 3 clicked')}
+                                    actions={
+                                      <MenuItemAction
+                                        icon={<StarIcon />}
+                                        actionId="favorite"
+                                        onClick={() => console.log('Favorite clicked')}
+                                        aria-label="Favorite"
+                                      />
+                                    }
+                                  >
+                                    Application 3 with tooltip
+                                  </MenuItem>
+                                  <MenuItem 
+                                    itemId="unavailable"
+                                    isDisabled
+                                  >
+                                    Unavailable Application
+                                  </MenuItem>
+                                </MenuList>
+                              </Menu>
                             </FlexItem>
                           </Flex>
                         );
