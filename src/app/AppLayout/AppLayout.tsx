@@ -2117,9 +2117,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <Divider />
                                       <MenuList>
                                         <MenuItem 
-                                          itemId="preferences"
-                                          description="Customize your console experience, themes, and personal settings"
-                                          onClick={() => console.log('Preferences clicked')}
+                                          itemId="directory-domain-services"
+                                          description="Configure directory services and domain management settings"
+                                          onClick={() => console.log('Directory and Domain Services clicked')}
                                           actions={
                                             <MenuItemAction
                                               icon={<StarIcon />}
@@ -2129,22 +2129,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             />
                                           }
                                         >
-                                          Preferences
-                                        </MenuItem>
-                                        <MenuItem 
-                                          itemId="notifications"
-                                          description="Configure alert preferences and notification settings for system events"
-                                          onClick={() => console.log('Notifications clicked')}
-                                          actions={
-                                            <MenuItemAction
-                                              icon={<StarIcon />}
-                                              actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
-                                            />
-                                          }
-                                        >
-                                          Notifications
+                                          Directory and Domain Services
                                         </MenuItem>
                                       </MenuList>
                                     </MenuGroup>
