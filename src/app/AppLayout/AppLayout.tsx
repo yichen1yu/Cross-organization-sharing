@@ -1344,7 +1344,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   // Define navigation groups
   const primaryNavPages = ['/overview', '/alert-manager', '/data-integration', '/event-log', '/learning-resources'];
-  const secondaryNavPages = ['/my-user-access', '/user-access', '/users', '/groups', '/authentication-policy', '/service-accounts', '/learning-resources-iam'];
+  const secondaryNavPages = ['/my-user-access', '/user-access', '/users', '/groups', '/roles', '/workspaces', '/red-hat-access-requests', '/authentication-policy', '/service-accounts', '/learning-resources-iam'];
 
   // Determine which navigation structure to show
   const getNavigationType = () => {
@@ -1372,12 +1372,15 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     { 
       label: 'User Access', 
       path: '/user-access', 
-      isActive: ['/user-access', '/users', '/groups'].includes(location.pathname),
+      isActive: ['/user-access', '/users', '/groups', '/roles', '/workspaces', '/red-hat-access-requests'].includes(location.pathname),
       isExpandable: true,
       subItems: [
         { label: 'Overview', path: '/user-access', isActive: location.pathname === '/user-access' },
         { label: 'Users', path: '/users', isActive: location.pathname === '/users' },
         { label: 'Groups', path: '/groups', isActive: location.pathname === '/groups' },
+        { label: 'Roles', path: '/roles', isActive: location.pathname === '/roles' },
+        { label: 'Workspaces', path: '/workspaces', isActive: location.pathname === '/workspaces' },
+        { label: 'Red Hat Access Requests', path: '/red-hat-access-requests', isActive: location.pathname === '/red-hat-access-requests' },
       ]
     },
     { label: 'Authentication Policy', path: '/authentication-policy', isActive: location.pathname === '/authentication-policy' },
