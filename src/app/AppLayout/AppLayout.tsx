@@ -1654,6 +1654,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 background-color: transparent !important;
                 color: var(--pf-v6-global--Color--100) !important;
               }
+              /* Customize star icon color in My Favorite Services */
+              .pf-v6-c-menu .pf-v6-c-menu__list .pf-v6-c-menu__item[data-item-id="my-favorite-services"] .pf-v6-c-menu__item-icon svg {
+                color: var(--pf-v6-c-button--m-favorited--hover__icon--Color) !important;
+                fill: var(--pf-v6-c-button--m-favorited--hover__icon--Color) !important;
+              }
               /* Style link items differently - increased specificity */
               .pf-v6-c-menu__item[data-is-link="true"] .pf-v6-c-menu__item-main {
                 color: var(--pf-v6-global--link--Color) !important;
