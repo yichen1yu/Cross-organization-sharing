@@ -360,33 +360,38 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   // Mock search data
   const mockSearchData = [
-    { id: '1', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/alert-manager' },
-    { id: '2', title: 'Vulnerability', description: 'View and manage system vulnerabilities', category: 'RHEL', route: null },
-    { id: '3', title: 'Policies', description: 'Configure and manage security policies', category: 'RHEL', route: null },
-    { id: '4', title: 'My User Access', description: 'View and manage your personal access permissions', category: 'IAM', route: '/my-user-access' },
-    { id: '5', title: 'Overview', description: 'View system overview and general information', category: 'Settings', route: '/overview' },
-    { id: '6', title: 'Kubernetes Clusters', description: 'Manage and monitor your Kubernetes clusters', category: 'Infrastructure', route: null },
-    { id: '7', title: 'Event Log Analytics', description: 'View and analyze application events', category: 'Monitoring', route: '/event-log' },
-    { id: '8', title: 'Alert Configuration', description: 'Configure alerts for your applications', category: 'Alerts', route: '/alert-manager' },
-    { id: '9', title: 'Data Integration Services', description: 'Connect and integrate external data sources', category: 'Integration', route: '/data-integration' },
-    { id: '10', title: 'User Access Management', description: 'Manage user permissions and roles', category: 'Security', route: null },
-    { id: '11', title: 'Application Performance', description: 'Monitor application performance metrics', category: 'Monitoring', route: null },
-    { id: '12', title: 'Service Mesh Configuration', description: 'Configure service mesh settings', category: 'Infrastructure', route: null },
-    { id: '13', title: 'Database Connections', description: 'Manage database connection strings', category: 'Integration', route: '/data-integration' },
-    { id: '14', title: 'API Gateway Settings', description: 'Configure API gateway policies', category: 'Infrastructure', route: null },
-    { id: '15', title: 'Backup and Recovery', description: 'Manage backup and recovery processes', category: 'Operations', route: null },
-    { id: '16', title: 'User Access', description: 'Manage user accounts and access permissions', category: 'IAM', route: '/user-access' },
-    { id: '17', title: 'Authentication Policy', description: 'Configure authentication policies and security settings', category: 'IAM', route: '/authentication-policy' },
-    { id: '18', title: 'Service Accounts', description: 'Manage service accounts and API credentials', category: 'IAM', route: '/service-accounts' }
+    // Main Settings Bundle Pages
+    { id: '1', title: 'Overview', description: 'View system overview and general information', category: 'Settings', route: '/overview' },
+    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/alert-manager' },
+    { id: '3', title: 'Data Integration', description: 'Manage data integration workflows, connectors, and synchronization settings', category: 'Settings', route: '/data-integration' },
+    { id: '4', title: 'Event Log', description: 'View and configure system event logging and monitoring', category: 'Settings', route: '/event-log' },
+    { id: '5', title: 'Learning Resources', description: 'Access training materials, tutorials, and documentation resources', category: 'Settings', route: '/learning-resources' },
+    
+    // IAM Bundle Pages
+    { id: '6', title: 'My User Access', description: 'View and manage your personal access permissions and settings', category: 'IAM', route: '/my-user-access' },
+    { id: '7', title: 'User Access', description: 'Manage user accounts, groups, and access permissions overview', category: 'IAM', route: '/user-access' },
+    { id: '8', title: 'Users', description: 'Manage user accounts and their access permissions', category: 'IAM', route: '/users' },
+    { id: '9', title: 'Groups', description: 'Create and manage user groups and group-based permissions', category: 'IAM', route: '/groups' },
+    { id: '10', title: 'Roles', description: 'Define and manage user roles with specific permissions and access levels', category: 'IAM', route: '/roles' },
+    { id: '11', title: 'Workspaces', description: 'Manage workspaces and project environments for teams', category: 'IAM', route: '/workspaces' },
+    { id: '12', title: 'Red Hat Access Requests', description: 'Manage access requests for Red Hat services and resources', category: 'IAM', route: '/red-hat-access-requests' },
+    { id: '13', title: 'Authentication Policy', description: 'Configure authentication policies and security settings', category: 'IAM', route: '/authentication-policy' },
+    { id: '14', title: 'Service Accounts', description: 'Manage service accounts and API credentials for automated systems', category: 'IAM', route: '/service-accounts' },
+    { id: '15', title: 'IAM Learning Resources', description: 'Access Identity & Access Management learning materials and guides', category: 'IAM', route: '/learning-resources-iam' },
+    
+    // Additional Services
+    { id: '16', title: 'Vulnerability', description: 'View and manage system vulnerabilities', category: 'RHEL', route: null },
+    { id: '17', title: 'Policies', description: 'Configure and manage security policies', category: 'RHEL', route: null },
+    { id: '18', title: 'Application Performance', description: 'Monitor application performance metrics', category: 'Monitoring', route: null }
   ];
 
   // Top 5 results for empty state
   const topResults = [
-    { id: '1', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/alert-manager' },
-    { id: '2', title: 'Vulnerability', description: 'View and manage system vulnerabilities', category: 'RHEL', route: null },
-    { id: '3', title: 'Policies', description: 'Configure and manage security policies', category: 'RHEL', route: null },
-    { id: '4', title: 'My User Access', description: 'View and manage your personal access permissions', category: 'IAM', route: '/my-user-access' },
-    { id: '5', title: 'Overview', description: 'View system overview and general information', category: 'Settings', route: '/overview' }
+    { id: '1', title: 'Overview', description: 'View system overview and general information', category: 'Settings', route: '/overview' },
+    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/alert-manager' },
+    { id: '6', title: 'My User Access', description: 'View and manage your personal access permissions and settings', category: 'IAM', route: '/my-user-access' },
+    { id: '7', title: 'User Access', description: 'Manage user accounts, groups, and access permissions overview', category: 'IAM', route: '/user-access' },
+    { id: '3', title: 'Data Integration', description: 'Manage data integration workflows, connectors, and synchronization settings', category: 'Settings', route: '/data-integration' }
   ];
 
   // Hide search results when clicking outside
@@ -1984,7 +1989,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <img 
                                         src="https://console.redhat.com/apps/frontend-assets/favoritedservices/favoriting-emptystate.svg"
                                         alt="No favorited services"
-                                        style={{ width: '48px', height: '48px' }}
+                                        style={{ width: '80px', height: '80px' }}
                                       />
                                     </div>
                                     <Title headingLevel="h4" size="lg" style={{ marginBottom: '8px' }}>No favorited services</Title>
