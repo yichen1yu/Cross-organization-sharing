@@ -1976,7 +1976,187 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                             </FlexItem>
                             
                             <FlexItem>
-                              {currentMenuItem.id === 'ai-ml' ? (
+                              {currentMenuItem.id === 'my-favorite-services' ? (
+                                // Dynamic My Favorite Services content based on user's favorites
+                                favoritedItems.size === 0 ? (
+                                  <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--pf-v6-global--Color--200)' }}>
+                                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>⭐</div>
+                                    <Title headingLevel="h4" size="lg" style={{ marginBottom: '8px' }}>No favorites yet</Title>
+                                    <p>Click the star icon next to any service in other categories to add them to your favorites.</p>
+                                  </div>
+                                ) : (
+                                  <Menu>
+                                    <MenuGroup label="Your Favorite Services" labelHeadingLevel="h2">
+                                      <Divider />
+                                      <MenuList>
+                                        {Array.from(favoritedItems).map((itemId) => {
+                                          // Map of itemId to display information
+                                          const itemMapping: { [key: string]: { name: string, description: string, onClick: () => void } } = {
+                                            'alert-manager-settings': {
+                                              name: 'Alert Manager | Settings',
+                                              description: 'Configure and manage system alerts and notifications',
+                                              onClick: () => {
+                                                navigate('/alert-manager');
+                                                setIsLogoDropdownOpen(false);
+                                              }
+                                            },
+                                            'data-integration-settings': {
+                                              name: 'Data Integration | Settings', 
+                                              description: 'Manage data integration workflows and connectors',
+                                              onClick: () => {
+                                                navigate('/data-integrations');
+                                                setIsLogoDropdownOpen(false);
+                                              }
+                                            },
+                                            'event-log-settings': {
+                                              name: 'Event Log | Settings',
+                                              description: 'View and configure system event logging',
+                                              onClick: () => {
+                                                navigate('/event-log');
+                                                setIsLogoDropdownOpen(false);
+                                              }
+                                            },
+                                            'overview-settings': {
+                                              name: 'Overview | Settings',
+                                              description: 'Access the main console overview and dashboard',
+                                              onClick: () => {
+                                                navigate('/overview');
+                                                setIsLogoDropdownOpen(false);
+                                              }
+                                            },
+                                            'users': {
+                                              name: 'Users',
+                                              description: 'Manage user accounts and their access permissions',
+                                              onClick: () => {
+                                                navigate('/users');
+                                                setIsLogoDropdownOpen(false);
+                                              }
+                                            },
+                                            'groups': {
+                                              name: 'Groups',
+                                              description: 'Create and manage user groups and permissions',
+                                              onClick: () => {
+                                                navigate('/groups');
+                                                setIsLogoDropdownOpen(false);
+                                              }
+                                            },
+                                            'roles': {
+                                              name: 'Roles',
+                                              description: 'Define and manage user roles with specific permissions',
+                                              onClick: () => {
+                                                navigate('/roles');
+                                                setIsLogoDropdownOpen(false);
+                                              }
+                                            },
+                                            '60day-trial-openshift-ai': {
+                                              name: '60-Day Product Trial | OpenShift AI',
+                                              description: 'Create, train, and service AI/ML models',
+                                              onClick: () => console.log('60-Day Product Trial | OpenShift AI clicked')
+                                            },
+                                            'developer-sandbox-openshift-ai': {
+                                              name: 'Developer Sandbox | OpenShift AI',
+                                              description: 'Create, train, and service AI/ML models',
+                                              onClick: () => console.log('Developer Sandbox | OpenShift AI clicked')
+                                            },
+                                            'authentication-factors': {
+                                              name: 'Authentication Factors',
+                                              description: 'Configure multi-factor authentication and security settings',
+                                              onClick: () => console.log('Authentication Factors clicked')
+                                            },
+                                            'service-accounts': {
+                                              name: 'Service Accounts',
+                                              description: 'Create and manage service accounts for automated systems',
+                                              onClick: () => console.log('Service Accounts clicked')
+                                            },
+                                            'identity-provider-information': {
+                                              name: 'Identity Provider Information',
+                                              description: 'Configure and manage external identity providers',
+                                              onClick: () => console.log('Identity Provider Information clicked')
+                                            },
+                                            'workspaces': {
+                                              name: 'Workspaces',
+                                              description: 'Manage organizational workspaces and their access controls',
+                                              onClick: () => console.log('Workspaces clicked')
+                                            },
+                                            'directory-domain-services': {
+                                              name: 'Directory and Domain Services',
+                                              description: 'Configure directory services and domain management',
+                                              onClick: () => console.log('Directory and Domain Services clicked')
+                                            },
+                                            'rhel-rhc': {
+                                              name: 'Remote Host Configuration (RHC)',
+                                              description: 'Configure and manage remote host connections',
+                                              onClick: () => console.log('Remote Host Configuration (RHC) clicked')
+                                            },
+                                            'rhel-activation-keys': {
+                                              name: 'Activation Keys',
+                                              description: 'Manage activation keys for system registration',
+                                              onClick: () => console.log('Activation Keys clicked')
+                                            },
+                                            'rhel-registration-assistant': {
+                                              name: 'Registration Assistant',
+                                              description: 'Step-by-step guidance for registering systems',
+                                              onClick: () => console.log('Registration Assistant clicked')
+                                            },
+                                            'rhel-staleness-deletion': {
+                                              name: 'Staleness & Deletion',
+                                              description: 'Configure system staleness detection and automated deletion',
+                                              onClick: () => console.log('Staleness & Deletion clicked')
+                                            },
+                                            'ansible-registration-assistant': {
+                                              name: 'Ansible Registration Assistant',
+                                              description: 'Guided setup for Ansible automation workflows',
+                                              onClick: () => console.log('Ansible Registration Assistant clicked')
+                                            },
+                                            'console-alert-manager': {
+                                              name: 'Alert Manager',
+                                              description: 'Configure and manage system alerts and notifications',
+                                              onClick: () => {
+                                                navigate('/alert-manager');
+                                                setIsLogoDropdownOpen(false);
+                                              }
+                                            },
+                                            'console-data-integration': {
+                                              name: 'Data Integration',
+                                              description: 'Manage data integration workflows and connectors',
+                                              onClick: () => {
+                                                navigate('/data-integrations');
+                                                setIsLogoDropdownOpen(false);
+                                              }
+                                            }
+                                          };
+
+                                          const item = itemMapping[itemId];
+                                          if (!item) return null;
+
+                                          return (
+                                            <MenuItem
+                                              key={itemId}
+                                              itemId={`favorite-${itemId}`}
+                                              description={item.description}
+                                              onClick={item.onClick}
+                                              actions={
+                                                <MenuItemAction
+                                                  icon={<StarIcon />}
+                                                  actionId="unfavorite"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleFavorite(itemId);
+                                                  }}
+                                                  isFavorited={true}
+                                                  aria-label="Remove from favorites"
+                                                />
+                                              }
+                                            >
+                                              {item.name}
+                                            </MenuItem>
+                                          );
+                                        })}
+                                      </MenuList>
+                                    </MenuGroup>
+                                  </Menu>
+                                )
+                              ) : currentMenuItem.id === 'ai-ml' ? (
                                 <Menu>
                                   <MenuGroup label="Red Hat OpenShift" labelHeadingLevel="h2">
                                     <Divider />
