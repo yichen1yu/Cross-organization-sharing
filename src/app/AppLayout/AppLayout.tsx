@@ -2120,6 +2120,24 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         Groups
                                       </MenuItem>
                                       <MenuItem 
+                                        itemId="roles"
+                                        description="Define and manage user roles with specific permissions and access levels"
+                                        onClick={() => {
+                                          navigate('/roles');
+                                          setIsLogoDropdownOpen(false);
+                                        }}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={() => console.log('Favorite clicked')}
+                                            aria-label="Favorite"
+                                          />
+                                        }
+                                      >
+                                        Roles
+                                      </MenuItem>
+                                      <MenuItem 
                                         itemId="authentication-factors"
                                         description="Configure multi-factor authentication and security settings"
                                         onClick={() => console.log('Authentication Factors clicked')}
