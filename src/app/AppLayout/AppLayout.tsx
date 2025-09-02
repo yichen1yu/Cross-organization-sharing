@@ -351,6 +351,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   // Ref for services dropdown to handle outside clicks
   const servicesDropdownRef = React.useRef<HTMLDivElement>(null);
   
+  // Ref for search container to handle outside clicks
+  const searchContainerRef = React.useRef<HTMLDivElement>(null);
+  
   // Location and navigation
   const location = useLocation();
   const navigate = useNavigate();
@@ -394,11 +397,24 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     { id: '3', title: 'Data Integration', description: 'Manage data integration workflows, connectors, and synchronization settings', category: 'Settings', route: '/data-integration' }
   ];
 
-  // Hide search results when clicking outside
+  // Hide search results and collapse search bar when clicking outside
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const searchContainer = document.querySelector('.masthead-search-expanded');
-      if (searchContainer && !searchContainer.contains(event.target as Node)) {
+      const searchButton = document.querySelector('[aria-label="Expandable search input toggle"]');
+      
+      // Check if click is on search toggle button - don't collapse if so
+      if (searchButton && searchButton.contains(event.target as Node)) {
+        return;
+      }
+      
+      // If search is expanded and click is outside the search container
+      if (isSearchExpanded && searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchExpanded(false);
+        setShowSearchResults(false);
+        setSearchResults([]);
+        setMastheadSearchValue('');
+      } else if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        // Just hide search results if search is not expanded
         setShowSearchResults(false);
       }
     };
@@ -407,7 +423,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [isSearchExpanded]);
 
   // Hide services dropdown when clicking outside
   React.useEffect(() => {
@@ -1030,6 +1046,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         
         {/* Expandable Search Input */}
         <div 
+          ref={searchContainerRef}
           style={{ 
             marginRight: '4px',
             width: isSearchExpanded ? '552px' : 'auto',
