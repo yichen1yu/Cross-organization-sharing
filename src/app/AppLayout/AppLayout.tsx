@@ -1981,8 +1981,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                 favoritedItems.size === 0 ? (
                                   <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--pf-v6-global--Color--200)' }}>
                                     <div style={{ fontSize: '48px', marginBottom: '16px' }}>⭐</div>
-                                    <Title headingLevel="h4" size="lg" style={{ marginBottom: '8px' }}>No favorites yet</Title>
-                                    <p>Click the star icon next to any service in other categories to add them to your favorites.</p>
+                                    <Title headingLevel="h4" size="lg" style={{ marginBottom: '8px' }}>No favorited services</Title>
+                                    <p style={{ marginBottom: '24px' }}>Add a service to your favorites to get started here.</p>
+                                    <Button 
+                                      variant="primary" 
+                                      onClick={() => {
+                                        navigate('/all-services');
+                                        setIsLogoDropdownOpen(false);
+                                      }}
+                                    >
+                                      View all services
+                                    </Button>
                                   </div>
                                 ) : (
                                   <Menu>
