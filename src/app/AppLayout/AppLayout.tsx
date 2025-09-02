@@ -325,6 +325,22 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   // Service dropdown primary-detail state
   const [selectedMenuItem, setSelectedMenuItem] = React.useState(getFirstMenuItemId());
   
+  // Favorited items state
+  const [favoritedItems, setFavoritedItems] = React.useState<Set<string>>(new Set());
+  
+  // Function to toggle favorite status of an item
+  const toggleFavorite = (itemId: string) => {
+    setFavoritedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  };
+  
   // Logo dropdown and expandable search state
   const [isLogoDropdownOpen, setIsLogoDropdownOpen] = React.useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = React.useState(false);
@@ -1973,8 +1989,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('60day-trial-openshift-ai');
+                                            }}
+                                            isFavorited={favoritedItems.has('60day-trial-openshift-ai')}
+                                            aria-label={favoritedItems.has('60day-trial-openshift-ai') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -1988,8 +2008,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('developer-sandbox-openshift-ai');
+                                            }}
+                                            isFavorited={favoritedItems.has('developer-sandbox-openshift-ai')}
+                                            aria-label={favoritedItems.has('developer-sandbox-openshift-ai') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2014,8 +2038,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('alert-manager-settings');
+                                            }}
+                                            isFavorited={favoritedItems.has('alert-manager-settings')}
+                                            aria-label={favoritedItems.has('alert-manager-settings') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2032,8 +2060,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('data-integration-settings');
+                                            }}
+                                            isFavorited={favoritedItems.has('data-integration-settings')}
+                                            aria-label={favoritedItems.has('data-integration-settings') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2050,8 +2082,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('event-log-settings');
+                                            }}
+                                            isFavorited={favoritedItems.has('event-log-settings')}
+                                            aria-label={favoritedItems.has('event-log-settings') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2068,8 +2104,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('overview-settings');
+                                            }}
+                                            isFavorited={favoritedItems.has('overview-settings')}
+                                            aria-label={favoritedItems.has('overview-settings') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2094,8 +2134,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('users');
+                                            }}
+                                            isFavorited={favoritedItems.has('users')}
+                                            aria-label={favoritedItems.has('users') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2112,8 +2156,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('groups');
+                                            }}
+                                            isFavorited={favoritedItems.has('groups')}
+                                            aria-label={favoritedItems.has('groups') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2130,8 +2178,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('roles');
+                                            }}
+                                            isFavorited={favoritedItems.has('roles')}
+                                            aria-label={favoritedItems.has('roles') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2145,8 +2197,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('authentication-factors');
+                                            }}
+                                            isFavorited={favoritedItems.has('authentication-factors')}
+                                            aria-label={favoritedItems.has('authentication-factors') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2160,8 +2216,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('service-accounts');
+                                            }}
+                                            isFavorited={favoritedItems.has('service-accounts')}
+                                            aria-label={favoritedItems.has('service-accounts') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2175,8 +2235,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('identity-provider-information');
+                                            }}
+                                            isFavorited={favoritedItems.has('identity-provider-information')}
+                                            aria-label={favoritedItems.has('identity-provider-information') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2190,8 +2254,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('workspaces');
+                                            }}
+                                            isFavorited={favoritedItems.has('workspaces')}
+                                            aria-label={favoritedItems.has('workspaces') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2205,15 +2273,19 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <Divider />
                                       <MenuList>
                                         <MenuItem 
-                                          itemId="directory-domain-services"
-                                          description="Configure directory services and domain management settings"
-                                          onClick={() => console.log('Directory and Domain Services clicked')}
-                                          actions={
-                                            <MenuItemAction
-                                              icon={<StarIcon />}
-                                              actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                                                                  itemId="directory-domain-services"
+                                        description="Configure directory services and domain management settings"
+                                        onClick={() => console.log('Directory and Domain Services clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('directory-domain-services');
+                                            }}
+                                            isFavorited={favoritedItems.has('directory-domain-services')}
+                                            aria-label={favoritedItems.has('directory-domain-services') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2236,8 +2308,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('rhel-rhc');
+                                            }}
+                                            isFavorited={favoritedItems.has('rhel-rhc')}
+                                            aria-label={favoritedItems.has('rhel-rhc') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2251,8 +2327,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('rhel-activation-keys');
+                                            }}
+                                            isFavorited={favoritedItems.has('rhel-activation-keys')}
+                                            aria-label={favoritedItems.has('rhel-activation-keys') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2266,8 +2346,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('rhel-registration-assistant');
+                                            }}
+                                            isFavorited={favoritedItems.has('rhel-registration-assistant')}
+                                            aria-label={favoritedItems.has('rhel-registration-assistant') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2281,8 +2365,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('rhel-staleness-deletion');
+                                            }}
+                                            isFavorited={favoritedItems.has('rhel-staleness-deletion')}
+                                            aria-label={favoritedItems.has('rhel-staleness-deletion') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2296,15 +2384,19 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <Divider />
                                       <MenuList>
                                         <MenuItem 
-                                          itemId="ansible-registration-assistant"
-                                          description="Guided setup for registering and configuring Ansible automation workflows"
-                                          onClick={() => console.log('Ansible Registration Assistant clicked')}
-                                          actions={
-                                            <MenuItemAction
-                                              icon={<StarIcon />}
-                                              actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                                                                  itemId="ansible-registration-assistant"
+                                        description="Guided setup for registering and configuring Ansible automation workflows"
+                                        onClick={() => console.log('Ansible Registration Assistant clicked')}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('ansible-registration-assistant');
+                                            }}
+                                            isFavorited={favoritedItems.has('ansible-registration-assistant')}
+                                            aria-label={favoritedItems.has('ansible-registration-assistant') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2319,36 +2411,44 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <Divider />
                                       <MenuList>
                                         <MenuItem 
-                                          itemId="console-alert-manager"
-                                          description="Configure and manage system alerts, notifications, and escalation policies"
-                                          onClick={() => {
-                                            navigate('/alert-manager');
-                                            setIsLogoDropdownOpen(false);
-                                          }}
-                                          actions={
-                                            <MenuItemAction
-                                              icon={<StarIcon />}
-                                              actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                                                                  itemId="console-alert-manager"
+                                        description="Configure and manage system alerts, notifications, and escalation policies"
+                                        onClick={() => {
+                                          navigate('/alert-manager');
+                                          setIsLogoDropdownOpen(false);
+                                        }}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('console-alert-manager');
+                                            }}
+                                            isFavorited={favoritedItems.has('console-alert-manager')}
+                                            aria-label={favoritedItems.has('console-alert-manager') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
                                           Alert Manager
                                         </MenuItem>
                                         <MenuItem 
-                                          itemId="console-data-integration"
-                                          description="Manage data integration workflows, connectors, and synchronization settings"
-                                          onClick={() => {
-                                            navigate('/data-integrations');
-                                            setIsLogoDropdownOpen(false);
-                                          }}
-                                          actions={
-                                            <MenuItemAction
-                                              icon={<StarIcon />}
-                                              actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                                                                  itemId="console-data-integration"
+                                        description="Manage data integration workflows, connectors, and synchronization settings"
+                                        onClick={() => {
+                                          navigate('/data-integrations');
+                                          setIsLogoDropdownOpen(false);
+                                        }}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('console-data-integration');
+                                            }}
+                                            isFavorited={favoritedItems.has('console-data-integration')}
+                                            aria-label={favoritedItems.has('console-data-integration') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2371,8 +2471,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                            isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2386,8 +2490,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItemAction
                                             icon={<StarIcon />}
                                             actionId="favorite"
-                                            onClick={() => console.log('Favorite clicked')}
-                                            aria-label="Favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                            isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2408,8 +2516,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2423,8 +2535,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2446,8 +2562,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2461,8 +2581,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2484,8 +2608,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2499,8 +2627,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2522,8 +2654,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2537,8 +2673,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2560,8 +2700,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2575,8 +2719,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2598,8 +2746,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2613,8 +2765,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             <MenuItemAction
                                               icon={<StarIcon />}
                                               actionId="favorite"
-                                              onClick={() => console.log('Favorite clicked')}
-                                              aria-label="Favorite"
+                                              onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('PLACEHOLDER');
+                                            }}
+                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
+                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
