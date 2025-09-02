@@ -1986,15 +1986,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                   </div>
                                 ) : (
                                   <Menu>
-                                    <MenuGroup label="Your Favorite Services" labelHeadingLevel="h2">
-                                      <Divider />
-                                      <MenuList>
-                                        {Array.from(favoritedItems).map((itemId) => {
-                                          // Map of itemId to display information
-                                          const itemMapping: { [key: string]: { name: string, description: string, onClick: () => void } } = {
+                                    {(() => {
+                                      // Map of itemId to display information with category grouping
+                                      const itemMapping: { [key: string]: { name: string, description: string, onClick: () => void, category: string } } = {
                                             'alert-manager-settings': {
                                               name: 'Alert Manager | Settings',
                                               description: 'Configure and manage system alerts and notifications',
+                                              category: 'Console Settings',
                                               onClick: () => {
                                                 navigate('/alert-manager');
                                                 setIsLogoDropdownOpen(false);
@@ -2003,6 +2001,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             'data-integration-settings': {
                                               name: 'Data Integration | Settings', 
                                               description: 'Manage data integration workflows and connectors',
+                                              category: 'Console Settings',
                                               onClick: () => {
                                                 navigate('/data-integrations');
                                                 setIsLogoDropdownOpen(false);
@@ -2011,6 +2010,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             'event-log-settings': {
                                               name: 'Event Log | Settings',
                                               description: 'View and configure system event logging',
+                                              category: 'Console Settings',
                                               onClick: () => {
                                                 navigate('/event-log');
                                                 setIsLogoDropdownOpen(false);
@@ -2019,6 +2019,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             'overview-settings': {
                                               name: 'Overview | Settings',
                                               description: 'Access the main console overview and dashboard',
+                                              category: 'Console Settings',
                                               onClick: () => {
                                                 navigate('/overview');
                                                 setIsLogoDropdownOpen(false);
@@ -2027,6 +2028,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             'users': {
                                               name: 'Users',
                                               description: 'Manage user accounts and their access permissions',
+                                              category: 'Identity & Access Management (IAM)',
                                               onClick: () => {
                                                 navigate('/users');
                                                 setIsLogoDropdownOpen(false);
@@ -2035,6 +2037,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             'groups': {
                                               name: 'Groups',
                                               description: 'Create and manage user groups and permissions',
+                                              category: 'Identity & Access Management (IAM)',
                                               onClick: () => {
                                                 navigate('/groups');
                                                 setIsLogoDropdownOpen(false);
@@ -2043,6 +2046,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             'roles': {
                                               name: 'Roles',
                                               description: 'Define and manage user roles with specific permissions',
+                                              category: 'Identity & Access Management (IAM)',
                                               onClick: () => {
                                                 navigate('/roles');
                                                 setIsLogoDropdownOpen(false);
@@ -2051,66 +2055,79 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             '60day-trial-openshift-ai': {
                                               name: '60-Day Product Trial | OpenShift AI',
                                               description: 'Create, train, and service AI/ML models',
+                                              category: 'Red Hat OpenShift',
                                               onClick: () => console.log('60-Day Product Trial | OpenShift AI clicked')
                                             },
                                             'developer-sandbox-openshift-ai': {
                                               name: 'Developer Sandbox | OpenShift AI',
                                               description: 'Create, train, and service AI/ML models',
+                                              category: 'Red Hat OpenShift',
                                               onClick: () => console.log('Developer Sandbox | OpenShift AI clicked')
                                             },
                                             'authentication-factors': {
                                               name: 'Authentication Factors',
                                               description: 'Configure multi-factor authentication and security settings',
+                                              category: 'Identity & Access Management (IAM)',
                                               onClick: () => console.log('Authentication Factors clicked')
                                             },
                                             'service-accounts': {
                                               name: 'Service Accounts',
                                               description: 'Create and manage service accounts for automated systems',
+                                              category: 'Identity & Access Management (IAM)',
                                               onClick: () => console.log('Service Accounts clicked')
                                             },
                                             'identity-provider-information': {
                                               name: 'Identity Provider Information',
                                               description: 'Configure and manage external identity providers',
+                                              category: 'Identity & Access Management (IAM)',
                                               onClick: () => console.log('Identity Provider Information clicked')
                                             },
                                             'workspaces': {
                                               name: 'Workspaces',
                                               description: 'Manage organizational workspaces and their access controls',
+                                              category: 'Identity & Access Management (IAM)',
                                               onClick: () => console.log('Workspaces clicked')
                                             },
                                             'directory-domain-services': {
                                               name: 'Directory and Domain Services',
                                               description: 'Configure directory services and domain management',
+                                              category: 'Console Settings',
                                               onClick: () => console.log('Directory and Domain Services clicked')
                                             },
                                             'rhel-rhc': {
                                               name: 'Remote Host Configuration (RHC)',
                                               description: 'Configure and manage remote host connections',
+                                              category: 'Red Hat Enterprise Linux',
                                               onClick: () => console.log('Remote Host Configuration (RHC) clicked')
                                             },
                                             'rhel-activation-keys': {
                                               name: 'Activation Keys',
                                               description: 'Manage activation keys for system registration',
+                                              category: 'Red Hat Enterprise Linux',
                                               onClick: () => console.log('Activation Keys clicked')
                                             },
                                             'rhel-registration-assistant': {
                                               name: 'Registration Assistant',
                                               description: 'Step-by-step guidance for registering systems',
+                                              category: 'Red Hat Enterprise Linux',
                                               onClick: () => console.log('Registration Assistant clicked')
                                             },
                                             'rhel-staleness-deletion': {
                                               name: 'Staleness & Deletion',
                                               description: 'Configure system staleness detection and automated deletion',
+                                              category: 'Red Hat Enterprise Linux',
                                               onClick: () => console.log('Staleness & Deletion clicked')
                                             },
                                             'ansible-registration-assistant': {
-                                              name: 'Ansible Registration Assistant',
+                                              name: 'Registration Assistant',
                                               description: 'Guided setup for Ansible automation workflows',
+                                              category: 'Red Hat Ansible Automation Platform',
                                               onClick: () => console.log('Ansible Registration Assistant clicked')
                                             },
                                             'console-alert-manager': {
                                               name: 'Alert Manager',
                                               description: 'Configure and manage system alerts and notifications',
+                                              category: 'Console Settings',
                                               onClick: () => {
                                                 navigate('/alert-manager');
                                                 setIsLogoDropdownOpen(false);
@@ -2119,41 +2136,164 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             'console-data-integration': {
                                               name: 'Data Integration',
                                               description: 'Manage data integration workflows and connectors',
+                                              category: 'Console Settings',
                                               onClick: () => {
                                                 navigate('/data-integrations');
                                                 setIsLogoDropdownOpen(false);
                                               }
+                                            },
+                                            // Additional items from default System Configuration menu
+                                            'rhel-insights': {
+                                              name: 'Red Hat Insights',
+                                              description: 'Proactive identification and remediation of threats',
+                                              category: 'Red Hat Enterprise Linux',
+                                              onClick: () => console.log('Red Hat Insights clicked')
+                                            },
+                                            'rhel-patch': {
+                                              name: 'Patch Management',
+                                              description: 'Automated patching and system updates for RHEL environments',
+                                              category: 'Red Hat Enterprise Linux',
+                                              onClick: () => console.log('Patch Management clicked')
+                                            },
+                                            'openshift-clusters': {
+                                              name: 'OpenShift Clusters',
+                                              description: 'Manage and monitor your OpenShift Kubernetes clusters',
+                                              category: 'Red Hat OpenShift',
+                                              onClick: () => console.log('OpenShift Clusters clicked')
+                                            },
+                                            'container-registry': {
+                                              name: 'Container Registry',
+                                              description: 'Secure container image registry for storing and managing images',
+                                              category: 'Red Hat OpenShift',
+                                              onClick: () => console.log('Container Registry clicked')
+                                            },
+                                            'automation-hub': {
+                                              name: 'Automation Hub',
+                                              description: 'Centralized repository for Ansible content collections',
+                                              category: 'Red Hat Ansible Automation Platform',
+                                              onClick: () => console.log('Automation Hub clicked')
+                                            },
+                                            'automation-controller': {
+                                              name: 'Automation Controller',
+                                              description: 'Enterprise automation control plane for Ansible playbooks',
+                                              category: 'Red Hat Ansible Automation Platform',
+                                              onClick: () => console.log('Automation Controller clicked')
+                                            },
+                                            'user-access-item': {
+                                              name: 'User Access',
+                                              description: 'Manage user permissions, roles, and access controls',
+                                              category: 'Identity & Access Management (IAM)',
+                                              onClick: () => console.log('User Access clicked')
+                                            },
+                                            'service-accounts-item': {
+                                              name: 'Service Accounts',
+                                              description: 'Create and manage service accounts for automated systems',
+                                              category: 'Identity & Access Management (IAM)',
+                                              onClick: () => console.log('Service Accounts clicked')
+                                            },
+                                            'preferences': {
+                                              name: 'Preferences',
+                                              description: 'Customize your console experience, themes, and settings',
+                                              category: 'Console Settings',
+                                              onClick: () => console.log('Preferences clicked')
+                                            },
+                                            'notifications': {
+                                              name: 'Notifications',
+                                              description: 'Configure alert preferences and notification settings',
+                                              category: 'Console Settings',
+                                              onClick: () => console.log('Notifications clicked')
+                                            },
+                                            'subscriptions': {
+                                              name: 'Subscriptions',
+                                              description: 'View and manage your Red Hat product subscriptions',
+                                              category: 'Subscription Services',
+                                              onClick: () => console.log('Subscriptions clicked')
+                                            },
+                                            'billing': {
+                                              name: 'Billing',
+                                              description: 'Access billing information, invoices, and payment methods',
+                                              category: 'Subscription Services',
+                                              onClick: () => console.log('Billing clicked')
+                                            },
+                                            'documentation': {
+                                              name: 'Documentation',
+                                              description: 'Access comprehensive guides and technical documentation',
+                                              category: 'Other',
+                                              onClick: () => console.log('Documentation clicked')
+                                            },
+                                            'support': {
+                                              name: 'Support',
+                                              description: 'Get help from Red Hat support team and submit cases',
+                                              category: 'Other',
+                                              onClick: () => console.log('Support clicked')
                                             }
                                           };
 
-                                          const item = itemMapping[itemId];
-                                          if (!item) return null;
+                                          // Group favorited items by category
+                                          const favoritesByCategory: { [category: string]: Array<{ id: string, item: typeof itemMapping[string] }> } = {};
+                                          
+                                          Array.from(favoritedItems).forEach(itemId => {
+                                            const item = itemMapping[itemId];
+                                            if (item) {
+                                              if (!favoritesByCategory[item.category]) {
+                                                favoritesByCategory[item.category] = [];
+                                              }
+                                              favoritesByCategory[item.category].push({ id: itemId, item });
+                                            }
+                                          });
+
+                                          // Define category order for consistent display
+                                          const categoryOrder = [
+                                            'Red Hat Enterprise Linux',
+                                            'Red Hat OpenShift', 
+                                            'Red Hat Ansible Automation Platform',
+                                            'Identity & Access Management (IAM)',
+                                            'Console Settings',
+                                            'Subscription Services',
+                                            'Other'
+                                          ];
 
                                           return (
-                                            <MenuItem
-                                              key={itemId}
-                                              itemId={`favorite-${itemId}`}
-                                              description={item.description}
-                                              onClick={item.onClick}
-                                              actions={
-                                                <MenuItemAction
-                                                  icon={<StarIcon />}
-                                                  actionId="unfavorite"
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleFavorite(itemId);
-                                                  }}
-                                                  isFavorited={true}
-                                                  aria-label="Remove from favorites"
-                                                />
-                                              }
-                                            >
-                                              {item.name}
-                                            </MenuItem>
+                                            <>
+                                              {categoryOrder.map((category, categoryIndex) => {
+                                                const categoryItems = favoritesByCategory[category];
+                                                if (!categoryItems || categoryItems.length === 0) return null;
+
+                                                return (
+                                                  <div key={category} style={categoryIndex > 0 ? { marginTop: '24px' } : {}}>
+                                                    <MenuGroup label={category} labelHeadingLevel="h2">
+                                                      <Divider />
+                                                      <MenuList>
+                                                        {categoryItems.map(({ id, item }) => (
+                                                          <MenuItem
+                                                            key={id}
+                                                            itemId={`favorite-${id}`}
+                                                            description={item.description}
+                                                            onClick={item.onClick}
+                                                            actions={
+                                                              <MenuItemAction
+                                                                icon={<StarIcon />}
+                                                                actionId="unfavorite"
+                                                                onClick={(e) => {
+                                                                  e.stopPropagation();
+                                                                  toggleFavorite(id);
+                                                                }}
+                                                                isFavorited={true}
+                                                                aria-label="Remove from favorites"
+                                                              />
+                                                            }
+                                                          >
+                                                            {item.name}
+                                                          </MenuItem>
+                                                        ))}
+                                                      </MenuList>
+                                                    </MenuGroup>
+                                                  </div>
+                                                );
+                                              })}
+                                            </>
                                           );
-                                        })}
-                                      </MenuList>
-                                    </MenuGroup>
+                                        })()}
                                   </Menu>
                                 )
                               ) : currentMenuItem.id === 'ai-ml' ? (
