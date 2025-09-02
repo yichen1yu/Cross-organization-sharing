@@ -2473,10 +2473,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             actionId="favorite"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('rhel-insights');
                                             }}
-                                            isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                            isFavorited={favoritedItems.has('rhel-insights')}
+                                            aria-label={favoritedItems.has('rhel-insights') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2492,10 +2492,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                             actionId="favorite"
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('rhel-patch');
                                             }}
-                                            isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                            isFavorited={favoritedItems.has('rhel-patch')}
+                                            aria-label={favoritedItems.has('rhel-patch') ? "Remove from favorites" : "Add to favorites"}
                                           />
                                         }
                                       >
@@ -2518,10 +2518,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('openshift-clusters');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('openshift-clusters')}
+                                            aria-label={favoritedItems.has('openshift-clusters') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2537,10 +2537,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('container-registry');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('container-registry')}
+                                            aria-label={favoritedItems.has('container-registry') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2564,10 +2564,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('automation-hub');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('automation-hub')}
+                                            aria-label={favoritedItems.has('automation-hub') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2583,10 +2583,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('automation-controller');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('automation-controller')}
+                                            aria-label={favoritedItems.has('automation-controller') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2610,10 +2610,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('user-access-item');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('user-access-item')}
+                                            aria-label={favoritedItems.has('user-access-item') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2629,10 +2629,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('service-accounts-item');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('service-accounts-item')}
+                                            aria-label={favoritedItems.has('service-accounts-item') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2656,10 +2656,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('preferences');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('preferences')}
+                                            aria-label={favoritedItems.has('preferences') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2675,10 +2675,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('notifications');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('notifications')}
+                                            aria-label={favoritedItems.has('notifications') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2702,10 +2702,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('subscriptions');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('subscriptions')}
+                                            aria-label={favoritedItems.has('subscriptions') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2721,10 +2721,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('billing');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('billing')}
+                                            aria-label={favoritedItems.has('billing') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2748,10 +2748,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('documentation');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('documentation')}
+                                            aria-label={favoritedItems.has('documentation') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
@@ -2767,10 +2767,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               actionId="favorite"
                                               onClick={(e) => {
                                               e.stopPropagation();
-                                              toggleFavorite('PLACEHOLDER');
+                                              toggleFavorite('support');
                                             }}
-                                              isFavorited={favoritedItems.has('PLACEHOLDER')}
-                                            aria-label={favoritedItems.has('PLACEHOLDER') ? "Remove from favorites" : "Add to favorites"}
+                                              isFavorited={favoritedItems.has('support')}
+                                            aria-label={favoritedItems.has('support') ? "Remove from favorites" : "Add to favorites"}
                                             />
                                           }
                                         >
