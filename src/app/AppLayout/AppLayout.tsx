@@ -1980,7 +1980,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                 // Dynamic My Favorite Services content based on user's favorites
                                 favoritedItems.size === 0 ? (
                                   <div style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--pf-v6-global--Color--200)' }}>
-                                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>⭐</div>
+                                    <div style={{ marginBottom: '16px' }}>
+                                      <img 
+                                        src="https://console.redhat.com/apps/frontend-assets/favoritedservices/favoriting-emptystate.svg"
+                                        alt="No favorited services"
+                                        style={{ width: '48px', height: '48px' }}
+                                      />
+                                    </div>
                                     <Title headingLevel="h4" size="lg" style={{ marginBottom: '8px' }}>No favorited services</Title>
                                     <p style={{ marginBottom: '24px' }}>Add a service to your favorites to get started here.</p>
                                     <Button 
