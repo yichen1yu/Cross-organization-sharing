@@ -66,16 +66,6 @@ import {
   DescriptionListTerm,
   DescriptionListDescription
 } from '@patternfly/react-core';
-import { 
-  Chatbot, 
-  ChatbotContent, 
-  ChatbotHeader, 
-  ChatbotHeaderMain,
-  ChatbotHeaderTitle,
-  ChatbotFooter, 
-  MessageBox, 
-  MessageBar 
-} from '@patternfly/chatbot';
 import {
   BarsIcon, 
   QuestionCircleIcon, 
@@ -157,14 +147,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   ]);
 
   const [searchValue, setSearchValue] = React.useState('');
-  const [chatMessages, setChatMessages] = React.useState<Array<{id: string, content: string, role: 'user' | 'bot', timestamp: Date}>>([
-    {
-      id: '1',
-      content: 'Hello! I\'m your Red Hat assistant. How can I help you today?',
-      role: 'bot',
-      timestamp: new Date()
-    }
-  ]);
 
   // User dropdown state
   const [isUserDropdownOpen, setIsUserDropdownOpen] = React.useState(false);
@@ -609,31 +591,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     return { onSearchSubmit, handleSearchKeyDown };
   };
 
-  const handleSendMessage = (message: string | number) => {
-    const messageStr = typeof message === 'string' ? message : message.toString();
-    if (messageStr.trim()) {
-      // Add user message
-      const userMessage = {
-        id: Date.now().toString(),
-        content: messageStr.trim(),
-        role: 'user' as const,
-        timestamp: new Date()
-      };
-      
-      setChatMessages(prev => [...prev, userMessage]);
-      
-      // Simulate bot response after a short delay
-      setTimeout(() => {
-        const botMessage = {
-          id: (Date.now() + 1).toString(),
-          content: `Thanks for your question: "${messageStr.trim()}". I'm here to help with Red Hat Hybrid Cloud solutions. How can I assist you further?`,
-          role: 'bot' as const,
-          timestamp: new Date()
-        };
-        setChatMessages(prev => [...prev, botMessage]);
-      }, 1000);
-    }
-  };
 
   const onUserDropdownToggle = () => {
     setIsUserDropdownOpen(!isUserDropdownOpen);
@@ -842,49 +799,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         }
         aria-label="Chat sub tab"
       >
-        <div style={{ height: '500px', padding: '16px' }}>
-          <Chatbot isVisible={true}>
-            <ChatbotHeader>
-              <ChatbotHeaderMain>
-                <ChatbotHeaderTitle>Ask Red Hat Assistant</ChatbotHeaderTitle>
-              </ChatbotHeaderMain>
-            </ChatbotHeader>
-            <ChatbotContent>
-              <MessageBox>
-                {chatMessages.map((msg) => (
-                  <div 
-                    key={msg.id} 
-                    style={{
-                      margin: '8px 0',
-                      padding: '8px 12px',
-                      borderRadius: '8px',
-                      backgroundColor: msg.role === 'user' ? '#0066cc' : '#f0f0f0',
-                      color: msg.role === 'user' ? 'white' : 'black',
-                      alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                      maxWidth: '80%',
-                      marginLeft: msg.role === 'user' ? 'auto' : '0',
-                      marginRight: msg.role === 'user' ? '0' : 'auto'
-                    }}
-                  >
-                    <div>{msg.content}</div>
-                    <div style={{ 
-                      fontSize: '12px', 
-                      opacity: 0.7, 
-                      marginTop: '4px' 
-                    }}>
-                      {msg.timestamp.toLocaleTimeString()}
-                    </div>
-                  </div>
-                ))}
-              </MessageBox>
-            </ChatbotContent>
-            <ChatbotFooter>
-              <MessageBar 
-                onSendMessage={handleSendMessage}
-                placeholder="Ask me anything about Red Hat Hybrid Cloud..."
-              />
-            </ChatbotFooter>
-          </Chatbot>
+        <div style={{ height: '500px', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+          <CommentsIcon style={{ fontSize: '48px', color: '#6a6e73', marginBottom: '16px' }} />
+          <h3 style={{ margin: '0 0 8px 0', color: '#151515' }}>Chat Assistant</h3>
+          <p style={{ margin: '0', color: '#6a6e73' }}>
+            The chat assistant feature is currently not available. Please check back later or contact support for assistance.
+          </p>
         </div>
       </Tab>
     </Tabs>

@@ -29,4 +29,20 @@ module.exports = {
 
   // The test environment that will be used for testing.
   testEnvironment: "jest-fixed-jsdom",
+
+  // Transform configuration for handling different file types
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: true
+    }],
+    '^.+\\.(js|jsx)$': 'babel-jest'
+  },
+
+  // Allow transformation of ES modules from node_modules
+  transformIgnorePatterns: [
+    "node_modules/(?!(@patternfly|react-markdown|remark|rehype|unified|bail|is-plain-obj|trough|vfile|unist|mdast|hast|hastscript|html-void-elements|property-information|space-separated-tokens|comma-separated-tokens|web-namespaces|devlop|micromark|decode-named-character-reference|character-entities))"
+  ],
+
+  // Enable ES modules
+  extensionsToTreatAsEsm: ['.ts', '.tsx']
 };
