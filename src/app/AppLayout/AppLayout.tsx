@@ -2008,7 +2008,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         alt="No favorited services"
                                         style={{ width: '80px', height: '80px' }}
                                       />
-                                    </div>
+                                            </div>
                                     <Title headingLevel="h4" size="lg" style={{ marginBottom: '8px' }}>No favorited services</Title>
                                     <p style={{ marginBottom: '24px' }}>Add a service to your favorites to get started here.</p>
                                     <Button 

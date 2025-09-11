@@ -4,18 +4,20 @@ import { Homepage } from '@app/Homepage/Homepage';
 import { AllServices } from '@app/AllServices/AllServices';
 import { Dashboard } from '@app/Dashboard/Dashboard';
 import { AlertManager } from '@app/AlertManager/AlertManager';
+import { RoleDeleted } from '@app/AlertManager/RoleDeleted';
 import { AuthenticationPolicy } from '@app/AuthenticationPolicy/AuthenticationPolicy';
 import { DataIntegration } from '@app/DataIntegration/DataIntegration';
 import { EventLog } from '@app/EventLog/EventLog';
 import { LearningResources } from '@app/LearningResources/LearningResources';
 import { LearningResourcesIAM } from '@app/LearningResourcesIAM/LearningResourcesIAM';
-import { MyUserAccess } from '@app/MyUserAccess/MyUserAccess';
+import { MyUserAccess } from '@app/MyUserAccess/MyUserAccess'; 
 import { ServiceAccounts } from '@app/ServiceAccounts/ServiceAccounts';
 import { UserAccess } from '@app/UserAccess/UserAccess';
 import { Support } from '@app/Support/Support';
 import { Users } from '@app/Users/Users';
 import { Groups } from '@app/Groups/Groups';
 import { Roles } from '@app/Roles/Roles';
+import { AlertOverriderRole } from '@app/Roles/AlertOverriderRole';
 import { Workspaces } from '@app/Workspaces/Workspaces';
 import { RedHatAccessRequests } from '@app/RedHatAccessRequests/RedHatAccessRequests';
 import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
@@ -64,6 +66,12 @@ const routes: AppRouteConfig[] = [
     label: 'Alert Manager',
     path: '/alert-manager',
     title: 'Alert Manager | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <RoleDeleted />,
+    exact: true,
+    path: '/alert-manager/role-deleted',
+    title: 'Role deleted | Alert Manager | Red Hat Hybrid Cloud Console',
   },
   {
     element: <DataIntegration />,
@@ -158,6 +166,12 @@ const routes: AppRouteConfig[] = [
     exact: true,
     path: '/roles',
     title: 'Roles | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <AlertOverriderRole />,
+    exact: true,
+    path: '/user-access/roles/alert-overrider',
+    title: 'Alert overrider | Red Hat Hybrid Cloud Console',
   },
   {
     element: <Workspaces />,

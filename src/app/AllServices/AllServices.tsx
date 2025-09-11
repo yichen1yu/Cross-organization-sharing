@@ -4,6 +4,8 @@ import {
   Title,
   Content,
   Card,
+  CardHeader,
+  CardTitle,
   CardBody,
   Grid,
   GridItem,
@@ -11,120 +13,221 @@ import {
   FlexItem,
   Button,
   Breadcrumb,
-  BreadcrumbItem
+  BreadcrumbItem,
+  Gallery,
+  Badge
 } from '@patternfly/react-core';
 import { 
-  CogIcon, 
+  WrenchIcon,
   ServerIcon, 
-  LayerGroupIcon, 
-  ShieldAltIcon, 
-  ChartLineIcon, 
-  QuestionCircleIcon,
-  CloudIcon,
-  DatabaseIcon,
-  NetworkWiredIcon,
-  MonitoringIcon,
-  ExclamationTriangleIcon,
-  UserIcon
+  CubeIcon,
+  StarIcon,
+  BrainIcon,
+  BellIcon,
+  RocketIcon,
+  UsersIcon,
+  ListIcon,
+  EyeIcon,
+  PlayIcon,
+  ShieldAltIcon,
+  CreditCardIcon,
+  ExternalLinkAltIcon
 } from '@patternfly/react-icons';
 import { useNavigate } from 'react-router-dom';
+
+interface ServiceItem {
+  id: string;
+  name: string;
+  description: string;
+  details: string;
+  features: string[];
+  icon: React.ReactElement;
+  url?: string;
+  isLink?: boolean;
+  category: string;
+  route?: string;
+}
 
 const AllServices: React.FunctionComponent = () => {
   const navigate = useNavigate();
 
-  const services = [
+  // Services data from the masthead dropdown - combining Platforms and Services
+  const allServices: ServiceItem[] = [
+    // Platform Services
     {
-      title: 'Settings',
-      description: 'Configure and manage all settings related to eventing, alerting, and data sourcing.',
-      icon: <CogIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--primary-color--100)' }} />,
-      route: '/overview',
-      category: 'Management'
+      id: 'ansible',
+      name: 'Red Hat Ansible Automation Platform',
+      description: 'Enterprise automation platform for IT processes and workflows',
+      details: 'Red Hat Ansible Automation Platform is a comprehensive automation solution that enables organizations to automate IT processes, configure systems, deploy applications, and orchestrate complex workflows across hybrid cloud environments.',
+      features: ['IT Automation', 'Configuration Management', 'Application Deployment', 'Workflow Orchestration'],
+      icon: <WrenchIcon />,
+      url: '/ansible-automation-platform',
+      isLink: true,
+      category: 'Platforms',
+      route: '/ansible-automation-platform'
     },
     {
-      title: 'Infrastructure',
-      description: 'Monitor and manage your cloud infrastructure, resources, and deployments.',
-      icon: <ServerIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--success-color--100)' }} />,
-      route: null,
-      category: 'Infrastructure'
+      id: 'rhel',
+      name: 'Red Hat Enterprise Linux',
+      description: 'Enterprise-grade Linux operating system',
+      details: 'Red Hat Enterprise Linux (RHEL) is the world\'s leading enterprise Linux platform. Built for mission-critical workloads, RHEL provides enhanced security, reliability, and performance for physical, virtual, cloud, and containerized environments.',
+      features: ['Security & Compliance', 'High Availability', 'Performance Optimization', 'Long-term Support'],
+      icon: <ServerIcon />,
+      url: '/red-hat-enterprise-linux',
+      isLink: true,
+      category: 'Platforms',
+      route: '/red-hat-enterprise-linux'
     },
     {
-      title: 'Applications',
-      description: 'Deploy, manage, and monitor your applications across hybrid cloud environments.',
-      icon: <LayerGroupIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--info-color--100)' }} />,
-      route: null,
-      category: 'Platform'
+      id: 'openshift',
+      name: 'Red Hat OpenShift',
+      description: 'Enterprise Kubernetes platform for containerized applications',
+      details: 'Red Hat OpenShift is a comprehensive Kubernetes platform that enables organizations to build, deploy, and manage containerized applications at scale. It provides developer-friendly tools and enterprise-grade security for modern application development.',
+      features: ['Container Orchestration', 'Developer Tools', 'Multi-cloud Deployment', 'Built-in Security'],
+      icon: <CubeIcon />,
+      url: '/red-hat-openshift',
+      isLink: true,
+      category: 'Platforms',
+      route: '/red-hat-openshift'
+    },
+    // Cloud Services
+    {
+      id: 'my-favorite-services',
+      name: 'My Favorite Services',
+      description: 'Quick access to your most-used services',
+      details: 'Access your frequently used and bookmarked services in one convenient location. Customize your dashboard with the services you use most often to improve your workflow efficiency.',
+      features: ['Quick Access', 'Custom Dashboard', 'Service Bookmarks', 'Usage Analytics'],
+      icon: <StarIcon style={{ color: '#f39200' }} />,
+      category: 'Services'
     },
     {
-      title: 'Security',
-      description: 'Manage security policies, compliance, and access controls across your environment.',
-      icon: <ShieldAltIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--warning-color--100)' }} />,
-      route: null,
-      category: 'Security'
+      id: 'ai-ml',
+      name: 'AI/ML',
+      description: 'Artificial intelligence and machine learning services',
+      details: 'Build, train, and deploy machine learning models with enterprise-grade AI/ML platforms. Access GPU-accelerated computing, automated model training, and MLOps pipelines.',
+      features: ['Model Training', 'GPU Computing', 'MLOps Pipelines', 'Data Science Workbenches'],
+      icon: <BrainIcon />,
+      category: 'Services'
     },
     {
-      title: 'Analytics',
-      description: 'Gain insights into your cloud usage, performance metrics, and operational data.',
-      icon: <ChartLineIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--palette--purple-400)' }} />,
-      route: null,
-      category: 'Analytics'
+      id: 'alerting-data-integrations',
+      name: 'Alerting & Data Integrations',
+      description: 'Monitoring alerts and data pipeline management',
+      details: 'Configure intelligent alerting systems and manage data integration workflows across your hybrid cloud infrastructure with real-time monitoring and automated responses.',
+      features: ['Real-time Alerts', 'Data Pipelines', 'Integration Workflows', 'Event Processing'],
+      icon: <BellIcon />,
+      category: 'Services',
+      route: '/alert-manager'
     },
     {
-      title: 'Support',
-      description: 'Access documentation, support resources, and get help with your cloud journey.',
-      icon: <QuestionCircleIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--Color--200)' }} />,
-      route: null,
-      category: 'Support'
+      id: 'automation',
+      name: 'Automation',
+      description: 'Infrastructure and application automation',
+      details: 'Automate repetitive tasks, configuration management, and deployment processes with comprehensive automation tools and workflow orchestration.',
+      features: ['Task Automation', 'Configuration Management', 'Workflow Orchestration', 'Process Optimization'],
+      icon: <WrenchIcon />,
+      category: 'Services'
     },
     {
-      title: 'Cloud Management',
-      description: 'Manage your multi-cloud environments and hybrid infrastructure.',
-      icon: <CloudIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--primary-color--200)' }} />,
-      route: null,
-      category: 'Infrastructure'
+      id: 'containers',
+      name: 'Containers',
+      description: 'Container management and orchestration',
+      details: 'Deploy, manage, and scale containerized applications with enterprise Kubernetes platforms, container registries, and orchestration tools.',
+      features: ['Container Orchestration', 'Registry Management', 'Application Scaling', 'Service Mesh'],
+      icon: <CubeIcon />,
+      category: 'Services'
     },
     {
-      title: 'Database Services',
-      description: 'Manage and monitor your database instances and connections.',
-      icon: <DatabaseIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--success-color--200)' }} />,
-      route: null,
-      category: 'Data'
+      id: 'deploy',
+      name: 'Deploy',
+      description: 'Application deployment and delivery',
+      details: 'Streamline application deployment with CI/CD pipelines, automated testing, and progressive delivery strategies across multiple environments.',
+      features: ['CI/CD Pipelines', 'Automated Testing', 'Progressive Delivery', 'Environment Management'],
+      icon: <RocketIcon />,
+      category: 'Services'
     },
     {
-      title: 'Networking',
-      description: 'Configure and monitor network connectivity and security.',
-      icon: <NetworkWiredIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--info-color--200)' }} />,
-      route: null,
-      category: 'Infrastructure'
+      id: 'identity-access-mgmt',
+      name: 'Identity & Access Management',
+      description: 'User authentication and authorization',
+      details: 'Secure your applications with comprehensive identity management, single sign-on, multi-factor authentication, and role-based access controls.',
+      features: ['Single Sign-On', 'Multi-Factor Auth', 'Role-Based Access', 'Identity Federation'],
+      icon: <UsersIcon />,
+      category: 'Services',
+      route: '/my-user-access'
     },
     {
-      title: 'Monitoring',
-      description: 'Monitor system health, performance, and operational metrics.',
-      icon: <MonitoringIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--palette--green-400)' }} />,
-      route: null,
-      category: 'Operations'
+      id: 'inventories',
+      name: 'Inventories',
+      description: 'Asset and resource inventory management',
+      details: 'Track and manage your IT assets, infrastructure resources, and application inventories with automated discovery and real-time updates.',
+      features: ['Asset Discovery', 'Resource Tracking', 'Inventory Updates', 'Compliance Reporting'],
+      icon: <ListIcon />,
+      category: 'Services'
     },
     {
-      title: 'Alerts & Events',
-      description: 'Configure alerting rules and manage event notifications.',
-      icon: <ExclamationTriangleIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--danger-color--100)' }} />,
-      route: '/alert-manager',
-      category: 'Operations'
+      id: 'observability-monitoring',
+      name: 'Observability & Monitoring',
+      description: 'System monitoring and observability',
+      details: 'Gain deep insights into your applications and infrastructure with comprehensive monitoring, logging, tracing, and performance analytics.',
+      features: ['Application Monitoring', 'Infrastructure Metrics', 'Distributed Tracing', 'Log Analytics'],
+      icon: <EyeIcon />,
+      category: 'Services'
     },
     {
-      title: 'Identity & Access',
-      description: 'Manage user identities, roles, and access permissions.',
-      icon: <UserIcon style={{ fontSize: '24px', color: 'var(--pf-v6-global--palette--orange-400)' }} />,
-      route: '/my-user-access',
-      category: 'Security'
+      id: 'operators',
+      name: 'Operators',
+      description: 'Kubernetes operators and lifecycle management',
+      details: 'Deploy and manage complex applications on Kubernetes with operators that automate installation, updates, and day-2 operations.',
+      features: ['Operator Lifecycle', 'Application Management', 'Automated Updates', 'Cluster Operations'],
+      icon: <PlayIcon />,
+      category: 'Services'
+    },
+    {
+      id: 'security',
+      name: 'Security',
+      description: 'Security scanning and threat protection',
+      details: 'Protect your infrastructure with advanced security scanning, vulnerability management, threat detection, and compliance monitoring.',
+      features: ['Vulnerability Scanning', 'Threat Detection', 'Security Policies', 'Compliance Monitoring'],
+      icon: <ShieldAltIcon />,
+      category: 'Services'
+    },
+    {
+      id: 'subscriptions-spend',
+      name: 'Subscriptions & Spend',
+      description: 'Subscription management and cost optimization',
+      details: 'Manage subscriptions, track usage, optimize costs, and analyze spending patterns across your Red Hat services and cloud resources.',
+      features: ['Subscription Tracking', 'Cost Analysis', 'Usage Optimization', 'Spend Management'],
+      icon: <CreditCardIcon />,
+      category: 'Services'
+    },
+    {
+      id: 'system-configuration',
+      name: 'System Configuration',
+      description: 'System settings and configuration management',
+      details: 'Configure and manage system settings, infrastructure parameters, and application configurations with centralized management tools.',
+      features: ['Configuration Management', 'System Settings', 'Parameter Tuning', 'Change Tracking'],
+      icon: <ServerIcon />,
+      category: 'Services'
     }
   ];
 
-  const categories = ['All', 'Management', 'Infrastructure', 'Platform', 'Security', 'Analytics', 'Data', 'Operations', 'Support'];
+  const categories = ['All', 'Platforms', 'Services'];
   const [selectedCategory, setSelectedCategory] = React.useState('All');
 
   const filteredServices = selectedCategory === 'All' 
-    ? services 
-    : services.filter(service => service.category === selectedCategory);
+    ? allServices 
+    : allServices.filter(service => service.category === selectedCategory);
+
+  const handleServiceClick = (service: ServiceItem) => {
+    if (service.isLink && service.url) {
+      // External link
+      window.open(service.url, '_blank');
+    } else if (service.route) {
+      // Internal route
+      navigate(service.route);
+    }
+  };
 
   return (
     <>
@@ -167,55 +270,91 @@ const AllServices: React.FunctionComponent = () => {
           </FlexItem>
           
           <FlexItem>
-            <Grid hasGutter>
-              {filteredServices.map((service, index) => (
-                <GridItem span={4} key={index}>
-                  <Card 
-                    isClickable={!!service.route} 
-                    onClick={() => service.route && navigate(service.route)}
-                    style={{ height: '100%' }}
-                  >
-                    <CardBody>
-                      <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsMd' }}>
-                        <FlexItem>
-                          <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
-                            <FlexItem>
-                              {service.icon}
+            <Gallery hasGutter minWidths={{ default: '360px' }} maxWidths={{ default: '1fr' }}>
+              {filteredServices.map((service) => (
+                <Card 
+                  key={service.id}
+                  isClickable={!!(service.route || (service.isLink && service.url))}
+                  onClick={() => handleServiceClick(service)}
+                  style={{ 
+                    height: '100%',
+                    cursor: (service.route || (service.isLink && service.url)) ? 'pointer' : 'default'
+                  }}
+                >
+                  <CardHeader>
+                    <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
+                      <FlexItem>
+                        <div style={{ fontSize: '20px', color: 'var(--pf-v6-global--primary-color--100)' }}>
+                          {service.icon}
+                        </div>
+                      </FlexItem>
+                      <FlexItem flex={{ default: 'flex_1' }}>
+                        <CardTitle component="h3">{service.name}</CardTitle>
+                      </FlexItem>
+                      <FlexItem>
+                        <Badge isRead>{service.category}</Badge>
+                      </FlexItem>
+                    </Flex>
+                    {service.isLink && (
+                      <div style={{ marginTop: '8px' }}>
+                        <ExternalLinkAltIcon style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }} />
+                      </div>
+                    )}
+                  </CardHeader>
+                  <CardBody>
+                    <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsSm' }}>
+                      <FlexItem>
+                        <Content>
+                          <p style={{ margin: 0, color: 'var(--pf-v6-global--Color--200)' }}>
+                            {service.description}
+                          </p>
+                        </Content>
+                      </FlexItem>
+                      <FlexItem>
+                        <Flex spaceItems={{ default: 'spaceItemsXs' }} style={{ flexWrap: 'wrap' }}>
+                          {service.features.slice(0, 3).map((feature, index) => (
+                            <FlexItem key={index}>
+                              <Badge 
+                                style={{ 
+                                  fontSize: '11px',
+                                  padding: '2px 6px'
+                                }}
+                              >
+                                {feature}
+                              </Badge>
                             </FlexItem>
+                          ))}
+                          {service.features.length > 3 && (
                             <FlexItem>
-                              <span style={{ 
-                                fontSize: '12px', 
-                                color: 'var(--pf-v6-global--Color--200)',
-                                fontWeight: 'var(--pf-v6-global--FontWeight--semi-bold)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.05em'
-                              }}>
-                                {service.category}
-                              </span>
+                              <Badge 
+                                style={{ 
+                                  fontSize: '11px',
+                                  padding: '2px 6px',
+                                  color: 'var(--pf-v6-global--Color--200)'
+                                }}
+                              >
+                                +{service.features.length - 3} more
+                              </Badge>
                             </FlexItem>
-                          </Flex>
-                        </FlexItem>
-                        <FlexItem>
-                          <Title headingLevel="h3" size="lg">{service.title}</Title>
-                          <Content>
-                            <p style={{ margin: '8px 0 0 0' }}>{service.description}</p>
-                          </Content>
-                          {!service.route && (
-                            <div style={{ 
-                              marginTop: '12px', 
-                              fontSize: '12px', 
-                              color: 'var(--pf-v6-global--Color--200)' 
-                            }}>
-                              Coming soon
-                            </div>
                           )}
+                        </Flex>
+                      </FlexItem>
+                      {!(service.route || (service.isLink && service.url)) && (
+                        <FlexItem>
+                          <div style={{ 
+                            fontSize: '12px', 
+                            color: 'var(--pf-v6-global--Color--200)',
+                            fontStyle: 'italic'
+                          }}>
+                            Coming soon
+                          </div>
                         </FlexItem>
-                      </Flex>
-                    </CardBody>
-                  </Card>
-                </GridItem>
+                      )}
+                    </Flex>
+                  </CardBody>
+                </Card>
               ))}
-            </Grid>
+            </Gallery>
           </FlexItem>
         </Flex>
       </PageSection>
