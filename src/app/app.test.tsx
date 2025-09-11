@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 import { act } from 'react';
+import { BrowserRouter } from 'react-router-dom';
 
 describe('App tests', () => {
   test('should render default App component', () => {
@@ -13,6 +14,7 @@ describe('App tests', () => {
   });
 
   it('should render a nav-toggle button', () => {
+    window.history.pushState({}, 'Test page', '/overview');
     render(<App />);
 
     expect(screen.getByRole('button', { name: 'Global navigation' })).toBeVisible();
@@ -24,26 +26,29 @@ describe('App tests', () => {
   it.skip('should hide the sidebar on smaller viewports', () => {
     Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value: 600 });
 
+    window.history.pushState({}, 'Test page', '/overview');
     render(<App />);
 
     window.dispatchEvent(new Event('resize'));
 
-    expect(screen.queryByRole('link', { name: 'Dashboard' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Global' })).not.toBeInTheDocument();
   });
 
   it('should expand the sidebar on larger viewports', () => {
+    window.history.pushState({}, 'Test page', '/overview');
     render(<App />);
 
     act(() => {
       window.dispatchEvent(new Event('resize'));
     });
 
-    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeVisible();
+    expect(screen.getByRole('navigation', { name: 'Global' })).toBeVisible();
   });
 
   it('should hide the sidebar when clicking the nav-toggle button', async () => {
     const user = userEvent.setup();
 
+    window.history.pushState({}, 'Test page', '/overview');
     render(<App />);
 
     act(() => {
@@ -51,10 +56,10 @@ describe('App tests', () => {
     });
     const button = screen.getByRole('button', { name: 'Global navigation' });
 
-    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeVisible();
+    expect(screen.getByRole('navigation', { name: 'Global' })).toBeVisible();
 
     await user.click(button);
 
-    expect(screen.queryByRole('link', { name: 'Dashboard' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'Global' })).not.toBeInTheDocument();
   });
 });
