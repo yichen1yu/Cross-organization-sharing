@@ -1,37 +1,37 @@
 import * as React from 'react';
 import {
-  PageSection,
-  Title,
-  Content,
-  Flex,
-  FlexItem,
+  Alert,
   Button,
-  Gallery,
-  Divider,
   Card,
-  CardHeader,
   CardBody,
   CardFooter,
+  CardHeader,
+  Content,
+  Divider,
+  Flex,
+  FlexItem,
+  Gallery,
   List,
   ListItem,
-  Alert
+  PageSection,
+  Title
 } from '@patternfly/react-core';
 import { ServiceCard } from '@patternfly/react-component-groups';
 import { 
-  ServerIcon, 
-  CloudIcon, 
-  CogIcon,
-  ClockIcon,
-  SearchIcon,
+  ArrowRightIcon, 
+  BellIcon, 
   ChartLineIcon,
-  DesktopIcon,
-  ShieldAltIcon,
-  BellIcon,
+  ClockIcon,
+  CloudIcon,
+  CogIcon,
   CreditCardIcon,
-  ArrowRightIcon,
+  DesktopIcon,
+  EllipsisVIcon,
   ExternalLinkAltIcon,
   GripVerticalIcon,
-  EllipsisVIcon
+  SearchIcon,
+  ServerIcon,
+  ShieldAltIcon
 } from '@patternfly/react-icons';
 import { useNavigate } from 'react-router-dom';
 

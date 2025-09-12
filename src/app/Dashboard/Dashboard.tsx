@@ -1,30 +1,30 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  PageSection, 
-  Title, 
-  Content,
+  Accordion, 
+  AccordionContent, 
+  AccordionItem,
+  AccordionToggle,
+  Breadcrumb,
+  BreadcrumbItem,
+  Button,
   Card,
-  CardHeader,
   CardBody,
+  CardHeader,
+  Content,
   Divider,
   Flex,
   FlexItem,
-  Button,
-  Breadcrumb,
-  BreadcrumbItem,
-  Tabs,
-  Tab,
-  TabTitleText,
-  TabTitleIcon,
   Label,
-  Accordion,
-  AccordionItem,
-  AccordionContent,
-  AccordionToggle
+  PageSection,
+  Tab,
+  TabTitleIcon,
+  TabTitleText,
+  Tabs,
+  Title
 } from '@patternfly/react-core';
-import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import { CogIcon, ExternalLinkAltIcon, BellIcon, UsersIcon, UserIcon, EnvelopeIcon, OutlinedWindowRestoreIcon, PlusCircleIcon, IntegrationIcon } from '@patternfly/react-icons';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { BellIcon, CogIcon, EnvelopeIcon, ExternalLinkAltIcon, IntegrationIcon, OutlinedWindowRestoreIcon, PlusCircleIcon, UserIcon, UsersIcon } from '@patternfly/react-icons';
 
 const Dashboard: React.FunctionComponent = () => {
   const navigate = useNavigate();

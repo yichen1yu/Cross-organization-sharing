@@ -1,18 +1,18 @@
 import * as React from 'react';
 import {
-  PageSection,
-  Title,
-  Content,
-  Card,
-  CardBody,
   Breadcrumb,
   BreadcrumbItem,
+  Button,
+  Card,
+  CardBody,
+  Content,
   Flex,
   FlexItem,
-  Button,
-  Tabs,
+  PageSection,
   Tab,
-  TabTitleText
+  TabTitleText,
+  Tabs,
+  Title
 } from '@patternfly/react-core';
 import { BuildIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
 

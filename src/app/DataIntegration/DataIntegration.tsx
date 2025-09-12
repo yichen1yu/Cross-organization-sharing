@@ -1,22 +1,22 @@
 import * as React from 'react';
 import {
-  PageSection,
-  Title,
-  Content,
-  Card,
-  CardBody,
-  Button,
-  Grid,
-  GridItem,
-  Progress,
-  ProgressMeasureLocation,
   Breadcrumb,
   BreadcrumbItem,
+  Button,
+  Card,
+  CardBody,
+  Content,
   Flex,
   FlexItem,
-  Tabs,
+  Grid,
+  GridItem,
+  PageSection,
+  Progress,
+  ProgressMeasureLocation,
   Tab,
-  TabTitleText
+  TabTitleText,
+  Tabs,
+  Title
 } from '@patternfly/react-core';
 import { DatabaseIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
 

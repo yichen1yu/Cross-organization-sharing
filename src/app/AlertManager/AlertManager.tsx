@@ -1,27 +1,27 @@
 import * as React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  PageSection,
-  Title,
-  Content,
   Breadcrumb,
   BreadcrumbItem,
+  Button,
+  Content,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
   Flex,
   FlexItem,
-  Button,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
+  Label,
+  MenuToggle,
+  PageSection,
   Pagination,
   SearchInput,
-  Dropdown,
-  DropdownList,
-  DropdownItem,
-  MenuToggle,
-  Label
+  Title,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem
 } from '@patternfly/react-core';
-import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import { BellIcon, OutlinedWindowRestoreIcon, FilterIcon } from '@patternfly/react-icons';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { BellIcon, FilterIcon, OutlinedWindowRestoreIcon } from '@patternfly/react-icons';
 
 interface AlertRow {
   eventType: string;

@@ -1,20 +1,20 @@
 import * as React from 'react';
 import {
-  PageSection,
-  Title,
-  Content,
-  Card,
-  CardBody,
   Breadcrumb,
   BreadcrumbItem,
+  Button,
+  Card,
+  CardBody,
+  Content,
   Flex,
   FlexItem,
-  Button,
-  Tabs,
+  PageSection,
   Tab,
-  TabTitleText
+  TabTitleText,
+  Tabs,
+  Title
 } from '@patternfly/react-core';
-import { UserIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
+import { ExternalLinkAltIcon, UserIcon } from '@patternfly/react-icons';
 import { NavLink } from 'react-router-dom';
 
 const MyUserAccess: React.FunctionComponent = () => {

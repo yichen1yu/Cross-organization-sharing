@@ -1,24 +1,24 @@
 import * as React from 'react';
 import {
-  PageSection,
-  Title,
-  Content,
-  Card,
-  CardBody,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
-  SearchInput,
-  Button,
   Breadcrumb,
   BreadcrumbItem,
+  Button,
+  Card,
+  CardBody,
+  Content,
   Flex,
   FlexItem,
-  Tabs,
+  PageSection,
+  SearchInput,
   Tab,
-  TabTitleText
+  TabTitleText,
+  Tabs,
+  Title,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem
 } from '@patternfly/react-core';
-import { ListIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
+import { ExternalLinkAltIcon, ListIcon } from '@patternfly/react-icons';
 
 const EventLog: React.FunctionComponent = () => {
   const [searchValue, setSearchValue] = React.useState('');

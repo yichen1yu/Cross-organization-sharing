@@ -45,7 +45,7 @@ jobs:
         run: npm run build
         env:
           # Set the base path for GitHub Pages
-          ASSET_PATH: /HCC-NewSettingsbundlel_Cursor/
+          ASSET_PATH: /HCC-cursor-seed/
       
       - name: Setup Pages
         uses: actions/configure-pages@v4

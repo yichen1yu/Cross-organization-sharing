@@ -1,33 +1,33 @@
 import * as React from 'react';
 import {
-  PageSection,
-  Title,
-  Content,
-  Card,
-  CardBody,
+  Alert,
+  AlertActionCloseButton,
   Breadcrumb,
   BreadcrumbItem,
+  Button,
+  Card,
+  CardBody,
+  Checkbox,
+  Content,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
   Flex,
   FlexItem,
-  Button,
-  Toolbar,
-  ToolbarContent,
-  ToolbarItem,
-  Pagination,
-  Checkbox,
-  SearchInput,
-  Dropdown,
-  DropdownList,
-  DropdownItem,
-  MenuToggle,
   Label,
+  MenuToggle,
   Modal,
   ModalVariant,
-  Alert,
-  AlertActionCloseButton
+  PageSection,
+  Pagination,
+  SearchInput,
+  Title,
+  Toolbar,
+  ToolbarContent,
+  ToolbarItem
 } from '@patternfly/react-core';
-import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
-import { UserCheckIcon, ExternalLinkAltIcon, EllipsisVIcon, FilterIcon } from '@patternfly/react-icons';
+import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon, UserCheckIcon } from '@patternfly/react-icons';
 import { useNavigate } from 'react-router-dom';
 
 interface UserAssignment {

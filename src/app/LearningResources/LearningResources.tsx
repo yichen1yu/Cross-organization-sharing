@@ -1,25 +1,25 @@
 import * as React from 'react';
 import {
-  PageSection,
-  Title,
-  Content,
   Breadcrumb,
   BreadcrumbItem,
-  Flex,
-  FlexItem,
   Button,
-  ExpandableSection,
-  JumpLinks,
-  JumpLinksItem,
-  SearchInput,
   Card,
+  CardBody,
   CardHeader,
   CardTitle,
-  CardBody,
+  Content,
   EmptyState,
-  Label
+  ExpandableSection,
+  Flex,
+  FlexItem,
+  JumpLinks,
+  JumpLinksItem,
+  Label,
+  PageSection,
+  SearchInput,
+  Title
 } from '@patternfly/react-core';
-import { BookOpenIcon, ExternalLinkAltIcon, StarIcon, CubesIcon, BookmarkIcon } from '@patternfly/react-icons';
+import { BookOpenIcon, BookmarkIcon, CubesIcon, ExternalLinkAltIcon, StarIcon } from '@patternfly/react-icons';
 
 const LearningResources: React.FunctionComponent = () => {
   const [expandedSections, setExpandedSections] = React.useState<{[key: string]: boolean}>({
