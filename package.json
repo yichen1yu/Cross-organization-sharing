@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "description": "An open source build scaffolding utility for web apps.",
   "repository": "https://github.com/patternfly/patternfly-react-seed.git",
-  "homepage": "https://patternfly-react-seed.surge.sh",
+  "homepage": "https://maryshak1996.github.io/HCC-NewSettingsbundlel_Cursor",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -21,7 +21,8 @@
     "ci-checks": "npm run type-check && npm run lint && npm run test:coverage",
     "build:bundle-profile": "webpack --config webpack.prod.js --profile --json > stats.json",
     "bundle-profile:analyze": "npm run build:bundle-profile && webpack-bundle-analyzer ./stats.json",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
@@ -40,6 +41,7 @@
     "eslint-plugin-prettier": "^5.4.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "gh-pages": "^6.1.1",
     "html-webpack-plugin": "^5.6.3",
     "imagemin": "^9.0.1",
     "jest-environment-jsdom": "^30.0.0",
