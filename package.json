@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "description": "An open source build scaffolding utility for web apps.",
   "repository": "https://github.com/patternfly/patternfly-react-seed.git",
-  "homepage": "https://maryshak1996.github.io/HCC-cursor-seed",
+  "homepage": "https://yichen1yu.github.io/HCC-cursor-seed",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -22,7 +22,7 @@
     "build:bundle-profile": "webpack --config webpack.prod.js --profile --json > stats.json",
     "bundle-profile:analyze": "npm run build:bundle-profile && webpack-bundle-analyzer ./stats.json",
     "clean": "rimraf dist",
-    "deploy": "npm run build && gh-pages -d dist"
+    "deploy": "ASSET_PATH=/HCC-cursor-seed/ npm run build && gh-pages -d dist"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",

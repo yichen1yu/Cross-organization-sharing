@@ -16,6 +16,20 @@ import { UserAccess } from '@app/UserAccess/UserAccess';
 import { Support } from '@app/Support/Support';
 import { Users } from '@app/Users/Users';
 import { Groups } from '@app/Groups/Groups';
+import { UsersAndGroups } from '@app/UsersAndGroups/UsersAndGroups';
+import { OrganizationWideAccess } from '@app/OrganizationManagement/OrganizationWideAccess';
+import { TrustedOrganizations } from '@app/OrganizationManagement/TrustedOrganizations';
+import { AuthenticationFactors } from '@app/OrganizationManagement/AuthenticationFactors';
+import { IdentityProviderIntegration } from '@app/OrganizationManagement/IdentityProviderIntegration';
+import { Subscriptions } from '@app/Subscriptions/Subscriptions';
+import { Billing } from '@app/Subscriptions/Billing';
+import { SubscriptionInventory } from '@app/Subscriptions/SubscriptionInventory';
+import { Insights } from '@app/SubscriptionsSpend/Insights';
+import { PatchManagement } from '@app/SubscriptionsSpend/PatchManagement';
+import { OpenShiftClusters } from '@app/SubscriptionsSpend/OpenShiftClusters';
+import { ContainerRegistry } from '@app/SubscriptionsSpend/ContainerRegistry';
+import { AutomationHub } from '@app/SubscriptionsSpend/AutomationHub';
+import { AutomationController } from '@app/SubscriptionsSpend/AutomationController';
 import { Roles } from '@app/Roles/Roles';
 import { AlertOverriderRole } from '@app/Roles/AlertOverriderRole';
 import { Workspaces } from '@app/Workspaces/Workspaces';
@@ -47,6 +61,95 @@ const routes: AppRouteConfig[] = [
     path: '/',
     title: 'Red Hat Hybrid Cloud Console',
   },
+  // Subscription Inventory expandable with sub-pages
+  {
+    label: 'Subscription Inventory',
+    routes: [
+      {
+        element: <SubscriptionInventory />,
+        exact: true,
+        path: '/subscription-inventory',
+        title: 'Subscription Inventory | Red Hat Hybrid Cloud Console'
+      },
+      {
+        element: <SubscriptionInventory />, // placeholder page
+        exact: true,
+        path: '/subscription-inventory/subscription-list',
+        title: 'Subscription list | Red Hat Hybrid Cloud Console',
+        label: 'Subscription list'
+      },
+      {
+        element: <SubscriptionInventory />, // placeholder page
+        exact: true,
+        path: '/subscription-inventory/features',
+        title: 'Features | Red Hat Hybrid Cloud Console',
+        label: 'Features'
+      },
+      {
+        element: <SubscriptionInventory />, // placeholder page
+        exact: true,
+        path: '/subscription-inventory/workspace',
+        title: 'Workspace | Red Hat Hybrid Cloud Console',
+        label: 'Workspace'
+      },
+      {
+        element: <Billing />, // billing account page
+        exact: true,
+        path: '/subscription-inventory/billing-account',
+        title: 'Billing account | Red Hat Hybrid Cloud Console',
+        label: 'Billing account'
+      }
+    ]
+  },
+  {
+    element: <Subscriptions />,
+    exact: true,
+    path: '/subscriptions',
+    title: 'Subscriptions | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <Billing />,
+    exact: true,
+    path: '/billing',
+    title: 'Billing | Red Hat Hybrid Cloud Console',
+  },
+  // Subscriptions & Spend section placeholder pages
+  {
+    element: <Insights />,
+    exact: true,
+    path: '/subscriptions/insights',
+    title: 'Insights | Subscriptions & Spend',
+  },
+  {
+    element: <PatchManagement />,
+    exact: true,
+    path: '/subscriptions/patch-management',
+    title: 'Patch Management | Subscriptions & Spend',
+  },
+  {
+    element: <OpenShiftClusters />,
+    exact: true,
+    path: '/subscriptions/openshift-clusters',
+    title: 'OpenShift Clusters | Subscriptions & Spend',
+  },
+  {
+    element: <ContainerRegistry />,
+    exact: true,
+    path: '/subscriptions/container-registry',
+    title: 'Container Registry | Subscriptions & Spend',
+  },
+  {
+    element: <AutomationHub />,
+    exact: true,
+    path: '/subscriptions/automation-hub',
+    title: 'Automation Hub | Subscriptions & Spend',
+  },
+  {
+    element: <AutomationController />,
+    exact: true,
+    path: '/subscriptions/automation-controller',
+    title: 'Automation Controller | Subscriptions & Spend',
+  },
   {
     element: <AllServices />,
     exact: true,
@@ -63,9 +166,9 @@ const routes: AppRouteConfig[] = [
   {
     element: <AlertManager />,
     exact: true,
-    label: 'Alert Manager',
+    label: 'Subscription Usage',
     path: '/alert-manager',
-    title: 'Alert Manager | Red Hat Hybrid Cloud Console',
+    title: 'Subscription Usage | Red Hat Hybrid Cloud Console',
   },
   {
     element: <RoleDeleted />,
@@ -76,9 +179,9 @@ const routes: AppRouteConfig[] = [
   {
     element: <DataIntegration />,
     exact: true,
-    label: 'Data Integration',
+    label: 'Hybrid Committed Spend',
     path: '/data-integration',
-    title: 'Data Integration | Red Hat Hybrid Cloud Console',
+    title: 'Hybrid Committed Spend | Red Hat Hybrid Cloud Console',
   },
   {
     element: <DataIntegration />,
@@ -89,9 +192,9 @@ const routes: AppRouteConfig[] = [
   {
     element: <EventLog />,
     exact: true,
-    label: 'Event Log',
+    label: 'Manifest',
     path: '/event-log',
-    title: 'Event Log | Red Hat Hybrid Cloud Console',
+    title: 'Manifest | Red Hat Hybrid Cloud Console',
   },
   {
     element: <LearningResources />,
@@ -150,6 +253,12 @@ const routes: AppRouteConfig[] = [
     title: 'IAM Learning Resources | Red Hat Hybrid Cloud Console',
   },
   {
+    element: <UsersAndGroups />,
+    exact: true,
+    path: '/users-and-groups',
+    title: 'Users and Groups | Red Hat Hybrid Cloud Console',
+  },
+  {
     element: <Users />,
     exact: true,
     path: '/users',
@@ -185,6 +294,31 @@ const routes: AppRouteConfig[] = [
     path: '/red-hat-access-requests',
     title: 'Red Hat Access Requests | Red Hat Hybrid Cloud Console',
   },
+  // Organization management routes
+  {
+    element: <OrganizationWideAccess />,
+    exact: true,
+    path: '/organization/organization-wide-access',
+    title: 'Organization-wide Access | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <TrustedOrganizations />,
+    exact: true,
+    path: '/organization/trusted-organizations',
+    title: 'Trusted Organizations | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <AuthenticationFactors />,
+    exact: true,
+    path: '/organization/authentication-factors',
+    title: 'Authentication Factors | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <IdentityProviderIntegration />,
+    exact: true,
+    path: '/organization/identity-provider-integration',
+    title: 'Identity Provider Integration | Red Hat Hybrid Cloud Console',
+  },
 ];
 
 const flattenedRoutes: IAppRoute[] = routes.reduce(
@@ -197,7 +331,7 @@ const AppRoutes = (): React.ReactElement => (
     {flattenedRoutes.map(({ path, element }, idx) => (
       <Route path={path} element={element} key={idx} />
     ))}
-    <Route element={<NotFound />} />
+    <Route path="*" element={<NotFound />} />
   </Routes>
 );
 

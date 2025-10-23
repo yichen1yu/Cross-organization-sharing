@@ -1301,8 +1301,21 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   // Define navigation groups
-  const primaryNavPages = ['/overview', '/alert-manager', '/data-integration', '/event-log', '/learning-resources'];
-  const secondaryNavPages = ['/my-user-access', '/user-access', '/users', '/groups', '/roles', '/workspaces', '/red-hat-access-requests', '/authentication-policy', '/service-accounts', '/learning-resources-iam'];
+  const primaryNavPages = ['/overview', '/subscription-inventory', '/subscription-inventory/subscription-list', '/subscription-inventory/features', '/subscription-inventory/workspace', '/subscription-inventory/billing-account', '/alert-manager', '/data-integration', '/event-log', '/learning-resources'];
+  const secondaryNavPages = [
+    '/my-user-access',
+    '/user-access',
+    '/users-and-groups',
+    '/roles',
+    '/workspaces',
+    '/red-hat-access-requests',
+    '/service-accounts',
+    '/learning-resources-iam',
+    '/organization/organization-wide-access',
+    '/organization/trusted-organizations',
+    '/organization/authentication-factors',
+    '/organization/identity-provider-integration',
+  ];
 
   // Determine which navigation structure to show
   const getNavigationType = () => {
@@ -1319,31 +1332,55 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const navigationType = getNavigationType();
 
   // Primary navigation structure (current navigation)
-  const primaryNavRoutes = routes.filter((route): route is IAppRoute => {
-    // Only individual routes, no expandable groups
-    return !route.routes && !!route.label && ['Overview', 'Alert Manager', 'Data Integration', 'Event Log', 'Learning Resources'].includes(route.label);
-  });
+  const primaryOrder = ['Overview', 'Subscription Usage', 'Hybrid Committed Spend', 'Manifest', 'Learning Resources'];
+  const primaryNavRoutes = routes
+    .flatMap((r) => (r as IAppRouteGroup).routes ? (r as IAppRouteGroup).routes : [r as IAppRoute])
+    .filter((route: any): route is IAppRoute => !!route.label && primaryOrder.includes(route.label))
+    .sort((a, b) => primaryOrder.indexOf(a.label as string) - primaryOrder.indexOf(b.label as string));
+
+  const subscriptionInventoryGroup = (routes.find((r) => (r as IAppRouteGroup).routes && (r as IAppRouteGroup).label === 'Subscription Inventory') as IAppRouteGroup | undefined);
+  const overviewRoute = primaryNavRoutes.find(r => r.label === 'Overview');
+  const otherPrimaryRoutes = primaryNavRoutes.filter(r => r.label !== 'Overview');
 
   // Secondary navigation structure (IAM bundle)
   const secondaryNavItems = [
-    { label: 'My User Access', path: '/my-user-access', isActive: location.pathname === '/my-user-access' },
+    // Promote Overview to a top-level item pointing to /user-access
+    { label: 'Overview', path: '/user-access', isActive: location.pathname === '/user-access' },
+    { label: 'My Access', path: '/my-user-access', isActive: location.pathname === '/my-user-access' },
     { 
-      label: 'User Access', 
+      label: 'Access Management', 
       path: '/user-access', 
-      isActive: ['/user-access', '/users', '/groups', '/roles', '/workspaces', '/red-hat-access-requests'].includes(location.pathname),
+      isActive: ['/user-access', '/users-and-groups', '/roles', '/workspaces', '/service-accounts'].includes(location.pathname),
       isExpandable: true,
       subItems: [
-        { label: 'Overview', path: '/user-access', isActive: location.pathname === '/user-access' },
-        { label: 'Users', path: '/users', isActive: location.pathname === '/users' },
-        { label: 'Groups', path: '/groups', isActive: location.pathname === '/groups' },
+        { label: 'Users and Groups', path: '/users-and-groups', isActive: location.pathname === '/users-and-groups' },
         { label: 'Roles', path: '/roles', isActive: location.pathname === '/roles' },
         { label: 'Workspaces', path: '/workspaces', isActive: location.pathname === '/workspaces' },
-        { label: 'Red Hat Access Requests', path: '/red-hat-access-requests', isActive: location.pathname === '/red-hat-access-requests' },
+        // New Service accounts under Access management
+        { label: 'Service Accounts', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
       ]
     },
-    { label: 'Authentication Policy', path: '/authentication-policy', isActive: location.pathname === '/authentication-policy' },
-    { label: 'Service Accounts', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
-    { label: 'IAM Learning', path: '/learning-resources-iam', isActive: location.pathname === '/learning-resources-iam' },
+    {
+      label: 'Organization Management',
+      path: '/organization/organization-wide-access',
+      isActive: [
+        '/organization/organization-wide-access',
+        '/organization/trusted-organizations',
+        '/organization/authentication-factors',
+        '/organization/identity-provider-integration',
+      ].includes(location.pathname),
+      isExpandable: true,
+      subItems: [
+        { label: 'Organization-wide Access', path: '/organization/organization-wide-access', isActive: location.pathname === '/organization/organization-wide-access' },
+        { label: 'Trusted Organizations', path: '/organization/trusted-organizations', isActive: location.pathname === '/organization/trusted-organizations' },
+        { label: 'Authentication Factors', path: '/organization/authentication-factors', isActive: location.pathname === '/organization/authentication-factors' },
+        { label: 'Identity Provider Integration', path: '/organization/identity-provider-integration', isActive: location.pathname === '/organization/identity-provider-integration' },
+      ]
+    },
+    // Remove Authentication Policy
+    // Remove standalone Service Accounts (now nested under Access Management)
+    { label: 'Learning Resources', path: '/learning-resources-iam', isActive: location.pathname === '/learning-resources-iam' },
+    { label: 'Request Access', path: '/red-hat-access-requests', isActive: location.pathname === '/red-hat-access-requests' },
   ];
 
   const Navigation = (
@@ -1351,9 +1388,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       <NavList id="nav-list-simple">
         {navigationType === 'primary' ? (
           // Show primary navigation
-          primaryNavRoutes.map((route, idx) => 
-            route.label && renderNavItem(route, idx)
-          )
+          <>
+            {overviewRoute && renderNavItem(overviewRoute, 0)}
+            {renderNavGroup(subscriptionInventoryGroup as IAppRouteGroup, 1)}
+            {otherPrimaryRoutes.map((route, idx) => 
+              route.label && renderNavItem(route, idx + 2)
+            )}
+          </>
         ) : (
           // Show secondary navigation (IAM bundle)
           secondaryNavItems.map((item, idx) => (
@@ -1363,6 +1404,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 id={`secondary-expandable-${idx}`}
                 title={item.label}
                 isActive={item.isActive}
+                isExpanded={item.isActive}
               >
                 {item.subItems?.map((subItem, subIdx) => (
                   <NavItem key={`secondary-sub-${idx}-${subIdx}`} id={`secondary-sub-${idx}-${subIdx}`} isActive={subItem.isActive}>
@@ -2104,37 +2146,37 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               name: 'Red Hat Insights',
                                               description: 'Proactive identification and remediation of threats',
                                               category: 'Red Hat Enterprise Linux',
-                                              onClick: () => console.log('Red Hat Insights clicked')
+                                              onClick: () => { navigate('/subscriptions/insights'); setIsLogoDropdownOpen(false); }
                                             },
                                             'rhel-patch': {
                                               name: 'Patch Management',
                                               description: 'Automated patching and system updates for RHEL environments',
                                               category: 'Red Hat Enterprise Linux',
-                                              onClick: () => console.log('Patch Management clicked')
+                                              onClick: () => { navigate('/subscriptions/patch-management'); setIsLogoDropdownOpen(false); }
                                             },
                                             'openshift-clusters': {
                                               name: 'OpenShift Clusters',
                                               description: 'Manage and monitor your OpenShift Kubernetes clusters',
                                               category: 'Red Hat OpenShift',
-                                              onClick: () => console.log('OpenShift Clusters clicked')
+                                              onClick: () => { navigate('/subscriptions/openshift-clusters'); setIsLogoDropdownOpen(false); }
                                             },
                                             'container-registry': {
                                               name: 'Container Registry',
                                               description: 'Secure container image registry for storing and managing images',
                                               category: 'Red Hat OpenShift',
-                                              onClick: () => console.log('Container Registry clicked')
+                                              onClick: () => { navigate('/subscriptions/container-registry'); setIsLogoDropdownOpen(false); }
                                             },
                                             'automation-hub': {
                                               name: 'Automation Hub',
                                               description: 'Centralized repository for Ansible content collections',
                                               category: 'Red Hat Ansible Automation Platform',
-                                              onClick: () => console.log('Automation Hub clicked')
+                                              onClick: () => { navigate('/subscriptions/automation-hub'); setIsLogoDropdownOpen(false); }
                                             },
                                             'automation-controller': {
                                               name: 'Automation Controller',
                                               description: 'Enterprise automation control plane for Ansible playbooks',
                                               category: 'Red Hat Ansible Automation Platform',
-                                              onClick: () => console.log('Automation Controller clicked')
+                                              onClick: () => { navigate('/subscriptions/automation-controller'); setIsLogoDropdownOpen(false); }
                                             },
                                             'user-access-item': {
                                               name: 'User Access',
@@ -2972,7 +3014,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         <MenuItem 
                                           itemId="subscriptions"
                                           description="View and manage your Red Hat product subscriptions and entitlements"
-                                          onClick={() => console.log('Subscriptions clicked')}
+                                          onClick={() => { setIsLogoDropdownOpen(false); navigate('/subscriptions'); }}
                                           actions={
                                             <MenuItemAction
                                               icon={<StarIcon />}
@@ -2991,7 +3033,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         <MenuItem 
                                           itemId="billing"
                                           description="Access billing information, invoices, and payment methods for Red Hat services"
-                                          onClick={() => console.log('Billing clicked')}
+                                          onClick={() => { setIsLogoDropdownOpen(false); navigate('/billing'); }}
                                           actions={
                                             <MenuItemAction
                                               icon={<StarIcon />}
