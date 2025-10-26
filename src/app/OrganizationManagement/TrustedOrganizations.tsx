@@ -223,13 +223,18 @@ const TrustedOrganizations: React.FunctionComponent = () => {
 
   const isDirty = React.useMemo(() => {
     if (originalSelectedGroups.size !== selectedGroups.size) return true;
-    for (const id of originalSelectedGroups) {
-      if (!selectedGroups.has(id)) return true;
-    }
+    // iterate without for..of to avoid downlevelIteration requirements
+    Array.from(originalSelectedGroups).forEach((id) => {
+      if (!selectedGroups.has(id)) {
+        return true;
+      }
+    });
     if (originalSelectedWorkspaces.size !== selectedWorkspaces.size) return true;
-    for (const id of originalSelectedWorkspaces) {
-      if (!selectedWorkspaces.has(id)) return true;
-    }
+    Array.from(originalSelectedWorkspaces).forEach((id) => {
+      if (!selectedWorkspaces.has(id)) {
+        return true;
+      }
+    });
     return false;
   }, [originalSelectedGroups, selectedGroups, originalSelectedWorkspaces, selectedWorkspaces]);
 
