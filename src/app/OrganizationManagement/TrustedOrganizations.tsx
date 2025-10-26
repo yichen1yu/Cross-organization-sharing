@@ -223,18 +223,13 @@ const TrustedOrganizations: React.FunctionComponent = () => {
 
   const isDirty = React.useMemo(() => {
     if (originalSelectedGroups.size !== selectedGroups.size) return true;
-    // iterate without for..of to avoid downlevelIteration requirements
-    Array.from(originalSelectedGroups).forEach((id) => {
-      if (!selectedGroups.has(id)) {
-        return true;
-      }
-    });
+    for (const id of Array.from(originalSelectedGroups)) {
+      if (!selectedGroups.has(id)) return true;
+    }
     if (originalSelectedWorkspaces.size !== selectedWorkspaces.size) return true;
-    Array.from(originalSelectedWorkspaces).forEach((id) => {
-      if (!selectedWorkspaces.has(id)) {
-        return true;
-      }
-    });
+    for (const id of Array.from(originalSelectedWorkspaces)) {
+      if (!selectedWorkspaces.has(id)) return true;
+    }
     return false;
   }, [originalSelectedGroups, selectedGroups, originalSelectedWorkspaces, selectedWorkspaces]);
 
@@ -378,13 +373,13 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     return incomingFilteredAndSortedData.slice(start, start + perPage);
   }, [incomingFilteredAndSortedData, page, perPage]);
 
-  const onSetPage = (_evt: React.SyntheticEvent, newPage: number) => setPage(newPage);
-  const onPerPageSelect = (_evt: React.SyntheticEvent, newPerPage: number) => {
+  const onSetPage = (_event: any, newPage: number) => setPage(newPage);
+  const onPerPageSelect = (_event: any, newPerPage: number) => {
     setPerPage(newPerPage);
     setPage(1);
   };
 
-  const onSort = (_event: React.SyntheticEvent, columnIndex: number, direction: 'asc' | 'desc') => {
+  const onSort = (_event: any, columnIndex: number, direction: 'asc' | 'desc') => {
     setSortBy({ index: columnIndex, direction });
   };
 
@@ -466,7 +461,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
   const areAllGroupsSelected = groupRows.length > 0 && selectedGroups.size === groupRows.length;
   const areSomeGroupsSelected = selectedGroups.size > 0 && selectedGroups.size < groupRows.length;
   const hasChanges = selectedGroups.size !== originalSelectedGroups.size || 
-    ![...selectedGroups].every(id => originalSelectedGroups.has(id));
+    !Array.from(selectedGroups).every(id => originalSelectedGroups.has(id));
 
   const onSelectAllGroups = (isSelecting: boolean) => {
     if (isSelecting) {
@@ -728,7 +723,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                       aria-label="Select all groups"
                                       isChecked={selectedGroups.size === groupRows.length}
                                       onChange={(_event, checked) => onToggleAllGroups(checked)}
-                                      isCheckedMixed={selectedGroups.size > 0 && selectedGroups.size < groupRows.length}
+                                      id="incoming-drawer-ug-select-all-legacy"
                                     />
                                   </Th>
                                   <Th sort={{ sortBy: { index: 0, direction: undefined }, onSort: () => {}, columnIndex: 0 }}>User group name</Th>
@@ -740,8 +735,9 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                   <Tr key={g.id}>
                                     <Td>
                                       <Checkbox
-                                        aria-label={`Select ${g.name}`}
+                                      aria-label={`Select ${g.name}`}
                                         isChecked={selectedGroups.has(g.id)}
+                                      id={`incoming-drawer-ug-${g.id}`}
                                       onChange={(_event, checked) => onToggleGroup(g.id, checked)}
                                       />
                                     </Td>
@@ -841,13 +837,13 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                       <Td dataLabel="Org ID">{row.orgId}</Td>
                       <Td dataLabel="Status" style={{ paddingRight: '8px' }}>
                         {row.status === 'Accepted' && (
-                          <Label variant="status" color="green" icon={<CheckCircleIcon />}>Accepted</Label>
+                          <Label color="green" icon={<CheckCircleIcon />}>Accepted</Label>
                         )}
                         {row.status === 'Severed' && (
-                          <Label variant="status" color="red" icon={<ExclamationCircleIcon />}>Severed</Label>
+                          <Label color="red" icon={<ExclamationCircleIcon />}>Severed</Label>
                         )}
                         {row.status === 'Acceptance pending' && (
-                          <Label variant="status" color="cyan" icon={<SyncAltIcon />}>Acceptance pending</Label>
+                          <Label color="blue" icon={<SyncAltIcon />}>Acceptance pending</Label>
                         )}
                       </Td>
                       <Td dataLabel="Last modified">{row.lastModified}</Td>
@@ -909,7 +905,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
           </Tab>
           <Tab eventKey={1} title={<TabTitleText>Incoming</TabTitleText>}>
             <PageSection>
-              <Drawer isExpanded={isDetailsOpen} isInline={false} hasNoBackgroundScroll={true}>
+              <Drawer isExpanded={isDetailsOpen} isInline={false}>
                 <DrawerContent
                   panelContent={
                     <DrawerPanelContent
@@ -966,7 +962,6 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                       select={{
                                         onSelect: (_event, isSelecting) => onSelectAllGroups(isSelecting),
                                         isSelected: areAllGroupsSelected,
-                                        isIndeterminate: areSomeGroupsSelected && !areAllGroupsSelected,
                                       }}
                                     />
                                     <Th>User group name</Th>
@@ -978,7 +973,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                     <Tr key={group.id}>
                                       <Td
                                         select={{
-                                          rowIndex: group.id,
+                                          rowIndex: Number(group.id),
                                           onSelect: (_event, isSelecting) => onToggleGroup(group.id, isSelecting),
                                           isSelected: selectedGroups.has(group.id),
                                         }}
@@ -1125,7 +1120,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                               {row.status === 'Rejected' && (
                                 <Label
                                   variant="filled"
-                                  color="gold"
+                                  color="yellow"
                                   icon={<ExclamationTriangleIcon />}
                                   style={{
                                     backgroundColor: 'var(--pf-v6-global--warning-color--100)',
@@ -1201,7 +1196,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
       </PageSection>
 
       {isPendingWizardOpen && pendingWizardOrg && (
-        <Modal isOpen onClose={closePendingWizard} variant="large" showClose={false} aria-label="Review trusted organization request wizard" className="trusted-wizard-modal">
+        <Modal isOpen onClose={closePendingWizard} variant="large" aria-label="Review trusted organization request wizard" className="trusted-wizard-modal">
           <Wizard
             onClose={closePendingWizard}
             header={
@@ -1244,24 +1239,24 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                   }}
                 >
                   <div>
-                    <Title headingLevel="h4" size="sm" style={{ fontWeight: 700 }}>Organization name</Title>
+                    <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Organization name</Title>
                     <div style={{ marginTop: 4 }}>{pendingWizardOrg.organizationName}</div>
                   </div>
                   <div>
-                    <Title headingLevel="h4" size="sm" style={{ fontWeight: 700 }}>Organization ID</Title>
+                    <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Organization ID</Title>
                     <div style={{ marginTop: 4 }}>{pendingWizardOrg.orgId}</div>
                   </div>
                   <div>
-                    <Title headingLevel="h4" size="sm" style={{ marginTop: 8, fontWeight: 700 }}>Requester name</Title>
+                    <Title headingLevel="h4" size="md" style={{ marginTop: 8, fontWeight: 700 }}>Requester name</Title>
                     <div style={{ marginTop: 4 }}>{pendingRequesterName}</div>
                   </div>
                   <div>
-                    <Title headingLevel="h4" size="sm" style={{ marginTop: 8, fontWeight: 700 }}>Requester email</Title>
+                    <Title headingLevel="h4" size="md" style={{ marginTop: 8, fontWeight: 700 }}>Requester email</Title>
                     <div style={{ marginTop: 4 }}>{pendingRequesterEmail}</div>
                   </div>
                 </div>
                 <div style={{ marginTop: 24 }}>
-                  <Title headingLevel="h4" size="sm" style={{ fontWeight: 700 }}>Request description</Title>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Request description</Title>
                   <p style={{ marginTop: 8 }}>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
                     et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
@@ -1558,7 +1553,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                   <Checkbox
                                     aria-label="Select all user groups"
                                     isChecked={selectedGroups.size === groupRows.length}
-                                    isCheckedMixed={selectedGroups.size > 0 && selectedGroups.size < groupRows.length}
+                                    id="incoming-wizard-ug-select-all-legacy"
                                     onChange={(_event, checked) => onToggleAllGroups(checked)}
                                   />
                                 </Th>
@@ -1573,6 +1568,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                     <Checkbox
                                       aria-label={`Select ${g.name}`}
                                       isChecked={selectedGroups.has(g.id)}
+                                      id={`incoming-wizard-ug-${g.id}`}
                                       onChange={(_event, checked) => onToggleGroup(g.id, checked)}
                                     />
                                   </Td>
@@ -1613,7 +1609,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                   />
                   {requestTrustedChoice === 'yes' && (
                     <div style={{ marginTop: 16 }}>
-                  <Title headingLevel="h4" size="sm" style={{ fontWeight: 700 }}>Request description</Title>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Request description</Title>
                       <div style={{ marginTop: 8, maxWidth: 560 }}>
                         <TextArea
                           id="request-description"
