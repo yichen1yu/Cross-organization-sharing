@@ -426,7 +426,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                                           ⋮
                                         </MenuToggle>
                                       )}
-                                      popperProps={{ position: 'bottom-end' }}
+                                      popperProps={{ position: 'right' }}
                                     >
                                       <DropdownList>
                                         <DropdownItem>Edit</DropdownItem>
