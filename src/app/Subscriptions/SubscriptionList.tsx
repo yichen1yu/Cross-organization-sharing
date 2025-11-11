@@ -175,7 +175,7 @@ const SubscriptionList: React.FunctionComponent = () => {
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
         <Toolbar>
           <ToolbarContent>
-            <ToolbarItem grow={{ default: 'grow' }}>
+            <ToolbarItem>
               <SearchInput
                 placeholder="Filter by Name or SKU"
                 value={query}

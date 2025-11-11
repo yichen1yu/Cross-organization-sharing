@@ -34,7 +34,7 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
     <>
       {/* Hero */}
       <PageSection hasBodyWrapper={false}>
-        <Card isFlat>
+        <Card>
           <CardBody>
             <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }} alignItems={{ default: 'alignItemsCenter' }}>
               <FlexItem>
@@ -109,7 +109,7 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
         </Content>
         <Gallery hasGutter minWidths={{ default: '320px' }}>
           <GalleryItem>
-            <Card isFlat isCompact onClick={() => navigate('/subscriptions/insights')} style={{ cursor: 'pointer' }}>
+            <Card onClick={() => navigate('/subscriptions/insights')} style={{ cursor: 'pointer' }}>
               <CardBody>
                 <Title headingLevel="h3" size="md">Red Hat Enterprise Linux</Title>
                 <LabelGroup style={{ marginTop: 8 }}>
@@ -119,7 +119,7 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
             </Card>
           </GalleryItem>
           <GalleryItem>
-            <Card isFlat isCompact onClick={() => navigate('/subscriptions/openshift-clusters')} style={{ cursor: 'pointer' }}>
+            <Card onClick={() => navigate('/subscriptions/openshift-clusters')} style={{ cursor: 'pointer' }}>
               <CardBody>
                 <Title headingLevel="h3" size="md">Red Hat OpenShift</Title>
                 <LabelGroup style={{ marginTop: 8 }}>
@@ -129,7 +129,7 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
             </Card>
           </GalleryItem>
           <GalleryItem>
-            <Card isFlat isCompact onClick={() => navigate('/subscriptions/automation-hub')} style={{ cursor: 'pointer' }}>
+            <Card onClick={() => navigate('/subscriptions/automation-hub')} style={{ cursor: 'pointer' }}>
               <CardBody>
                 <Title headingLevel="h3" size="md">Red Hat Ansible Automation Platform</Title>
                 <LabelGroup style={{ marginTop: 8 }}>
@@ -139,7 +139,7 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
             </Card>
           </GalleryItem>
           <GalleryItem>
-            <Card isFlat isCompact onClick={() => navigate('/subscriptions')} style={{ cursor: 'pointer' }}>
+            <Card onClick={() => navigate('/subscriptions')} style={{ cursor: 'pointer' }}>
               <CardBody>
                 <Title headingLevel="h3" size="md">View all Red Hat Products</Title>
               </CardBody>
@@ -151,16 +151,16 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
       {/* FAQ */}
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
         <Title headingLevel="h2" size="lg" style={{ marginBottom: 12 }}>Have more questions?</Title>
-        <Accordion asDefinitionList noBoxShadow>
+        <Accordion>
           <AccordionItem>
             <AccordionToggle
-              onClick={(_e, isExpanded) => onToggle('q1', isExpanded)}
+              onClick={() => onToggle('q1', expanded !== 'q1')}
               isExpanded={expanded === 'q1'}
               id="q1-toggle"
             >
               How can I see all my subscriptions?
             </AccordionToggle>
-            <AccordionContent id="q1-content" isHidden={expanded !== 'q1'}>
+            <AccordionContent isHidden={expanded !== 'q1'}>
               <div style={{ padding: '12px 16px' }}>
                 View details and status information for each of your subscriptions with{' '}
                 <Button variant="link" isInline onClick={() => navigate('/subscription-inventory')}>
@@ -172,13 +172,13 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
           </AccordionItem>
           <AccordionItem>
             <AccordionToggle
-              onClick={(_e, isExpanded) => onToggle('q2', isExpanded)}
+              onClick={() => onToggle('q2', expanded !== 'q2')}
               isExpanded={expanded === 'q2'}
               id="q2-toggle"
             >
               What is a manifest?
             </AccordionToggle>
-            <AccordionContent id="q2-content" isHidden={expanded !== 'q2'}>
+            <AccordionContent isHidden={expanded !== 'q2'}>
               <div style={{ padding: '12px 16px' }}>
                 A subscription manifest is a file you export from your account to register systems with Red Hat Satellite.
               </div>
@@ -186,13 +186,13 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
           </AccordionItem>
           <AccordionItem>
             <AccordionToggle
-              onClick={(_e, isExpanded) => onToggle('q3', isExpanded)}
+              onClick={() => onToggle('q3', expanded !== 'q3')}
               isExpanded={expanded === 'q3'}
               id="q3-toggle"
             >
               How is Subscriptions Usage counting the usage of my subscriptions?
             </AccordionToggle>
-            <AccordionContent id="q3-content" isHidden={expanded !== 'q3'}>
+            <AccordionContent isHidden={expanded !== 'q3'}>
               <div style={{ padding: '12px 16px' }}>
                 Subscriptions Usage aggregates entitlement and reporting data to present usage against capacity over time.
               </div>
@@ -200,13 +200,13 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
           </AccordionItem>
           <AccordionItem>
             <AccordionToggle
-              onClick={(_e, isExpanded) => onToggle('q4', isExpanded)}
+              onClick={() => onToggle('q4', expanded !== 'q4')}
               isExpanded={expanded === 'q4'}
               id="q4-toggle"
             >
               How do I prepare to manage my RHEL subscriptions?
             </AccordionToggle>
-            <AccordionContent id="q4-content" isHidden={expanded !== 'q4'}>
+            <AccordionContent isHidden={expanded !== 'q4'}>
               <div style={{ padding: '12px 16px' }}>
                 Register your systems, enable Subscriptions Usage, and ensure required data sources are configured.
               </div>

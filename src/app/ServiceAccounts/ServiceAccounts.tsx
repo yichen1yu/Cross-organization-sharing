@@ -112,7 +112,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
           <CardHeader>
             <Toolbar>
               <ToolbarContent>
-                <ToolbarItem grow={{ default: 'grow' }}>
+                <ToolbarItem>
                   <SearchInput
                     placeholder="Filter by name"
                     value={query}
