@@ -359,7 +359,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                         <>
                           <Toolbar>
                             <ToolbarContent>
-                              <ToolbarItem grow={{ default: 'grow' }}>
+                              <ToolbarItem>
                                 <SearchInput
                                   placeholder="Filter by name"
                                   value={query}
@@ -370,7 +370,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                               <ToolbarItem>
                                 <Button variant="primary">Create group</Button>
                               </ToolbarItem>
-                              <ToolbarItem align={{ default: 'alignRight' }}>
+                              <ToolbarItem align={{ default: 'alignEnd' }}>
                                 <Pagination
                                   isCompact
                                   itemCount={filtered.length}

@@ -153,7 +153,7 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
         <Title headingLevel="h2" size="lg" style={{ marginBottom: 12 }}>Have more questions?</Title>
         <Accordion>
           <AccordionItem isExpanded={expanded === 'q1'}>
-            <AccordionToggle onClick={() => onToggle('q1', expanded !== 'q1')}>
+            <AccordionToggle id="q1-toggle" onClick={() => onToggle('q1', expanded !== 'q1')}>
               How can I see all my subscriptions?
             </AccordionToggle>
             <AccordionContent>
@@ -167,7 +167,7 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
             </AccordionContent>
           </AccordionItem>
           <AccordionItem isExpanded={expanded === 'q2'}>
-            <AccordionToggle onClick={() => onToggle('q2', expanded !== 'q2')}>
+            <AccordionToggle id="q2-toggle" onClick={() => onToggle('q2', expanded !== 'q2')}>
               What is a manifest?
             </AccordionToggle>
             <AccordionContent>
@@ -177,7 +177,7 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
             </AccordionContent>
           </AccordionItem>
           <AccordionItem isExpanded={expanded === 'q3'}>
-            <AccordionToggle onClick={() => onToggle('q3', expanded !== 'q3')}>
+            <AccordionToggle id="q3-toggle" onClick={() => onToggle('q3', expanded !== 'q3')}>
               How is Subscriptions Usage counting the usage of my subscriptions?
             </AccordionToggle>
             <AccordionContent>
@@ -187,7 +187,7 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
             </AccordionContent>
           </AccordionItem>
           <AccordionItem isExpanded={expanded === 'q4'}>
-            <AccordionToggle onClick={() => onToggle('q4', expanded !== 'q4')}>
+            <AccordionToggle id="q4-toggle" onClick={() => onToggle('q4', expanded !== 'q4')}>
               How do I prepare to manage my RHEL subscriptions?
             </AccordionToggle>
             <AccordionContent>
