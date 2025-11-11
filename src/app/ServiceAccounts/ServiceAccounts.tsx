@@ -20,7 +20,7 @@ import {
   ToolbarContent,
   ToolbarItem
 } from '@patternfly/react-core';
-import { Dropdown, DropdownItem, DropdownList } from '@patternfly/react-core/dist/esm/components/Dropdown';
+import { Dropdown, DropdownItem, DropdownList } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { ExternalLinkAltIcon, ServerIcon } from '@patternfly/react-icons';
 
