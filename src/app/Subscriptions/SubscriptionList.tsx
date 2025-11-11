@@ -137,7 +137,7 @@ const SubscriptionList: React.FunctionComponent = () => {
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
         <Grid hasGutter>
           <GridItem span={3}>
-            <Card isFlat>
+            <Card>
               <CardBody>
                 <Title headingLevel="h3" size="md">Active</Title>
                 <div style={{ marginTop: 8 }}><Label color="green">{active.toLocaleString()}</Label></div>
@@ -145,7 +145,7 @@ const SubscriptionList: React.FunctionComponent = () => {
             </Card>
           </GridItem>
           <GridItem span={3}>
-            <Card isFlat>
+            <Card>
               <CardBody>
                 <Title headingLevel="h3" size="md">Expiring soon</Title>
                 <div style={{ marginTop: 8 }}><Label color="orange">{expiringSoon.toLocaleString()}</Label></div>
@@ -153,7 +153,7 @@ const SubscriptionList: React.FunctionComponent = () => {
             </Card>
           </GridItem>
           <GridItem span={3}>
-            <Card isFlat>
+            <Card>
               <CardBody>
                 <Title headingLevel="h3" size="md">Expired</Title>
                 <div style={{ marginTop: 8 }}><Label color="red">{expired.toLocaleString()}</Label></div>
@@ -161,7 +161,7 @@ const SubscriptionList: React.FunctionComponent = () => {
             </Card>
           </GridItem>
           <GridItem span={3}>
-            <Card isFlat>
+            <Card>
               <CardBody>
                 <Title headingLevel="h3" size="md">Future dated</Title>
                 <div style={{ marginTop: 8 }}><Label color="grey">{futureDated.toLocaleString()}</Label></div>
@@ -183,7 +183,7 @@ const SubscriptionList: React.FunctionComponent = () => {
                 onClear={() => { setQuery(''); setPage(1); }}
               />
             </ToolbarItem>
-            <ToolbarItem align={{ default: 'alignRight' }}>
+            <ToolbarItem align={{ default: 'alignEnd' }}>
               <Pagination
                 isCompact
                 itemCount={filtered.length}

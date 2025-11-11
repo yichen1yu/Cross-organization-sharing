@@ -123,7 +123,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
                 <ToolbarItem>
                   <Button variant="primary">Create service account</Button>
                 </ToolbarItem>
-                <ToolbarItem align={{ default: 'alignRight' }}>
+                <ToolbarItem align={{ default: 'alignEnd' }}>
                   <Pagination
                     isCompact
                     itemCount={filtered.length}
@@ -146,7 +146,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
                   <Th width={20}>Client ID</Th>
                   <Th width={15}>Owner</Th>
                   <Th width={10}>Time created</Th>
-                  <Th width={5}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
+                  <Th width={10}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -168,7 +168,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
                             ⋮
                           </MenuToggle>
                         )}
-                        popperProps={{ position: 'bottom-end' }}
+                        popperProps={{ position: 'right' }}
                       >
                         <DropdownList>
                           <DropdownItem>View</DropdownItem>

@@ -1983,7 +1983,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       View all services
                                     </Button>
                                   </div>
-                                ) : (currentMenuItem.id === 'subscriptions-spend' || currentMenuItem.name === 'Subscriptions & Spend') ? (
+                                ) : (currentMenuItem.name === 'Subscriptions & Spend') ? (
                                   <Menu>
                                     <div>
                                       <MenuGroup label="Red Hat Enterprise Linux" labelHeadingLevel="h2">

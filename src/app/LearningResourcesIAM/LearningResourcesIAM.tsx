@@ -21,7 +21,7 @@ import { NavLink } from 'react-router-dom';
 
 const LearningResourcesIAM: React.FunctionComponent = () => {
   const DocCard: React.FC<{ title: string; link?: string; description: string; badges: string[]; footerBadges?: string[] } > = ({ title, link, description, badges, footerBadges }) => (
-    <Card isSelectable={false} isFlat>
+    <Card>
       <CardHeader>
         <Title headingLevel="h3" size="md">
           {link ? (
