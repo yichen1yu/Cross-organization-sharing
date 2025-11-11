@@ -182,7 +182,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                               {filterField}
                             </MenuToggle>
                           )}
-                          popperProps={{ position: 'bottom-start' }}
+                          popperProps={{ position: 'right' }}
                         >
                           <DropdownList>
                             <DropdownItem key="Username" value="Username">Username</DropdownItem>
@@ -190,7 +190,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                           </DropdownList>
                         </Dropdown>
                       </ToolbarItem>
-                      <ToolbarItem grow={{ default: 'grow' }}>
+                      <ToolbarItem>
                         <SearchInput
                           placeholder={`Filter by ${filterField.toLowerCase()}`}
                           value={filterValue}
@@ -201,7 +201,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                       <ToolbarItem>
                         <Button variant="primary">Invite users</Button>
                       </ToolbarItem>
-                      <ToolbarItem align={{ default: 'alignRight' }}>
+                      <ToolbarItem align={{ default: 'alignEnd' }}>
                         <Pagination
                           isCompact
                           itemCount={filteredUsers.length}
@@ -220,8 +220,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                         <Th
                           select={{
                             onSelect: (_e, isSelected) => onSelectAll(isSelected as boolean),
-                            isSelected: areAllSelected,
-                            isIndeterminate: areSomeSelected
+                            isSelected: areAllSelected
                           }}
                         />
                         <Th>Org. Administrator</Th>
@@ -256,7 +255,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                                   {u.isAdmin ? 'Yes' : 'No'}
                                 </MenuToggle>
                               )}
-                              popperProps={{ position: 'bottom-start' }}
+                              popperProps={{ position: 'right' }}
                             >
                               <DropdownList>
                                 <DropdownItem value="yes">Yes</DropdownItem>
@@ -275,8 +274,6 @@ const UsersAndGroups: React.FunctionComponent = () => {
                               <FlexItem>
                                 <Switch
                                   id={`user-active-${u.id}`}
-                                  label="Active"
-                                  labelOff="Inactive"
                                   isChecked={u.active}
                                   onChange={(_e, checked) => onToggleActive(u.id, checked)}
                                 />
@@ -392,8 +389,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                                 <Th
                                   select={{
                                     onSelect: (_e, isSelected) => onSelectAllG(isSelected as boolean),
-                                    isSelected: areAllSelectedG,
-                                    isIndeterminate: areSomeSelectedG
+                                    isSelected: areAllSelectedG
                                   }}
                                 />
                                 <Th width={40}>Name</Th>

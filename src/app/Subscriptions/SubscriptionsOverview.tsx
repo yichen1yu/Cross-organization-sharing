@@ -152,15 +152,11 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
         <Title headingLevel="h2" size="lg" style={{ marginBottom: 12 }}>Have more questions?</Title>
         <Accordion>
-          <AccordionItem>
-            <AccordionToggle
-              onClick={() => onToggle('q1', expanded !== 'q1')}
-              isExpanded={expanded === 'q1'}
-              id="q1-toggle"
-            >
+          <AccordionItem isExpanded={expanded === 'q1'}>
+            <AccordionToggle onClick={() => onToggle('q1', expanded !== 'q1')}>
               How can I see all my subscriptions?
             </AccordionToggle>
-            <AccordionContent isHidden={expanded !== 'q1'}>
+            <AccordionContent>
               <div style={{ padding: '12px 16px' }}>
                 View details and status information for each of your subscriptions with{' '}
                 <Button variant="link" isInline onClick={() => navigate('/subscription-inventory')}>
@@ -170,43 +166,31 @@ const SubscriptionsOverview: React.FunctionComponent = () => {
               </div>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem>
-            <AccordionToggle
-              onClick={() => onToggle('q2', expanded !== 'q2')}
-              isExpanded={expanded === 'q2'}
-              id="q2-toggle"
-            >
+          <AccordionItem isExpanded={expanded === 'q2'}>
+            <AccordionToggle onClick={() => onToggle('q2', expanded !== 'q2')}>
               What is a manifest?
             </AccordionToggle>
-            <AccordionContent isHidden={expanded !== 'q2'}>
+            <AccordionContent>
               <div style={{ padding: '12px 16px' }}>
                 A subscription manifest is a file you export from your account to register systems with Red Hat Satellite.
               </div>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem>
-            <AccordionToggle
-              onClick={() => onToggle('q3', expanded !== 'q3')}
-              isExpanded={expanded === 'q3'}
-              id="q3-toggle"
-            >
+          <AccordionItem isExpanded={expanded === 'q3'}>
+            <AccordionToggle onClick={() => onToggle('q3', expanded !== 'q3')}>
               How is Subscriptions Usage counting the usage of my subscriptions?
             </AccordionToggle>
-            <AccordionContent isHidden={expanded !== 'q3'}>
+            <AccordionContent>
               <div style={{ padding: '12px 16px' }}>
                 Subscriptions Usage aggregates entitlement and reporting data to present usage against capacity over time.
               </div>
             </AccordionContent>
           </AccordionItem>
-          <AccordionItem>
-            <AccordionToggle
-              onClick={() => onToggle('q4', expanded !== 'q4')}
-              isExpanded={expanded === 'q4'}
-              id="q4-toggle"
-            >
+          <AccordionItem isExpanded={expanded === 'q4'}>
+            <AccordionToggle onClick={() => onToggle('q4', expanded !== 'q4')}>
               How do I prepare to manage my RHEL subscriptions?
             </AccordionToggle>
-            <AccordionContent isHidden={expanded !== 'q4'}>
+            <AccordionContent>
               <div style={{ padding: '12px 16px' }}>
                 Register your systems, enable Subscriptions Usage, and ensure required data sources are configured.
               </div>
