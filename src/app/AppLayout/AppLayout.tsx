@@ -1303,6 +1303,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   // Define navigation groups
   const primaryNavPages = ['/overview', '/subscription-inventory', '/subscription-inventory/subscription-list', '/subscription-inventory/features', '/subscription-inventory/workspace', '/subscription-inventory/billing-account', '/alert-manager', '/data-integration', '/event-log', '/learning-resources'];
   const secondaryNavPages = [
+    '/iam/overview',
     '/my-user-access',
     '/user-access',
     '/users-and-groups',
@@ -1344,8 +1345,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   // Secondary navigation structure (IAM bundle)
   const secondaryNavItems = [
-    // Promote Overview to a top-level item pointing to /user-access
-    { label: 'Overview', path: '/user-access', isActive: location.pathname === '/user-access' },
+    // IAM Overview (separate from Subscriptions Overview)
+    { label: 'Overview', path: '/iam/overview', isActive: location.pathname === '/iam/overview' },
     { label: 'My Access', path: '/my-user-access', isActive: location.pathname === '/my-user-access' },
     { 
       label: 'Access Management', 
@@ -1380,7 +1381,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     // Remove Authentication Policy
     // Remove standalone Service Accounts (now nested under Access Management)
     { label: 'Learning Resources', path: '/learning-resources-iam', isActive: location.pathname === '/learning-resources-iam' },
-    { label: 'Request Access', path: '/red-hat-access-requests', isActive: location.pathname === '/red-hat-access-requests' },
   ];
 
   const Navigation = (
@@ -1983,6 +1983,65 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       View all services
                                     </Button>
                                   </div>
+                                ) : (currentMenuItem.id === 'subscriptions-spend' || currentMenuItem.name === 'Subscriptions & Spend') ? (
+                                  <Menu>
+                                    <div>
+                                      <MenuGroup label="Red Hat Enterprise Linux" labelHeadingLevel="h2">
+                                        <Divider />
+                                        <MenuList>
+                                          <MenuItem onClick={() => { navigate('/subscriptions/insights'); setIsLogoDropdownOpen(false); }}>
+                                            Resource Optimization
+                                          </MenuItem>
+                                          <MenuItem onClick={() => { navigate('/alert-manager'); setIsLogoDropdownOpen(false); }}>
+                                            Subscriptions Usage
+                                          </MenuItem>
+                                        </MenuList>
+                                      </MenuGroup>
+                                    </div>
+                                    <div style={{ marginTop: '24px' }}>
+                                      <MenuGroup label="OpenShift" labelHeadingLevel="h2">
+                                        <Divider />
+                                        <MenuList>
+                                          <MenuItem isDisabled>Cost Management</MenuItem>
+                                          <MenuItem onClick={() => { navigate('/alert-manager'); setIsLogoDropdownOpen(false); }}>
+                                            Subscriptions Usage
+                                          </MenuItem>
+                                        </MenuList>
+                                      </MenuGroup>
+                                    </div>
+                                    <div style={{ marginTop: '24px' }}>
+                                      <MenuGroup label="Ansible" labelHeadingLevel="h2">
+                                        <Divider />
+                                        <MenuList>
+                                          <MenuItem onClick={() => { navigate('/alert-manager'); setIsLogoDropdownOpen(false); }}>
+                                            Subscriptions Usage
+                                          </MenuItem>
+                                        </MenuList>
+                                      </MenuGroup>
+                                    </div>
+                                    <div style={{ marginTop: '24px' }}>
+                                      <MenuGroup label="Subscription Services" labelHeadingLevel="h2">
+                                        <Divider />
+                                        <MenuList>
+                                          <MenuItem onClick={() => { navigate('/overview'); setIsLogoDropdownOpen(false); }}>
+                                            Overview
+                                          </MenuItem>
+                                          <MenuItem onClick={() => { navigate('/subscription-inventory/billing-account'); setIsLogoDropdownOpen(false); }}>
+                                            Billing account
+                                          </MenuItem>
+                                          <MenuItem onClick={() => { navigate('/subscription-inventory'); setIsLogoDropdownOpen(false); }}>
+                                            Subscription Inventory
+                                          </MenuItem>
+                                          <MenuItem onClick={() => { navigate('/event-log'); setIsLogoDropdownOpen(false); }}>
+                                            Manifests
+                                          </MenuItem>
+                                          <MenuItem onClick={() => { navigate('/alert-manager'); setIsLogoDropdownOpen(false); }}>
+                                            Subscriptions Usage
+                                          </MenuItem>
+                                        </MenuList>
+                                      </MenuGroup>
+                                    </div>
+                                  </Menu>
                                 ) : (
                                   <Menu>
                                     {(() => {

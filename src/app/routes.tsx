@@ -3,6 +3,8 @@ import { Route, Routes } from 'react-router-dom';
 import { Homepage } from '@app/Homepage/Homepage';
 import { AllServices } from '@app/AllServices/AllServices';
 import { Dashboard } from '@app/Dashboard/Dashboard';
+import { OverviewIAM } from '@app/OverviewIAM/OverviewIAM';
+import { SubscriptionsOverview } from '@app/Subscriptions/SubscriptionsOverview';
 import { AlertManager } from '@app/AlertManager/AlertManager';
 import { RoleDeleted } from '@app/AlertManager/RoleDeleted';
 import { AuthenticationPolicy } from '@app/AuthenticationPolicy/AuthenticationPolicy';
@@ -24,6 +26,7 @@ import { IdentityProviderIntegration } from '@app/OrganizationManagement/Identit
 import { Subscriptions } from '@app/Subscriptions/Subscriptions';
 import { Billing } from '@app/Subscriptions/Billing';
 import { SubscriptionInventory } from '@app/Subscriptions/SubscriptionInventory';
+import { SubscriptionList } from '@app/Subscriptions/SubscriptionList';
 import { Insights } from '@app/SubscriptionsSpend/Insights';
 import { PatchManagement } from '@app/SubscriptionsSpend/PatchManagement';
 import { OpenShiftClusters } from '@app/SubscriptionsSpend/OpenShiftClusters';
@@ -33,7 +36,6 @@ import { AutomationController } from '@app/SubscriptionsSpend/AutomationControll
 import { Roles } from '@app/Roles/Roles';
 import { AlertOverriderRole } from '@app/Roles/AlertOverriderRole';
 import { Workspaces } from '@app/Workspaces/Workspaces';
-import { RedHatAccessRequests } from '@app/RedHatAccessRequests/RedHatAccessRequests';
 import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
 import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { NotFound } from '@app/NotFound/NotFound';
@@ -72,7 +74,7 @@ const routes: AppRouteConfig[] = [
         title: 'Subscription Inventory | Red Hat Hybrid Cloud Console'
       },
       {
-        element: <SubscriptionInventory />, // placeholder page
+        element: <SubscriptionList />,
         exact: true,
         path: '/subscription-inventory/subscription-list',
         title: 'Subscription list | Red Hat Hybrid Cloud Console',
@@ -157,11 +159,17 @@ const routes: AppRouteConfig[] = [
     title: 'All Services | Red Hat Hybrid Cloud Console',
   },
   {
-    element: <Dashboard />,
+    element: <SubscriptionsOverview />,
     exact: true,
     label: 'Overview',
     path: '/overview',
-    title: 'Overview | Red Hat Hybrid Cloud Console',
+    title: 'Overview | Subscriptions',
+  },
+  {
+    element: <OverviewIAM />,
+    exact: true,
+    path: '/iam/overview',
+    title: 'Overview | Identity & Access Management',
   },
   {
     element: <AlertManager />,
@@ -288,12 +296,7 @@ const routes: AppRouteConfig[] = [
     path: '/workspaces',
     title: 'Workspaces | Red Hat Hybrid Cloud Console',
   },
-  {
-    element: <RedHatAccessRequests />,
-    exact: true,
-    path: '/red-hat-access-requests',
-    title: 'Red Hat Access Requests | Red Hat Hybrid Cloud Console',
-  },
+  
   // Organization management routes
   {
     element: <OrganizationWideAccess />,

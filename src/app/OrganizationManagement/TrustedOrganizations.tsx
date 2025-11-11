@@ -219,6 +219,26 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     });
   };
 
+  // Users rows for the Outgoing drawer Users tab (same table structure as User groups)
+  type UserRow = { id: string; name: string; roles: number };
+  const [userRows, setUserRows] = React.useState<UserRow[]>([]);
+  const [selectedUsers, setSelectedUsers] = React.useState<Set<string>>(new Set());
+  const [originalSelectedUsers, setOriginalSelectedUsers] = React.useState<Set<string>>(new Set());
+  const generateUsersForOrg = React.useCallback((org: TrustedOrg): UserRow[] => {
+    const firstNames = ['Harry', 'Ron', 'Hermione', 'Tony', 'Bruce', 'Peter', 'Natasha', 'Wanda'];
+    const lastNames = ['Potter', 'Weasley', 'Granger', 'Stark', 'Banner', 'Parker', 'Romanoff', 'Maximoff'];
+    const idStr = String(org.orgId);
+    let hash = 0; for (let i = 0; i < idStr.length; i++) hash += idStr.charCodeAt(i);
+    const count = 3 + (hash % 3); // 3-5 users
+    const rows: UserRow[] = Array.from({ length: count }).map((_, idx) => {
+      const f = firstNames[(hash + idx) % firstNames.length];
+      const l = lastNames[(hash + idx * 2) % lastNames.length];
+      const roles = (hash + idx) % 7; // 0-6 roles
+      return { id: `${idStr}-u${idx}`, name: `${f} ${l}`, roles };
+    });
+    return rows;
+  }, []);
+
   // (Removed workspace-specific save tracking per user request)
 
   const isDirty = React.useMemo(() => {
@@ -230,8 +250,12 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     for (const id of Array.from(originalSelectedWorkspaces)) {
       if (!selectedWorkspaces.has(id)) return true;
     }
+    if (originalSelectedUsers.size !== selectedUsers.size) return true;
+    for (const id of Array.from(originalSelectedUsers)) {
+      if (!selectedUsers.has(id)) return true;
+    }
     return false;
-  }, [originalSelectedGroups, selectedGroups, originalSelectedWorkspaces, selectedWorkspaces]);
+  }, [originalSelectedGroups, selectedGroups, originalSelectedWorkspaces, selectedWorkspaces, originalSelectedUsers, selectedUsers]);
 
   const [outgoingData, setOutgoingData] = React.useState<TrustedOrg[]>([
     { organizationName: 'Acme Corp', orgId: '100001', status: 'Accepted', lastModified: '2025-09-01' },
@@ -416,6 +440,11 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     const allSelected = new Set(rows.map((g) => g.id));
     setSelectedGroups(allSelected);
     setOriginalSelectedGroups(new Set(allSelected));
+    // Generate users for this org and select all by default
+    const uRows = generateUsersForOrg(org);
+    setUserRows(uRows);
+    setSelectedUsers(new Set(uRows.map(u => u.id)));
+    setOriginalSelectedUsers(new Set(uRows.map(u => u.id)));
     // Generate workspace rows for this org and select all by default
     const wRows = generateWorkspaceRowsForOrg(org);
     setWorkspaceTableRows(wRows);
@@ -455,6 +484,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     // Persist selection (mock)
     setOriginalSelectedGroups(new Set(selectedGroups));
     setOriginalSelectedWorkspaces(new Set(selectedWorkspaces));
+    setOriginalSelectedUsers(new Set(selectedUsers));
   };
 
   // Derived state for group selection
@@ -535,28 +565,6 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                           </div>
                         </div>
                         <DrawerActions>
-                          <Dropdown
-                            isOpen={detailsKebabOpen}
-                            onOpenChange={setDetailsKebabOpen}
-                            onSelect={() => setDetailsKebabOpen(false)}
-                            toggle={(toggleRef) => (
-                              <MenuToggle
-                                ref={toggleRef}
-                                aria-label="More actions"
-                                variant="plain"
-                                onClick={() => setDetailsKebabOpen(!detailsKebabOpen)}
-                                isExpanded={detailsKebabOpen}
-                              >
-                                <EllipsisVIcon />
-                              </MenuToggle>
-                            )}
-                          >
-                            <DropdownList>
-                              <DropdownItem>View details</DropdownItem>
-                              <DropdownItem>Edit</DropdownItem>
-                              <DropdownItem>Remove trust</DropdownItem>
-                            </DropdownList>
-                          </Dropdown>
                           <DrawerCloseButton onClick={closeDetails} />
                         </DrawerActions>
                       </DrawerHead>
@@ -751,9 +759,46 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                             </Table>
                           </Tab>
                           <Tab eventKey={2} title={<TabTitleText>Users</TabTitleText>}>
-                            <Content>
-                              <p>Users associated through this trust relationship.</p>
-                            </Content>
+                            <div style={{ padding: '16px' }}>
+                              <Table>
+                                <Thead>
+                                  <Tr>
+                                    <Th
+                                      select={{
+                                        onSelect: (_event, isSelecting) => {
+                                          if (isSelecting) setSelectedUsers(new Set(userRows.map(u => u.id)));
+                                          else setSelectedUsers(new Set());
+                                        },
+                                        isSelected: userRows.length > 0 && selectedUsers.size === userRows.length,
+                                      }}
+                                    />
+                                    <Th>Users</Th>
+                                    <Th>Roles</Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  {userRows.map((u) => (
+                                    <Tr key={u.id}>
+                                      <Td
+                                        select={{
+                                          rowIndex: Number(u.id.replace(/\D/g, '') || 0),
+                                          onSelect: (_event, isSelecting) => {
+                                            setSelectedUsers(prev => {
+                                              const next = new Set(prev);
+                                              if (isSelecting) next.add(u.id); else next.delete(u.id);
+                                              return next;
+                                            });
+                                          },
+                                          isSelected: selectedUsers.has(u.id),
+                                        }}
+                                      />
+                                      <Td>{u.name}</Td>
+                                      <Td>{u.roles}</Td>
+                                    </Tr>
+                                  ))}
+                                </Tbody>
+                              </Table>
+                            </div>
                           </Tab>
                         </Tabs>
                         <div style={{ position: 'sticky', bottom: 0, padding: '16px', background: 'var(--pf-v6-global--BackgroundColor--100)', boxShadow: '0 -1px 0 var(--pf-v6-global--BorderColor--100)' }}>
@@ -830,9 +875,13 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                   {paginatedData.map((row) => (
                     <Tr key={row.orgId}>
                       <Td dataLabel="Organization name" style={{ paddingRight: '32px' }}>
-                        <Button variant="link" isInline onClick={() => openDetails(row)}>
-                          {row.organizationName}
-                        </Button>
+                        {row.status === 'Severed' ? (
+                          <span>{row.organizationName}</span>
+                        ) : (
+                          <Button variant="link" isInline onClick={() => openDetails(row)}>
+                            {row.organizationName}
+                          </Button>
+                        )}
                       </Td>
                       <Td dataLabel="Org ID">{row.orgId}</Td>
                       <Td dataLabel="Status" style={{ paddingRight: '8px' }}>
@@ -848,51 +897,62 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                       </Td>
                       <Td dataLabel="Last modified">{row.lastModified}</Td>
                       <Td isActionCell>
-                        <Dropdown
-                          isOpen={openKebabKey === `out-${row.orgId}`}
-                          onSelect={() => setOpenKebabKey(null)}
-                          onOpenChange={(isOpen) => setOpenKebabKey(isOpen ? `out-${row.orgId}` : null)}
-                          toggle={(toggleRef) => (
-                            <MenuToggle
-                              ref={toggleRef}
-                              aria-label={`Row actions for ${row.organizationName}`}
-                              variant="plain"
-                              onClick={() => setOpenKebabKey(openKebabKey === `out-${row.orgId}` ? null : `out-${row.orgId}`)}
-                              isExpanded={openKebabKey === `out-${row.orgId}`}
+                        {(() => {
+                          const isSevered = row.status === 'Severed';
+                          const isOpen = !isSevered && openKebabKey === `out-${row.orgId}`;
+                          return (
+                            <Dropdown
+                              isOpen={isOpen}
+                              onSelect={() => setOpenKebabKey(null)}
+                              onOpenChange={(isOpen) => {
+                                if (!isSevered) setOpenKebabKey(isOpen ? `out-${row.orgId}` : null);
+                              }}
+                              toggle={(toggleRef) => (
+                                <MenuToggle
+                                  ref={toggleRef}
+                                  aria-label={`Row actions for ${row.organizationName}`}
+                                  variant="plain"
+                                  isDisabled={isSevered}
+                                  onClick={() => {
+                                    if (!isSevered) setOpenKebabKey(openKebabKey === `out-${row.orgId}` ? null : `out-${row.orgId}`);
+                                  }}
+                                  isExpanded={isOpen}
+                                >
+                                  <EllipsisVIcon />
+                                </MenuToggle>
+                              )}
+                              popperProps={{ position: 'right' }}
                             >
-                              <EllipsisVIcon />
-                            </MenuToggle>
-                          )}
-                          popperProps={{ position: 'right' }}
-                        >
-                          <DropdownList>
-                            {row.status === 'Accepted' && (
-                              <DropdownItem
-                                onClick={() => {
-                                  setOpenKebabKey(null);
-                                  setRemoveTargetOrg(row);
-                                  setIsRemoveModalOpen(true);
-                                  setRemoveSource('outgoing');
-                                }}
-                              >
-                                Remove connection
-                              </DropdownItem>
-                            )}
-                            {row.status === 'Acceptance pending' && (
-                              <>
-                                <DropdownItem>Send reminder</DropdownItem>
-                                <DropdownItem>Cancel request</DropdownItem>
-                              </>
-                            )}
-                            {row.status !== 'Accepted' && row.status !== 'Acceptance pending' && (
-                              <>
-                                <DropdownItem>Edit</DropdownItem>
-                                <DropdownItem>View details</DropdownItem>
-                                <DropdownItem>Delete</DropdownItem>
-                              </>
-                            )}
-                          </DropdownList>
-                        </Dropdown>
+                              <DropdownList>
+                                {row.status === 'Accepted' && (
+                                  <DropdownItem
+                                    onClick={() => {
+                                      setOpenKebabKey(null);
+                                      setRemoveTargetOrg(row);
+                                      setIsRemoveModalOpen(true);
+                                      setRemoveSource('outgoing');
+                                    }}
+                                  >
+                                    Remove connection
+                                  </DropdownItem>
+                                )}
+                                {row.status === 'Acceptance pending' && (
+                                  <>
+                                    <DropdownItem>Send reminder</DropdownItem>
+                                    <DropdownItem>Cancel request</DropdownItem>
+                                  </>
+                                )}
+                                {row.status !== 'Accepted' && row.status !== 'Acceptance pending' && (
+                                  <>
+                                    <DropdownItem>Edit</DropdownItem>
+                                    <DropdownItem>View details</DropdownItem>
+                                    <DropdownItem>Delete</DropdownItem>
+                                  </>
+                                )}
+                              </DropdownList>
+                            </Dropdown>
+                          );
+                        })()}
                       </Td>
                     </Tr>
                   ))}
@@ -925,26 +985,6 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                           View and manage user group access for this trusted organization
                         </div>
                         <DrawerActions>
-                          <Dropdown
-                            isOpen={detailsKebabOpen}
-                            onSelect={() => setDetailsKebabOpen(false)}
-                            onOpenChange={(isOpen) => setDetailsKebabOpen(isOpen)}
-                            toggle={(toggleRef) => (
-                              <MenuToggle
-                                ref={toggleRef}
-                                aria-label="Drawer actions"
-                                variant="plain"
-                                onClick={() => setDetailsKebabOpen(!detailsKebabOpen)}
-                              >
-                                <EllipsisVIcon />
-                              </MenuToggle>
-                            )}
-                            popperProps={{ position: 'right' }}
-                          >
-                            <DropdownList>
-                              <DropdownItem>Remove connection</DropdownItem>
-                            </DropdownList>
-                          </Dropdown>
                           <DrawerCloseButton onClick={() => setIsDetailsOpen(false)} />
                         </DrawerActions>
                       </DrawerHead>
@@ -1145,43 +1185,54 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                             </Td>
                             <Td>{row.lastModified}</Td>
                             <Td isActionCell>
-                              <Dropdown
-                                isOpen={openKebabKey === `in-${row.orgId}`}
-                                onSelect={() => setOpenKebabKey(null)}
-                                onOpenChange={(isOpen) => setOpenKebabKey(isOpen ? `in-${row.orgId}` : null)}
-                                toggle={(toggleRef) => (
-                                  <MenuToggle
-                                    ref={toggleRef}
-                                    aria-label="Actions"
-                                    variant="plain"
-                                    onClick={() => setOpenKebabKey(openKebabKey === `in-${row.orgId}` ? null : `in-${row.orgId}`)}
+                              {(() => {
+                                const disableKebab = row.status === 'Rejected' || row.status === 'Acceptance pending';
+                                const isOpen = !disableKebab && openKebabKey === `in-${row.orgId}`;
+                                return (
+                                  <Dropdown
+                                    isOpen={isOpen}
+                                    onSelect={() => setOpenKebabKey(null)}
+                                    onOpenChange={(isOpen) => {
+                                      if (!disableKebab) setOpenKebabKey(isOpen ? `in-${row.orgId}` : null);
+                                    }}
+                                    toggle={(toggleRef) => (
+                                      <MenuToggle
+                                        ref={toggleRef}
+                                        aria-label="Actions"
+                                        variant="plain"
+                                        isDisabled={disableKebab}
+                                        onClick={() => {
+                                          if (!disableKebab) setOpenKebabKey(openKebabKey === `in-${row.orgId}` ? null : `in-${row.orgId}`);
+                                        }}
+                                      >
+                                        <EllipsisVIcon />
+                                      </MenuToggle>
+                                    )}
+                                    popperProps={{ position: 'right' }}
                                   >
-                                    <EllipsisVIcon />
-                                  </MenuToggle>
-                                )}
-                                popperProps={{ position: 'right' }}
-                              >
-                                <DropdownList>
-                                  {row.status === 'Accepted' ? (
-                                    <DropdownItem
-                                      onClick={() => {
-                                        setOpenKebabKey(null);
-                                        setRemoveTargetOrg(row);
-                                        setIsRemoveModalOpen(true);
-                                        setRemoveSource('incoming');
-                                      }}
-                                    >
-                                      Remove connection
-                                    </DropdownItem>
-                                  ) : (
-                                    <>
-                                      <DropdownItem>Edit</DropdownItem>
-                                      <DropdownItem>View details</DropdownItem>
-                                      <DropdownItem>Delete</DropdownItem>
-                                    </>
-                                  )}
-                                </DropdownList>
-                              </Dropdown>
+                                    <DropdownList>
+                                      {row.status === 'Accepted' ? (
+                                        <DropdownItem
+                                          onClick={() => {
+                                            setOpenKebabKey(null);
+                                            setRemoveTargetOrg(row);
+                                            setIsRemoveModalOpen(true);
+                                            setRemoveSource('incoming');
+                                          }}
+                                        >
+                                          Remove connection
+                                        </DropdownItem>
+                                      ) : (
+                                        <>
+                                          <DropdownItem>Edit</DropdownItem>
+                                          <DropdownItem>View details</DropdownItem>
+                                          <DropdownItem>Delete</DropdownItem>
+                                        </>
+                                      )}
+                                    </DropdownList>
+                                  </Dropdown>
+                                );
+                              })()}
                             </Td>
                           </Tr>
                         ))}
