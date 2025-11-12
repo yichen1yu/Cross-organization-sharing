@@ -1277,7 +1277,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">You have a request to become a trusted organization. Review the request info below:</Title>
                 <p style={{ marginTop: 8 }}>
-                  Accepting to become a trusted org to {pendingWizardOrg.organizationName} will allow them to see your organization.
+                  Accepting to become a trusted org to {pendingWizardOrg.organizationName} will allow them to see your organization. However, you will not be able to see their organization unless you choose to establish the trusted organization connection back with {pendingWizardOrg.organizationName} in the third step.
                   For more information about trusted organizations, <a href="#">click here</a>.
                 </p>
                 <div
