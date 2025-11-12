@@ -54,6 +54,24 @@ const Workspaces: React.FunctionComponent = () => {
     });
   };
 
+  // Selection and rows for "Roles assigned in parent workspaces"
+  const parentGroupNames = ['Cardiology admins', 'Radiology viewers', 'Operating room ops'];
+  const [parentSelectedRowIds, setParentSelectedRowIds] = React.useState<Set<number>>(new Set());
+  const areAllParentSelected = parentSelectedRowIds.size === parentGroupNames.length;
+  const areSomeParentSelected = parentSelectedRowIds.size > 0 && parentSelectedRowIds.size < parentGroupNames.length;
+  const [isParentMasterOpen, setIsParentMasterOpen] = React.useState(false);
+  const onToggleAllParent = (checked: boolean) => {
+    if (checked) setParentSelectedRowIds(new Set(parentGroupNames.map((_, idx) => idx)));
+    else setParentSelectedRowIds(new Set());
+  };
+  const onToggleParentRow = (idx: number, checked: boolean) => {
+    setParentSelectedRowIds(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(idx); else next.delete(idx);
+      return next;
+    });
+  };
+
   const handleTabClick = (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent | MouseEvent, tabIndex: string | number) => {
     setActiveTabKey(tabIndex);
   };
@@ -73,10 +91,14 @@ const Workspaces: React.FunctionComponent = () => {
   type UserEntry = { name: string; org: string };
   type GrantedRow = { groupName: string; description: string; users: number; roles: number; lastModified: string; rolesList?: string[]; usersList?: UserEntry[]; orgName?: string };
   const [grantedRows, setGrantedRows] = React.useState<GrantedRow[]>([
-    { groupName: 'Golden girls', description: 'Classic show members', users: 4, roles: 2, lastModified: '2 days ago' },
-    { groupName: 'Powerpuff girls', description: '3 superhero sisters', users: 3, roles: 3, lastModified: '2 days ago' },
-    { groupName: 'Seattle Grace admins', description: 'Lorem ipsum', users: 3, roles: 2, lastModified: '2 days ago' },
-    { groupName: 'Spice girls', description: 'Group of international female popstars', users: 5, roles: 2, lastModified: '2 days ago' }
+    { groupName: 'Golden girls', description: 'Workspace administrators handling access approvals and settings', users: 4, roles: 2, lastModified: '2 days ago' },
+    { groupName: 'Seattle Grace admins', description: 'Clinical admins overseeing user lifecycle, roles, and audits', users: 3, roles: 2, lastModified: '2 days ago' },
+    { groupName: 'Spice girls', description: 'Project members with standard access to dashboards and reports', users: 5, roles: 2, lastModified: '2 days ago' }
+  ]);
+  const [parentGrantedRows] = React.useState<GrantedRow[]>([
+    { groupName: 'Cardiology admins', description: 'Manage cardiac imaging access, approvals, and workspace settings', users: 2, roles: 1, lastModified: '6 hours ago' },
+    { groupName: 'Radiology viewers', description: 'Read‑only access to imaging dashboards and reports', users: 8, roles: 1, lastModified: '1 day ago' },
+    { groupName: 'Operating room ops', description: 'Operational runbooks, device integrations, and audit oversight', users: 6, roles: 2, lastModified: '4 days ago' }
   ]);
 
   // (Drawer removed) noop handlers left to avoid references
@@ -251,7 +273,7 @@ const Workspaces: React.FunctionComponent = () => {
                     Don’t see the trusted org you need? Establish a new trusted org connection
                   </p>
                 </div>
-              </div>
+            </div>
             </WizardStep>
             <WizardStep id="grant-step-2" name="Select user group(s)">
               <div style={{ padding: 16 }}>
@@ -401,7 +423,7 @@ const Workspaces: React.FunctionComponent = () => {
             <Button variant="link" isInline style={{ fontWeight: 700, padding: 0 }}>UXD</Button>
             {' '}&gt;&nbsp;Workspace A
           </p>
-        </Content>
+              </Content>
       </PageSection>
       
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
@@ -484,7 +506,9 @@ const Workspaces: React.FunctionComponent = () => {
                             <Td dataLabel="User group name" style={{ paddingRight: '32px' }}>
                               <Button variant="link" isInline onClick={() => openDetails(row)}>{row.groupName}</Button>
                             </Td>
-                            <Td dataLabel="Description">{row.description}</Td>
+                            <Td dataLabel="Description" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '520px' }}>
+                              {row.description}
+                            </Td>
                             <Td dataLabel="Users">{row.users}</Td>
                             <Td dataLabel="Roles">{row.roles}</Td>
                             <Td dataLabel="Last modified">{row.lastModified}</Td>
@@ -511,42 +535,155 @@ const Workspaces: React.FunctionComponent = () => {
                   </PageSection>
                 </Tab>
                 <Tab eventKey={1} title={<TabTitleText>Roles assigned in parent workspaces</TabTitleText>}>
-                  <PageSection style={{ paddingTop: 8 }}>
-                    <Card>
-                      <CardBody>
-                        <Content>
-                          <Title headingLevel="h2" size="xl">Roles assigned in parent workspaces</Title>
-                          <p>View inherited roles coming from UXD and other parent workspaces.</p>
-                        </Content>
-                      </CardBody>
-                    </Card>
+                  <PageSection style={{ paddingTop: 8, paddingBottom: 0 }}>
+                    <Toolbar style={{ marginTop: 16 }}>
+                      <ToolbarContent>
+                        <ToolbarItem>
+                          <Dropdown
+                            isOpen={isParentMasterOpen}
+                            onOpenChange={setIsParentMasterOpen}
+                            toggle={(toggleRef) => (
+                              <MenuToggle ref={toggleRef} isExpanded={isParentMasterOpen}>
+                                <Checkbox
+                                  id="parent-toolbar-master-checkbox"
+                                  aria-label="Select"
+                                  isChecked={areAllParentSelected}
+                                  onChange={(_e, checked) => onToggleAllParent(!!checked)}
+                                />
+                              </MenuToggle>
+                            )}
+                          >
+                            <DropdownList>
+                              <DropdownItem onClick={() => { onToggleAllParent(true); setIsParentMasterOpen(false); }}>Select all</DropdownItem>
+                              <DropdownItem onClick={() => { onToggleAllParent(false); setIsParentMasterOpen(false); }}>Deselect all</DropdownItem>
+                            </DropdownList>
+                          </Dropdown>
+                        </ToolbarItem>
+                        <ToolbarItem style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <Dropdown
+                            isOpen={false}
+                            onOpenChange={() => {}}
+                            toggle={(toggleRef) => (
+                              <MenuToggle ref={toggleRef} isExpanded={false} icon={null} style={{ minWidth: '220px' }}>
+                                User name group
+                              </MenuToggle>
+                            )}
+                          >
+                            <DropdownList>
+                              <DropdownItem>User name group</DropdownItem>
+                              <DropdownItem>Organization name</DropdownItem>
+                            </DropdownList>
+                          </Dropdown>
+                          <SearchInput aria-label={'Search'} placeholder={'Search'} value={''} onChange={() => {}} onClear={() => {}} />
+                        </ToolbarItem>
+                      </ToolbarContent>
+                    </Toolbar>
+                  </PageSection>
+                  <PageSection style={{ paddingTop: 0 }}>
+                    <Table aria-label="Parent role assignment groups table">
+                      <Thead>
+                        <Tr>
+                          <Th aria-label="Row select" />
+                          <Th width={35}>User group name</Th>
+                          <Th width={25}>Description</Th>
+                          <Th width={10}>Users</Th>
+                          <Th width={10}>Roles</Th>
+                          <Th width={20}>Last modified</Th>
+                          <Th aria-label="Row actions"></Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {parentGrantedRows.map((row, idx) => (
+                          <Tr key={`${row.groupName}-${idx}`}>
+                            <Td>
+                              <Checkbox
+                                id={`select-parent-group-${idx}`}
+                                aria-label={`Select ${row.groupName}`}
+                                isChecked={parentSelectedRowIds.has(idx)}
+                                onChange={(_e, checked) => onToggleParentRow(idx, !!checked)}
+                              />
+                            </Td>
+                            <Td dataLabel="User group name" style={{ paddingRight: '32px' }}>
+                              <Button variant="link" isInline onClick={() => openDetails(row)}>{row.groupName}</Button>
+                            </Td>
+                            <Td dataLabel="Description" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '520px' }}>
+                              {row.description}
+                            </Td>
+                            <Td dataLabel="Users">{row.users}</Td>
+                            <Td dataLabel="Roles">{row.roles}</Td>
+                            <Td dataLabel="Last modified">{row.lastModified}</Td>
+                            <Td isActionCell>
+                              <Dropdown isOpen={false} onOpenChange={() => {}}
+                                toggle={(toggleRef) => (
+                                  <MenuToggle ref={toggleRef} aria-label={`Row actions for ${row.groupName}`} variant="plain">
+                                    <EllipsisVIcon />
+                                  </MenuToggle>
+                                )}
+                                popperProps={{ position: 'right' }}
+                              >
+                                <DropdownList>
+                                  <DropdownItem>View</DropdownItem>
+                                  <DropdownItem>Edit</DropdownItem>
+                                  <DropdownItem>Remove</DropdownItem>
+                                </DropdownList>
+                              </Dropdown>
+                            </Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
                   </PageSection>
                 </Tab>
               </Tabs>
             </PageSection>
           </Tab>
           <Tab eventKey={1} title={<TabTitleText>Assets</TabTitleText>}>
-            <PageSection>
-              <Card>
-                <CardBody>
-                  <Content>
-                    <Title headingLevel="h2" size="xl">Assets</Title>
-                    <p>Browse and manage assets associated with this workspace.</p>
-                  </Content>
-                </CardBody>
-              </Card>
-            </PageSection>
-          </Tab>
-          <Tab eventKey={2} title={<TabTitleText>Features management</TabTitleText>}>
-            <PageSection>
-              <Card>
-                <CardBody>
-                  <Content>
-                    <Title headingLevel="h2" size="xl">Features management</Title>
-                    <p>Enable or disable workspace features and capabilities.</p>
-                  </Content>
-                </CardBody>
-              </Card>
+            <PageSection style={{ paddingTop: 8 }}>
+              <Content>
+                <p style={{ marginTop: 0, color: '#6a6e73' }}>Navigate to a service to manage your assets.</p>
+              </Content>
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                <Card style={{ width: 320, flex: '0 0 320px' }}>
+                  <CardBody>
+                    <div>
+                      <Title headingLevel="h3" size="md" style={{ marginBottom: 6 }}>Red Hat Insights</Title>
+                      <div style={{ color: '#6a6e73', marginBottom: 8 }}>Manage your RHEL systems</div>
+                      <Button
+                        variant="link"
+                        isInline
+                        icon={<ExternalLinkAltIcon />}
+                        iconPosition="end"
+                        component="a"
+                        href="https://console.redhat.com/insights"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Take me to Red Hat Insights
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+                <Card style={{ width: 320, flex: '0 0 320px' }}>
+                  <CardBody>
+                    <div>
+                      <Title headingLevel="h3" size="md" style={{ marginBottom: 6 }}>Red Hat OpenShift</Title>
+                      <div style={{ color: '#6a6e73', marginBottom: 8 }}>Manage your OpenShift clusters</div>
+                      <Button
+                        variant="link"
+                        isInline
+                        icon={<ExternalLinkAltIcon />}
+                        iconPosition="end"
+                        component="a"
+                        href="https://console.redhat.com/openshift"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Take me to Red Hat OpenShift
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              </div>
             </PageSection>
           </Tab>
         </Tabs>
