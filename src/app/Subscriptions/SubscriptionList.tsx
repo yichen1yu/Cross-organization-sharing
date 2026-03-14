@@ -21,25 +21,11 @@ import {
   ToolbarItem
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
+import { subscriptionsData } from './subscriptionsData';
 
-type SubscriptionRow = {
-  id: string;
-  name: string;
-  sku: string;
-  quantity: number;
-  serviceLevel: 'Self-Support' | 'Standard' | 'Premium';
-};
-
-const initialRows: SubscriptionRow[] = [
-  { id: '1', name: '1 Year Product Trial of Red Hat Insights for Red Hat Enterprise Linux, Self‑Supported', sku: 'SER0482', quantity: 10, serviceLevel: 'Self-Support' },
-  { id: '2', name: '30 Day Product Trial Developer Sandbox for Red Hat OpenShift, Self‑Supported', sku: 'SER0772', quantity: 2, serviceLevel: 'Self-Support' },
-  { id: '3', name: '30 Day Product Trial of Red Hat JBoss Enterprise Application Platform, Self‑Supported', sku: 'MW0150761', quantity: 100, serviceLevel: 'Self-Support' },
-  { id: '4', name: '60 Day Product Trial of Red Hat AI Inference Server, Self‑Support', sku: 'SER0861', quantity: 6, serviceLevel: 'Self-Support' },
-  { id: '5', name: '60 Day Product Trial of Red Hat Advanced Cluster Management for Kubernetes, Self‑Supported', sku: 'SER0599', quantity: 1, serviceLevel: 'Self-Support' },
-  { id: '6', name: '60 Day Product Trial of Red Hat Advanced Cluster Security Cloud Service, Self‑Supported', sku: 'SER0798', quantity: 0, serviceLevel: 'Self-Support' },
-  { id: '7', name: '60 Day Product Trial of Red Hat Advanced Cluster Security for Kubernetes, Self‑Support', sku: 'SER0720', quantity: 1, serviceLevel: 'Self-Support' },
-  { id: '8', name: '60 Day Product Trial of Red Hat Ansible Automation Platform, Self‑Supported (100 Managed Nodes)', sku: 'SER0569', quantity: 3, serviceLevel: 'Self-Support' },
-];
+// Source of truth for rows
+const initialRows = subscriptionsData;
 
 const SubscriptionList: React.FunctionComponent = () => {
   const [query, setQuery] = React.useState('');
@@ -208,7 +194,16 @@ const SubscriptionList: React.FunctionComponent = () => {
           <Tbody>
             {pageRows.map(r => (
               <Tr key={r.id}>
-                <Td><Button variant="link" isInline>{r.name}</Button></Td>
+                <Td>
+                  <Button
+                    variant="link"
+                    isInline
+                    component={Link}
+                    to={`/subscription-inventory/subscription/${r.id}`}
+                  >
+                    {r.name}
+                  </Button>
+                </Td>
                 <Td>{r.sku}</Td>
                 <Td>{r.quantity}</Td>
                 <Td>{r.serviceLevel}</Td>

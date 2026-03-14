@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "patternfly-docs": {
+      "command": "npx",
+      "args": ["-y", "@patternfly/patternfly-mcp@latest"],
+      "description": "PatternFly design system rules and documentation for React components, styling, and accessibility"
+    }
+  }
+}

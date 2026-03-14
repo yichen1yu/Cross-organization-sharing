@@ -1,12 +1,14 @@
 import * as React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router-dom';
+
+const SubscriptionUsageRHEL = React.lazy(() => import('@app/SubscriptionUsage/SubscriptionUsage').then(m => ({ default: m.SubscriptionUsageRHEL })));
+const SubscriptionUsageOpenShift = React.lazy(() => import('@app/SubscriptionUsage/SubscriptionUsage').then(m => ({ default: m.SubscriptionUsageOpenShift })));
+const SubscriptionUsageAnsible = React.lazy(() => import('@app/SubscriptionUsage/SubscriptionUsage').then(m => ({ default: m.SubscriptionUsageAnsible })));
 import { Homepage } from '@app/Homepage/Homepage';
 import { AllServices } from '@app/AllServices/AllServices';
 import { Dashboard } from '@app/Dashboard/Dashboard';
 import { OverviewIAM } from '@app/OverviewIAM/OverviewIAM';
 import { SubscriptionsOverview } from '@app/Subscriptions/SubscriptionsOverview';
-import { AlertManager } from '@app/AlertManager/AlertManager';
-import { RoleDeleted } from '@app/AlertManager/RoleDeleted';
 import { AuthenticationPolicy } from '@app/AuthenticationPolicy/AuthenticationPolicy';
 import { DataIntegration } from '@app/DataIntegration/DataIntegration';
 import { EventLog } from '@app/EventLog/EventLog';
@@ -26,6 +28,10 @@ import { IdentityProviderIntegration } from '@app/OrganizationManagement/Identit
 import { Subscriptions } from '@app/Subscriptions/Subscriptions';
 import { Billing } from '@app/Subscriptions/Billing';
 import { SubscriptionInventory } from '@app/Subscriptions/SubscriptionInventory';
+import { SubscriptionDetails } from '@app/Subscriptions/SubscriptionDetails';
+import { GoldImages } from '@app/CloudInventory/GoldImages';
+import { CloudAccounts } from '@app/CloudInventory/CloudAccounts';
+import { MarketplacePurchases } from '@app/CloudInventory/MarketplacePurchases';
 import { SubscriptionList } from '@app/Subscriptions/SubscriptionList';
 import { Insights } from '@app/SubscriptionsSpend/Insights';
 import { PatchManagement } from '@app/SubscriptionsSpend/PatchManagement';
@@ -39,7 +45,6 @@ import { Workspaces } from '@app/Workspaces/Workspaces';
 import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
 import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { NotFound } from '@app/NotFound/NotFound';
-
 export interface IAppRoute {
   label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
   element: React.ReactElement;
@@ -81,6 +86,12 @@ const routes: AppRouteConfig[] = [
         label: 'Subscription list'
       },
       {
+        element: <SubscriptionDetails />,
+        exact: true,
+        path: '/subscription-inventory/subscription/:id',
+        title: 'Subscription details | Red Hat Hybrid Cloud Console'
+      },
+      {
         element: <SubscriptionInventory />, // placeholder page
         exact: true,
         path: '/subscription-inventory/features',
@@ -108,6 +119,38 @@ const routes: AppRouteConfig[] = [
     exact: true,
     path: '/subscriptions',
     title: 'Subscriptions | Red Hat Hybrid Cloud Console',
+  },
+  {
+    label: 'Cloud Inventory',
+    routes: [
+      {
+        element: <SubscriptionInventory />, // placeholder page
+        exact: true,
+        path: '/cloud-inventory',
+        title: 'Cloud Inventory | Red Hat Hybrid Cloud Console'
+      },
+      {
+        element: <GoldImages />,
+        exact: true,
+        path: '/cloud-inventory/gold-images',
+        title: 'Gold Images | Red Hat Hybrid Cloud Console',
+        label: 'Gold Images'
+      },
+      {
+        element: <CloudAccounts />,
+        exact: true,
+        path: '/cloud-inventory/cloud-accounts',
+        title: 'Cloud Accounts | Red Hat Hybrid Cloud Console',
+        label: 'Cloud Accounts'
+      },
+      {
+        element: <MarketplacePurchases />,
+        exact: true,
+        path: '/cloud-inventory/marketplace-purchases',
+        title: 'Marketplace Purchases | Red Hat Hybrid Cloud Console',
+        label: 'Marketplace Purchases'
+      }
+    ]
   },
   {
     element: <Billing />,
@@ -172,17 +215,50 @@ const routes: AppRouteConfig[] = [
     title: 'Overview | Identity & Access Management',
   },
   {
-    element: <AlertManager />,
-    exact: true,
     label: 'Subscription Usage',
-    path: '/alert-manager',
-    title: 'Subscription Usage | Red Hat Hybrid Cloud Console',
-  },
-  {
-    element: <RoleDeleted />,
-    exact: true,
-    path: '/alert-manager/role-deleted',
-    title: 'Role deleted | Alert Manager | Red Hat Hybrid Cloud Console',
+    routes: [
+      {
+        // Backward-compatible redirect for old bookmarks/links.
+        element: <Navigate to="/subscription-usage/rhel" replace />,
+        exact: true,
+        path: '/alert-manager',
+        title: 'Subscription Usage | Red Hat Hybrid Cloud Console'
+      },
+      {
+        element: <Navigate to="/subscription-usage/rhel" replace />,
+        exact: true,
+        path: '/subscription-usage',
+        title: 'Subscription Usage | Red Hat Hybrid Cloud Console'
+      },
+      {
+        // Backward-compatible redirect for old bookmarks/links.
+        element: <Navigate to="/subscription-usage/rhel" replace />,
+        exact: true,
+        path: '/alert-manager/role-deleted',
+        title: 'Subscription Usage | Red Hat Hybrid Cloud Console',
+      },
+      {
+        element: <React.Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><SubscriptionUsageRHEL /></React.Suspense>,
+        exact: true,
+        path: '/subscription-usage/rhel',
+        title: 'RHEL | Subscription Usage | Red Hat Hybrid Cloud Console',
+        label: 'RHEL'
+      },
+      {
+        element: <React.Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><SubscriptionUsageOpenShift /></React.Suspense>,
+        exact: true,
+        path: '/subscription-usage/openshift',
+        title: 'OpenShift | Subscription Usage | Red Hat Hybrid Cloud Console',
+        label: 'OpenShift'
+      },
+      {
+        element: <React.Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><SubscriptionUsageAnsible /></React.Suspense>,
+        exact: true,
+        path: '/subscription-usage/ansible',
+        title: 'Ansible | Subscription Usage | Red Hat Hybrid Cloud Console',
+        label: 'Ansible'
+      }
+    ]
   },
   {
     element: <DataIntegration />,

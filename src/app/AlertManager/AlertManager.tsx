@@ -125,7 +125,7 @@ const AlertManager: React.FunctionComponent = () => {
       service: 'Roles | IAM',
       myNotifiers: { text: 'Customized from default', color: 'yellow' },
       workspaceNotifiers: { count: 3 },
-      onClick: () => navigate('/alert-manager/role-deleted')
+      onClick: () => navigate('/subscription-usage/role-deleted')
     },
     {
       eventType: 'Performance degradation',

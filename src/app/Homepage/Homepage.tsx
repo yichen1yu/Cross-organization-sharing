@@ -386,7 +386,7 @@ const Homepage: React.FunctionComponent = () => {
                           </Button>
                         </ListItem>
                         <ListItem>
-                          <Button variant="link" onClick={() => navigate('/alert-manager')}>
+                          <Button variant="link" onClick={() => navigate('/subscription-usage')}>
                             Alert Manager
                           </Button>
                         </ListItem>

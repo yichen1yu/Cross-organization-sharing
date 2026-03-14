@@ -117,7 +117,7 @@ const AllServices: React.FunctionComponent = () => {
       features: ['Real-time Alerts', 'Data Pipelines', 'Integration Workflows', 'Event Processing'],
       icon: <BellIcon />,
       category: 'Services',
-      route: '/alert-manager'
+      route: '/subscription-usage'
     },
     {
       id: 'automation',

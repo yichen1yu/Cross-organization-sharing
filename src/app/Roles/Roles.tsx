@@ -227,7 +227,7 @@ const Roles: React.FunctionComponent = () => {
   };
 
   const handleManageAlerts = () => {
-    navigate('/alert-manager?filter=Roles | IAM');
+    navigate('/subscription-usage?filter=Roles | IAM');
   };
 
   return (

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
 import {
+  Alert,
   Avatar,
   Button,
   Card,
@@ -29,6 +30,12 @@ import {
   DropdownList,
   Flex,
   FlexItem,
+  Form,
+  FormGroup,
+  FormSelect,
+  FormSelectOption,
+  HelperText,
+  HelperTextItem,
   Masthead,
   MastheadBrand,
   MastheadContent,
@@ -37,6 +44,9 @@ import {
   MastheadToggle,
   Menu,
   MenuGroup,
+  Modal,
+  ModalBody,
+  ModalHeader,
   MenuItem,
   MenuItemAction,
   MenuList,
@@ -64,7 +74,17 @@ import {
   TabTitleText,
   Tabs,
   Title,
-  Tooltip
+  Toolbar,
+  ToolbarContent,
+  ToolbarGroup,
+  ToolbarItem,
+  TextInput,
+  Tooltip,
+  useWizardContext,
+  Wizard,
+  WizardFooterWrapper,
+  WizardHeader,
+  WizardStep
 } from '@patternfly/react-core';
 import {
   BarsIcon, 
@@ -73,16 +93,20 @@ import {
   BrainIcon, 
   ChartLineIcon,
   CloudIcon,
+  ClockIcon,
   CodeIcon,
   CogIcon,
   CommentsIcon,
   CreditCardIcon,
   CubeIcon,
   DatabaseIcon,
+  CheckCircleIcon,
   EllipsisVIcon,
+  ExclamationCircleIcon,
   ExclamationTriangleIcon,
   ExternalLinkAltIcon,
   EyeIcon,
+  FilterIcon,
   HelpIcon,
   InfoCircleIcon,
   ListIcon,
@@ -93,12 +117,14 @@ import {
   ShieldAltIcon,
   SignOutAltIcon,
   StarIcon,
+  SyncAltIcon,
   TachometerAltIcon,
   TimesIcon,
   UserIcon,
   UsersIcon,
   WrenchIcon
 } from '@patternfly/react-icons';
+import { Table, Thead, Tbody, Tr, Th, Td, ExpandableRowContent } from '@patternfly/react-table';
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -155,6 +181,218 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   // Notification drawer state
   const [isNotificationDrawerOpen, setIsNotificationDrawerOpen] = React.useState(false);
   const [isNotificationActionsOpen, setIsNotificationActionsOpen] = React.useState(false);
+  const [isSchedulerPanelOpen, setIsSchedulerPanelOpen] = React.useState(false);
+  const [schedulerActiveTab, setSchedulerActiveTab] = React.useState<number>(0);
+  const [schedulerFilterNameOpen, setSchedulerFilterNameOpen] = React.useState(false);
+  const [schedulerFilterName, setSchedulerFilterName] = React.useState('Filter name');
+  const [schedulerFilterOpen, setSchedulerFilterOpen] = React.useState(false);
+  const [schedulerFilter, setSchedulerFilter] = React.useState('Filter');
+  const [schedulerPage, setSchedulerPage] = React.useState(1);
+  const [schedulerExpanded, setSchedulerExpanded] = React.useState<Set<number>>(new Set());
+  const [schedulerSortBy, setSchedulerSortBy] = React.useState<{ index: number; direction: 'asc' | 'desc' }>({ index: 0, direction: 'asc' });
+  const [isScheduleWizardOpen, setIsScheduleWizardOpen] = React.useState(false);
+  const [wizardReportName, setWizardReportName] = React.useState('');
+  const [wizardFileType, setWizardFileType] = React.useState('');
+  const [wizardFileTypeOpen, setWizardFileTypeOpen] = React.useState(false);
+  const [wizardInstances, setWizardInstances] = React.useState<Array<{ service: string; task: string; serviceOpen: boolean; taskOpen: boolean }>>([
+    { service: '', task: '', serviceOpen: false, taskOpen: false },
+  ]);
+  const [cronMinute, setCronMinute] = React.useState('');
+  const [cronHour, setCronHour] = React.useState('');
+  const [cronDayOfMonth, setCronDayOfMonth] = React.useState('');
+  const [cronMonth, setCronMonth] = React.useState('');
+  const [cronDayOfWeek, setCronDayOfWeek] = React.useState('');
+  const [cronTimezone, setCronTimezone] = React.useState('Eastern Standard Time (EST)');
+  const [cronTimezoneOpen, setCronTimezoneOpen] = React.useState(false);
+
+  const validateCronField = (value: string, type: 'minute' | 'hour' | 'dayOfMonth' | 'month' | 'dayOfWeek'): { valid: boolean; message?: string } => {
+    if (!value.trim()) return { valid: false };
+    const ranges: Record<string, { min: number; max: number; names?: RegExp }> = {
+      minute: { min: 0, max: 59 },
+      hour: { min: 0, max: 23 },
+      dayOfMonth: { min: 1, max: 31 },
+      month: { min: 1, max: 12, names: /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)$/i },
+      dayOfWeek: { min: 0, max: 6, names: /^(sun|mon|tue|wed|thu|fri|sat)$/i },
+    };
+    const { min, max, names } = ranges[type];
+    const parts = value.split(',');
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!trimmed) return { valid: false, message: 'Empty segment' };
+      // wildcard
+      if (trimmed === '*') continue;
+      // step: */n or range/n
+      const stepMatch = trimmed.match(/^(\*|\d+(-\d+)?)\/(\d+)$/);
+      if (stepMatch) {
+        const step = parseInt(stepMatch[3], 10);
+        if (step < 1) return { valid: false, message: `Step must be >= 1` };
+        if (stepMatch[1] !== '*') {
+          const baseParts = stepMatch[1].split('-').map(Number);
+          if (baseParts.some(n => isNaN(n) || n < min || n > max)) return { valid: false, message: `Values must be ${min}-${max}` };
+        }
+        continue;
+      }
+      // range: n-m
+      const rangeMatch = trimmed.match(/^(\w+)-(\w+)$/);
+      if (rangeMatch) {
+        const [, a, b] = rangeMatch;
+        const aNum = parseInt(a, 10);
+        const bNum = parseInt(b, 10);
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          if (aNum < min || aNum > max || bNum < min || bNum > max) return { valid: false, message: `Values must be ${min}-${max}` };
+          continue;
+        }
+        if (names && names.test(a) && names.test(b)) continue;
+        return { valid: false, message: `Invalid range` };
+      }
+      // single value: number or name
+      const num = parseInt(trimmed, 10);
+      if (!isNaN(num)) {
+        if (num < min || num > max) return { valid: false, message: `Must be ${min}-${max}` };
+        continue;
+      }
+      if (names && names.test(trimmed)) continue;
+      return { valid: false, message: `Invalid value "${trimmed}"` };
+    }
+    return { valid: true };
+  };
+
+  const cronMinuteValidation = cronMinute ? validateCronField(cronMinute, 'minute') : { valid: false };
+  const cronHourValidation = cronHour ? validateCronField(cronHour, 'hour') : { valid: false };
+  const cronDayOfMonthValidation = cronDayOfMonth ? validateCronField(cronDayOfMonth, 'dayOfMonth') : { valid: false };
+  const cronMonthValidation = cronMonth ? validateCronField(cronMonth, 'month') : { valid: false };
+  const cronDayOfWeekValidation = cronDayOfWeek ? validateCronField(cronDayOfWeek, 'dayOfWeek') : { valid: false };
+  const allCronValid = cronMinuteValidation.valid && cronHourValidation.valid && cronDayOfMonthValidation.valid && cronMonthValidation.valid && cronDayOfWeekValidation.valid;
+
+  const cronToNaturalLanguage = (minute: string, hour: string, dom: string, month: string, dow: string): string => {
+    const dayNames: Record<string, string> = { '0': 'Sunday', '1': 'Monday', '2': 'Tuesday', '3': 'Wednesday', '4': 'Thursday', '5': 'Friday', '6': 'Saturday' };
+    const dayAbbrevs: Record<string, string> = { sun: 'Sunday', mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday' };
+    const monthNames: Record<string, string> = { '1': 'January', '2': 'February', '3': 'March', '4': 'April', '5': 'May', '6': 'June', '7': 'July', '8': 'August', '9': 'September', '10': 'October', '11': 'November', '12': 'December' };
+    const monthAbbrevs: Record<string, string> = { jan: 'January', feb: 'February', mar: 'March', apr: 'April', may: 'May', jun: 'June', jul: 'July', aug: 'August', sep: 'September', oct: 'October', nov: 'November', dec: 'December' };
+
+    let timePart = '';
+    const h = parseInt(hour, 10);
+    const m = parseInt(minute, 10);
+    if (!isNaN(h) && !isNaN(m)) {
+      const period = h >= 12 ? 'PM' : 'AM';
+      const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+      const mStr = m.toString().padStart(2, '0');
+      if (h === 0 && m === 0) timePart = 'At midnight';
+      else if (h === 12 && m === 0) timePart = 'At noon';
+      else timePart = `At ${h12}:${mStr} ${period}`;
+    } else if (minute.startsWith('*/')) {
+      timePart = `Every ${minute.slice(2)} minutes`;
+    } else if (hour === '*' && minute === '*') {
+      timePart = 'Every minute';
+    } else if (hour === '*') {
+      timePart = `At minute ${minute} of every hour`;
+    } else {
+      timePart = `At ${hour}:${minute}`;
+    }
+
+    let datePart = '';
+    const dowLower = dow.toLowerCase();
+    const resolvedDow = dayNames[dow] || dayAbbrevs[dowLower];
+    const resolvedMonth = monthNames[month] || monthAbbrevs[month.toLowerCase()];
+
+    if (dom === '*' && month === '*' && dow === '*') {
+      datePart = 'every day';
+    } else if (dom === '*' && month === '*' && resolvedDow) {
+      datePart = `every ${resolvedDow}`;
+    } else if (dow === '*' && month === '*' && dom !== '*') {
+      datePart = `on day ${dom} of every month`;
+    } else if (dow === '*' && resolvedMonth && dom !== '*') {
+      datePart = `on ${resolvedMonth} ${dom}`;
+    } else if (dow === '*' && resolvedMonth) {
+      datePart = `every day in ${resolvedMonth}`;
+    } else if (resolvedDow && resolvedMonth) {
+      datePart = `on ${resolvedDow}s in ${resolvedMonth}`;
+    } else if (dom.startsWith('*/')) {
+      datePart = `every ${dom.slice(2)} days`;
+    } else {
+      const parts: string[] = [];
+      if (dom !== '*') parts.push(`day ${dom}`);
+      if (month !== '*') parts.push(`month ${month}`);
+      if (dow !== '*') parts.push(`weekday ${dow}`);
+      datePart = parts.join(', ');
+    }
+
+    return datePart ? `${timePart} ${datePart}` : timePart;
+  };
+
+  const getNextCronDate = (minute: string, hour: string, dom: string, _month: string, dow: string, timezone: string): string => {
+    const now = new Date();
+    const m = minute === '*' ? 0 : parseInt(minute, 10) || 0;
+    const h = hour === '*' ? 0 : parseInt(hour, 10) || 0;
+    const dayAbbrevMap: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+
+    const next = new Date(now);
+    next.setSeconds(0, 0);
+    next.setHours(h, m);
+
+    if (dow !== '*') {
+      const targetDay = dayAbbrevMap[dow.toLowerCase()] ?? parseInt(dow, 10);
+      if (!isNaN(targetDay)) {
+        const currentDay = now.getDay();
+        let daysUntil = targetDay - currentDay;
+        if (daysUntil < 0 || (daysUntil === 0 && next <= now)) daysUntil += 7;
+        next.setDate(now.getDate() + daysUntil);
+      }
+    } else if (dom !== '*') {
+      const targetDom = parseInt(dom, 10);
+      if (!isNaN(targetDom)) {
+        next.setDate(targetDom);
+        if (next <= now) next.setMonth(next.getMonth() + 1, targetDom);
+      }
+    } else {
+      if (next <= now) next.setDate(next.getDate() + 1);
+    }
+
+    const dd = String(next.getDate()).padStart(2, '0');
+    const mm = String(next.getMonth() + 1).padStart(2, '0');
+    const yyyy = next.getFullYear();
+    const hh12 = next.getHours() === 0 ? 12 : next.getHours() > 12 ? next.getHours() - 12 : next.getHours();
+    const ampm = next.getHours() >= 12 ? 'pm' : 'am';
+    const mins = String(next.getMinutes()).padStart(2, '0');
+    const tz = timezone.match(/\(([^)]+)\)/)?.[1] || 'EST';
+    return `${dd}/${mm}/${yyyy} ${hh12}:${mins} ${ampm} ${tz}`;
+  };
+
+  type ReportEntry = {
+    name: string;
+    date: string;
+    status: 'Running' | 'Failed' | 'Completed';
+    service: string;
+    creator: string;
+    frequency: string;
+  };
+
+  const [schedulerReports, setSchedulerReports] = React.useState<ReportEntry[]>([
+    {
+      name: 'AWS monthly cost breakdown',
+      date: '25/07/2025 12:00 am EST',
+      status: 'Running',
+      service: 'Cost Management',
+      creator: 'Allison Robinhood',
+      frequency: 'Monthly on the 1st at 6:00am EST',
+    },
+    {
+      name: 'RHEL vulnerability scan summary',
+      date: '25/07/2025 12:00 am EST',
+      status: 'Failed',
+      service: 'Insights Vulnerability',
+      creator: 'Carlos Mendez',
+      frequency: 'Weekly on Monday at 8:00am EST',
+    },
+    {
+      name: 'OpenShift cluster utilization',
+      date: '26/07/2025 12:00 am EST',
+      status: 'Completed',
+      service: 'OpenShift Cluster Manager',
+      creator: 'Priya Sharma',
+      frequency: 'Daily at 12:00am EST',
+    },
+  ]);
 
   // Menu groups data for primary-detail view
   const menuGroupsData: Record<string, MenuItem[]> = {
@@ -347,8 +585,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const mockSearchData = [
     // Main Settings Bundle Pages
     { id: '1', title: 'Overview', description: 'View system overview and general information', category: 'Settings', route: '/overview' },
-    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/alert-manager' },
+    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/subscription-usage' },
     { id: '3', title: 'Data Integration', description: 'Manage data integration workflows, connectors, and synchronization settings', category: 'Settings', route: '/data-integration' },
+    { id: '3a', title: 'Scheduler', description: 'Configure and manage scheduled jobs and automation tasks', category: 'Settings', route: '/scheduler' },
     { id: '4', title: 'Event Log', description: 'View and configure system event logging and monitoring', category: 'Settings', route: '/event-log' },
     { id: '5', title: 'Learning Resources', description: 'Access training materials, tutorials, and documentation resources', category: 'Settings', route: '/learning-resources' },
     
@@ -373,10 +612,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   // Top 5 results for empty state
   const topResults = [
     { id: '1', title: 'Overview', description: 'View system overview and general information', category: 'Settings', route: '/overview' },
-    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/alert-manager' },
+    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/subscription-usage' },
     { id: '6', title: 'My User Access', description: 'View and manage your personal access permissions and settings', category: 'IAM', route: '/my-user-access' },
     { id: '7', title: 'User Access', description: 'Manage user accounts, groups, and access permissions overview', category: 'IAM', route: '/user-access' },
-    { id: '3', title: 'Data Integration', description: 'Manage data integration workflows, connectors, and synchronization settings', category: 'Settings', route: '/data-integration' }
+    { id: '3', title: 'Data Integration', description: 'Manage data integration workflows, connectors, and synchronization settings', category: 'Settings', route: '/data-integration' },
+    { id: '3a', title: 'Scheduler', description: 'Configure and manage scheduled jobs and automation tasks', category: 'Settings', route: '/scheduler' }
   ];
 
   // Hide search results and collapse search bar when clicking outside
@@ -527,6 +767,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     if (newDrawerState && isNotificationDrawerOpen) {
       setIsNotificationDrawerOpen(false);
     }
+    // If opening help, close scheduler panel
+    if (newDrawerState && isSchedulerPanelOpen) {
+      setIsSchedulerPanelOpen(false);
+    }
   };
 
   const onDrawerClose = () => {
@@ -546,11 +790,31 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     if (newNotificationState && isDrawerExpanded) {
       setIsDrawerExpanded(false);
     }
+    // If opening notifications, close scheduler panel
+    if (newNotificationState && isSchedulerPanelOpen) {
+      setIsSchedulerPanelOpen(false);
+    }
   };
 
   const onNotificationDrawerClose = () => {
     setIsNotificationDrawerOpen(false);
     setIsNotificationActionsOpen(false); // Close actions dropdown when drawer closes
+  };
+
+  const openSchedulerPanel = () => {
+    setIsSchedulerPanelOpen(true);
+    // Ensure only one side panel is open at a time
+    if (isNotificationDrawerOpen) {
+      setIsNotificationDrawerOpen(false);
+      setIsNotificationActionsOpen(false);
+    }
+    if (isDrawerExpanded) {
+      setIsDrawerExpanded(false);
+    }
+  };
+
+  const onSchedulerPanelClose = () => {
+    setIsSchedulerPanelOpen(false);
   };
 
   const onSearchChange = (_event: React.FormEvent<HTMLInputElement>, value: string) => {
@@ -1044,10 +1308,14 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                         onSelect={(event, itemId) => {
                           console.log('Selected search result:', itemId);
                           setShowSearchResults(false);
-                          // Find the result and navigate if it has a route
+                          // Find the result and handle route
                           const selectedResult = searchResults.find(result => result.id === itemId);
                           if (selectedResult && selectedResult.route) {
-                            navigate(selectedResult.route);
+                            if (selectedResult.route === '/scheduler') {
+                              openSchedulerPanel();
+                            } else {
+                              navigate(selectedResult.route);
+                            }
                           }
                         }}
                       >
@@ -1063,7 +1331,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                 setShowSearchResults(false);
                                 // Navigate to the route if it exists
                                 if (result.route) {
-                                  navigate(result.route);
+                                  if (result.route === '/scheduler') {
+                                    openSchedulerPanel();
+                                  } else {
+                                    navigate(result.route);
+                                  }
                                 }
                               }}
                             >
@@ -1084,85 +1356,89 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       </MastheadMain>
       <MastheadContent>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: 'auto' }}>
-            {/* Settings */}
-            <Tooltip 
-              content="Settings" 
-              position="bottom"
-              {...(isUtilitiesDropdownOpen ? { isVisible: false } : {})}
+            {/* Settings - inline popper to avoid overlay/ghost; no Tooltip */}
+            <Dropdown
+              isOpen={isUtilitiesDropdownOpen}
+              onSelect={onUtilitiesDropdownSelect}
+              onOpenChange={(isOpen: boolean) => setIsUtilitiesDropdownOpen(isOpen)}
+              popperProps={{ appendTo: 'inline' }}
+              toggle={(toggleRef: React.Ref<any>) => (
+                <Button
+                  ref={toggleRef}
+                  onClick={onUtilitiesDropdownToggle}
+                  variant="control"
+                  aria-label="Settings"
+                  aria-expanded={isUtilitiesDropdownOpen}
+                  className={isUtilitiesDropdownOpen ? 'pf-m-clicked' : ''}
+                >
+                  <CogIcon />
+                </Button>
+              )}
+              shouldFocusToggleOnSelect
             >
-              <Dropdown
-                isOpen={isUtilitiesDropdownOpen}
-                onSelect={onUtilitiesDropdownSelect}
-                onOpenChange={(isOpen: boolean) => setIsUtilitiesDropdownOpen(isOpen)}
-                toggle={(toggleRef: React.Ref<any>) => (
-                  <Button
-                    ref={toggleRef}
-                    onClick={onUtilitiesDropdownToggle}
-                    variant="control"
-                    aria-label="Settings"
-                    aria-expanded={isUtilitiesDropdownOpen}
-                    className={isUtilitiesDropdownOpen ? 'pf-m-clicked' : ''}
-                  >
-                    <CogIcon />
-                  </Button>
-                )}
-                shouldFocusToggleOnSelect
-              >
-                <Menu>
-                  <MenuList>
-                    <MenuGroup label="Settings">
-                      <MenuItem 
-                        icon={<BellIcon />}
-                        onClick={() => {
-                          navigate('/alert-manager');
-                          setIsUtilitiesDropdownOpen(false);
-                        }}
-                      >
-                        Alert Manager
-                      </MenuItem>
-                      <MenuItem 
-                        icon={<DatabaseIcon />}
-                        onClick={() => {
-                          navigate('/data-integration');
-                          setIsUtilitiesDropdownOpen(false);
-                        }}
-                      >
-                        Data Integration
-                      </MenuItem>
-                    </MenuGroup>
-                    <MenuGroup label="Identity & Access Management">
-                      <MenuItem 
-                        icon={<UsersIcon />}
-                        onClick={() => {
-                          navigate('/user-access');
-                          setIsUtilitiesDropdownOpen(false);
-                        }}
-                      >
-                        User Access
-                      </MenuItem>
-                      <MenuItem 
-                        icon={<ShieldAltIcon />}
-                        onClick={() => {
-                          navigate('/authentication-policy');
-                          setIsUtilitiesDropdownOpen(false);
-                        }}
-                      >
-                        Authentication Policy
-                      </MenuItem>
-                      <MenuItem 
-                        icon={<ServerIcon />}
-                        onClick={() => {
-                          navigate('/service-accounts');
-                          setIsUtilitiesDropdownOpen(false);
-                        }}
-                      >
-                        Service Accounts
-                      </MenuItem>
-                    </MenuGroup>
-                  </MenuList>
-                </Menu>
-              </Dropdown>
-            </Tooltip>
+              <Menu>
+                <MenuList>
+                  <MenuGroup label="Settings">
+                    <MenuItem 
+                      icon={<BellIcon />}
+                      onClick={() => {
+                        navigate('/subscription-usage');
+                        setIsUtilitiesDropdownOpen(false);
+                      }}
+                    >
+                      Alert Manager
+                    </MenuItem>
+                    <MenuItem 
+                      icon={<DatabaseIcon />}
+                      onClick={() => {
+                        navigate('/data-integration');
+                        setIsUtilitiesDropdownOpen(false);
+                      }}
+                    >
+                      Data Integration
+                    </MenuItem>
+                    <MenuItem 
+                      icon={<ClockIcon />}
+                      onClick={() => {
+                        openSchedulerPanel();
+                        setIsUtilitiesDropdownOpen(false);
+                      }}
+                    >
+                      Scheduler
+                    </MenuItem>
+                  </MenuGroup>
+                  <MenuGroup label="Identity & Access Management">
+                    <MenuItem 
+                      icon={<UsersIcon />}
+                      onClick={() => {
+                        navigate('/user-access');
+                        setIsUtilitiesDropdownOpen(false);
+                      }}
+                    >
+                      User Access
+                    </MenuItem>
+                    <MenuItem 
+                      icon={<ShieldAltIcon />}
+                      onClick={() => {
+                        navigate('/authentication-policy');
+                        setIsUtilitiesDropdownOpen(false);
+                      }}
+                    >
+                      Authentication Policy
+                    </MenuItem>
+                    <MenuItem 
+                      icon={<ServerIcon />}
+                      onClick={() => {
+                        navigate('/service-accounts');
+                        setIsUtilitiesDropdownOpen(false);
+                      }}
+                    >
+                      Service Accounts
+                    </MenuItem>
+                  </MenuGroup>
+                </MenuList>
+              </Menu>
+            </Dropdown>
 
             {/* Help Panel */}
             <Tooltip 
@@ -1198,29 +1474,25 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </Button>
             </Tooltip>
 
-            {/* User dropdown */}
-            <Tooltip 
-              content="User menu" 
-              position="bottom"
-              {...(isUserDropdownOpen ? { isVisible: false } : {})}
+            {/* User dropdown - no Tooltip to avoid ghost overlay when any dropdown is open */}
+            <Dropdown
+              isOpen={isUserDropdownOpen}
+              onSelect={onUserDropdownSelect}
+              onOpenChange={(isOpen: boolean) => setIsUserDropdownOpen(isOpen)}
+              popperProps={{ appendTo: 'inline' }}
+              toggle={(toggleRef: React.Ref<any>) => (
+                <MenuToggle
+                  ref={toggleRef}
+                  onClick={onUserDropdownToggle}
+                  isExpanded={isUserDropdownOpen}
+                  aria-label="User menu"
+                  icon={<UserIcon />}
+                >
+                  Ned Username
+                </MenuToggle>
+              )}
+              shouldFocusToggleOnSelect
             >
-              <Dropdown
-                isOpen={isUserDropdownOpen}
-                onSelect={onUserDropdownSelect}
-                onOpenChange={(isOpen: boolean) => setIsUserDropdownOpen(isOpen)}
-                toggle={(toggleRef: React.Ref<any>) => (
-                  <MenuToggle
-                    ref={toggleRef}
-                    onClick={onUserDropdownToggle}
-                    isExpanded={isUserDropdownOpen}
-                    aria-label="User menu"
-                    icon={<UserIcon />}
-                  >
-                    Ned Username
-                  </MenuToggle>
-                )}
-                shouldFocusToggleOnSelect
-              >
               <DropdownList>
                 <div style={{ padding: '16px' }}>
                   <DescriptionList isCompact>
@@ -1259,7 +1531,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => {
-                    navigate('/alert-manager');
+                    navigate('/subscription-usage');
                     setIsUserDropdownOpen(false);
                   }}
                 >
@@ -1272,8 +1544,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   Logout
                 </DropdownItem>
               </DropdownList>
-              </Dropdown>
-            </Tooltip>
+            </Dropdown>
         </div>
       </MastheadContent>
     </Masthead>
@@ -1301,7 +1572,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   // Define navigation groups
-  const primaryNavPages = ['/overview', '/subscription-inventory', '/subscription-inventory/subscription-list', '/subscription-inventory/features', '/subscription-inventory/workspace', '/subscription-inventory/billing-account', '/alert-manager', '/data-integration', '/event-log', '/learning-resources'];
+  const primaryNavPages = ['/overview', '/subscription-inventory', '/subscription-inventory/subscription-list', '/subscription-inventory/features', '/subscription-inventory/workspace', '/subscription-inventory/billing-account', '/cloud-inventory', '/cloud-inventory/gold-images', '/cloud-inventory/cloud-accounts', '/cloud-inventory/marketplace-purchases', '/subscription-usage', '/subscription-usage/rhel', '/subscription-usage/openshift', '/subscription-usage/ansible', '/data-integration', '/event-log', '/learning-resources'];
   const secondaryNavPages = [
     '/iam/overview',
     '/my-user-access',
@@ -1333,13 +1604,15 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const navigationType = getNavigationType();
 
   // Primary navigation structure (current navigation)
-  const primaryOrder = ['Overview', 'Subscription Usage', 'Hybrid Committed Spend', 'Manifest', 'Learning Resources'];
+  const primaryOrder = ['Overview', 'Hybrid Committed Spend', 'Manifest', 'Learning Resources'];
   const primaryNavRoutes = routes
     .flatMap((r) => (r as IAppRouteGroup).routes ? (r as IAppRouteGroup).routes : [r as IAppRoute])
     .filter((route: any): route is IAppRoute => !!route.label && primaryOrder.includes(route.label))
     .sort((a, b) => primaryOrder.indexOf(a.label as string) - primaryOrder.indexOf(b.label as string));
 
   const subscriptionInventoryGroup = (routes.find((r) => (r as IAppRouteGroup).routes && (r as IAppRouteGroup).label === 'Subscription Inventory') as IAppRouteGroup | undefined);
+  const cloudInventoryGroup = (routes.find((r) => (r as IAppRouteGroup).routes && (r as IAppRouteGroup).label === 'Cloud Inventory') as IAppRouteGroup | undefined);
+  const subscriptionUsageGroup = (routes.find((r) => (r as IAppRouteGroup).routes && (r as IAppRouteGroup).label === 'Subscription Usage') as IAppRouteGroup | undefined);
   const overviewRoute = primaryNavRoutes.find(r => r.label === 'Overview');
   const otherPrimaryRoutes = primaryNavRoutes.filter(r => r.label !== 'Overview');
 
@@ -1390,9 +1663,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           // Show primary navigation
           <>
             {overviewRoute && renderNavItem(overviewRoute, 0)}
-            {renderNavGroup(subscriptionInventoryGroup as IAppRouteGroup, 1)}
+            {subscriptionInventoryGroup && renderNavGroup(subscriptionInventoryGroup as IAppRouteGroup, 1)}
+            {cloudInventoryGroup && renderNavGroup(cloudInventoryGroup as IAppRouteGroup, 2)}
+            {subscriptionUsageGroup && renderNavGroup(subscriptionUsageGroup as IAppRouteGroup, 3)}
             {otherPrimaryRoutes.map((route, idx) => 
-              route.label && renderNavItem(route, idx + 2)
+              route.label && renderNavItem(route, idx + 4)
             )}
           </>
         ) : (
@@ -1529,7 +1804,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </DropdownItem>
               <DropdownItem
                 onClick={() => {
-                  navigate('/alert-manager');
+                  navigate('/subscription-usage');
                   setIsNotificationActionsOpen(false);
                 }}
               >
@@ -1537,7 +1812,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </DropdownItem>
               <DropdownItem
                 onClick={() => {
-                  navigate('/alert-manager');
+                  navigate('/subscription-usage');
                   setIsNotificationActionsOpen(false);
                 }}
               >
@@ -1589,21 +1864,451 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </DrawerPanelContent>
   );
 
+  const updateWizardInstance = (index: number, updates: Partial<{ service: string; task: string; serviceOpen: boolean; taskOpen: boolean }>) => {
+    setWizardInstances(prev => prev.map((inst, i) => i === index ? { ...inst, ...updates } : inst));
+  };
+
+  const addWizardInstance = () => {
+    setWizardInstances(prev => [...prev, { service: '', task: '', serviceOpen: false, taskOpen: false }]);
+  };
+
+  const ScheduleWizardFooter = ({ isNextDisabled, canAddReport }: { isNextDisabled?: boolean; canAddReport?: boolean }) => {
+    const { goToNextStep, close } = useWizardContext();
+    return (
+      <WizardFooterWrapper>
+        <Flex style={{ gap: '16px' }} alignItems={{ default: 'alignItemsCenter' }}>
+          <Button variant="secondary" isDisabled={!canAddReport} onClick={() => { addWizardInstance(); setTimeout(goToNextStep, 0); }}>Add a report instance</Button>
+          <Button variant="primary" isDisabled={isNextDisabled} onClick={goToNextStep}>Next</Button>
+          <Button variant="link" onClick={close}>Cancel</Button>
+        </Flex>
+      </WizardFooterWrapper>
+    );
+  };
+
+  const ScheduleWizardBackNextFooter = ({ isNextDisabled }: { isNextDisabled?: boolean }) => {
+    const { goToNextStep, goToPrevStep, close } = useWizardContext();
+    return (
+      <WizardFooterWrapper>
+        <Flex style={{ gap: '16px' }} alignItems={{ default: 'alignItemsCenter' }}>
+          <Button variant="secondary" onClick={goToPrevStep}>Back</Button>
+          <Button variant="primary" isDisabled={isNextDisabled} onClick={goToNextStep}>Next</Button>
+          <Button variant="link" onClick={close}>Cancel</Button>
+        </Flex>
+      </WizardFooterWrapper>
+    );
+  };
+
+  const ScheduleWizardLastFooter = () => {
+    const { goToPrevStep, close } = useWizardContext();
+    return (
+      <WizardFooterWrapper>
+        <Flex style={{ gap: '16px' }} alignItems={{ default: 'alignItemsCenter' }}>
+          <Button variant="secondary" onClick={goToPrevStep}>Back</Button>
+          <Button variant="primary" onClick={() => {
+            const nextDate = getNextCronDate(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek, cronTimezone);
+            const naturalLang = allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : '';
+            setSchedulerReports(prev => [...prev, {
+              name: wizardReportName,
+              date: nextDate,
+              status: 'Running' as const,
+              service: wizardInstances[0]?.service || '',
+              creator: 'Current User',
+              frequency: naturalLang,
+            }]);
+            setIsScheduleWizardOpen(false);
+          }}>Save</Button>
+          <Button variant="link" onClick={close}>Cancel</Button>
+        </Flex>
+      </WizardFooterWrapper>
+    );
+  };
+
+  const schedulerDrawerContent = (
+    <DrawerPanelContent defaultSize="540px">
+      <DrawerHead style={{ paddingTop: '24px' }}>
+        <Title headingLevel="h2" size="lg">
+          Scheduler
+        </Title>
+        <DrawerActions>
+          <DrawerCloseButton onClick={onSchedulerPanelClose} />
+        </DrawerActions>
+      </DrawerHead>
+      <div style={{ paddingTop: '16px' }}>
+        <Tabs activeKey={schedulerActiveTab} onSelect={(_e, tabIndex) => setSchedulerActiveTab(tabIndex as number)}>
+          <Tab eventKey={0} title={<TabTitleText>Scheduled reports</TabTitleText>}>
+            <Toolbar style={{ paddingLeft: '16px', paddingRight: '16px', marginTop: '24px' }}>
+              <ToolbarContent style={{ paddingLeft: 0, paddingRight: 0, flexWrap: 'nowrap' }}>
+                <ToolbarGroup>
+                  <ToolbarItem>
+                    <Dropdown
+                      isOpen={schedulerFilterNameOpen}
+                      onSelect={() => setSchedulerFilterNameOpen(false)}
+                      onOpenChange={setSchedulerFilterNameOpen}
+                      toggle={(toggleRef) => (
+                        <MenuToggle ref={toggleRef} onClick={() => setSchedulerFilterNameOpen(!schedulerFilterNameOpen)} variant="default">
+                          <FilterIcon style={{ marginRight: '6px' }} />
+                          {schedulerFilterName}
+                        </MenuToggle>
+                      )}
+                      popperProps={{ appendTo: 'inline' }}
+                    >
+                      <DropdownList>
+                        <DropdownItem onClick={() => setSchedulerFilterName('Filter name')}>Filter name</DropdownItem>
+                        <DropdownItem onClick={() => setSchedulerFilterName('Report type')}>Report type</DropdownItem>
+                      </DropdownList>
+                    </Dropdown>
+                  </ToolbarItem>
+                  <ToolbarItem>
+                    <Dropdown
+                      isOpen={schedulerFilterOpen}
+                      onSelect={() => setSchedulerFilterOpen(false)}
+                      onOpenChange={setSchedulerFilterOpen}
+                      toggle={(toggleRef) => (
+                        <MenuToggle ref={toggleRef} onClick={() => setSchedulerFilterOpen(!schedulerFilterOpen)} variant="default">
+                          {schedulerFilter}
+                        </MenuToggle>
+                      )}
+                      popperProps={{ appendTo: 'inline' }}
+                    >
+                      <DropdownList>
+                        <DropdownItem onClick={() => setSchedulerFilter('Filter')}>Filter</DropdownItem>
+                      </DropdownList>
+                    </Dropdown>
+                  </ToolbarItem>
+                  <ToolbarItem>
+                    <Button variant="primary" onClick={() => {
+                      setWizardReportName('');
+                      setWizardFileType('');
+                      setWizardInstances([{ service: '', task: '', serviceOpen: false, taskOpen: false }]);
+                      setCronMinute(''); setCronHour(''); setCronDayOfMonth(''); setCronMonth(''); setCronDayOfWeek('');
+                      setCronTimezone('Eastern Standard Time (EST)');
+                      setIsScheduleWizardOpen(true);
+                    }}>Create new</Button>
+                  </ToolbarItem>
+                </ToolbarGroup>
+                <ToolbarGroup align={{ default: 'alignEnd' }}>
+                  <ToolbarItem>
+                    <Button variant="plain" aria-label="Previous page" isDisabled={schedulerPage <= 1} onClick={() => setSchedulerPage(p => Math.max(1, p - 1))}>
+                      &lsaquo;
+                    </Button>
+                    <Button variant="plain" aria-label="Next page" onClick={() => setSchedulerPage(p => p + 1)}>
+                      &rsaquo;
+                    </Button>
+                  </ToolbarItem>
+                </ToolbarGroup>
+              </ToolbarContent>
+            </Toolbar>
+            <Table aria-label="Scheduled reports table" variant="compact">
+              <Thead>
+                <Tr>
+                  <Th screenReaderText="Expand" />
+                  <Th sort={{ sortBy: schedulerSortBy, onSort: (_e, index, direction) => setSchedulerSortBy({ index, direction }), columnIndex: 0 }}>
+                    Reports
+                  </Th>
+                  <Th sort={{ sortBy: schedulerSortBy, onSort: (_e, index, direction) => setSchedulerSortBy({ index, direction }), columnIndex: 1 }} style={{ whiteSpace: 'nowrap' }}>
+                    Latest instance status
+                  </Th>
+                  <Th screenReaderText="Actions" />
+                </Tr>
+              </Thead>
+              {[...schedulerReports].sort((a, b) => {
+                const dir = schedulerSortBy.direction === 'asc' ? 1 : -1;
+                if (schedulerSortBy.index === 0) return dir * a.name.localeCompare(b.name);
+                return dir * a.status.localeCompare(b.status);
+              }).map((report, rowIndex) => {
+                const isRowExpanded = schedulerExpanded.has(rowIndex);
+                const statusIcon =
+                  report.status === 'Running' ? <SyncAltIcon color="#0066CC" /> :
+                  report.status === 'Failed' ? <ExclamationCircleIcon color="var(--pf-t--global--color--status--danger--100)" /> :
+                  <CheckCircleIcon color="var(--pf-t--global--color--status--success--100)" />;
+                return (
+                  <Tbody key={rowIndex} isExpanded={isRowExpanded}>
+                    <Tr>
+                      <Td
+                        expand={{
+                          rowIndex,
+                          isExpanded: isRowExpanded,
+                          onToggle: () => {
+                            const next = new Set(schedulerExpanded);
+                            if (next.has(rowIndex)) next.delete(rowIndex);
+                            else next.add(rowIndex);
+                            setSchedulerExpanded(next);
+                          },
+                        }}
+                      />
+                      <Td dataLabel="Reports">
+                        <div>
+                          <Button variant="link" isInline>{report.name}</Button>
+                        </div>
+                        <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', marginTop: '2px' }}>Next report: {report.date}</div>
+                      </Td>
+                      <Td dataLabel="Latest instance status">
+                        <Flex alignItems={{ default: 'alignItemsCenter' }} style={{ gap: '8px', flexWrap: 'nowrap' }}>
+                          {statusIcon}
+                          <span>{report.status}</span>
+                        </Flex>
+                      </Td>
+                      <Td isActionCell>
+                        <Button variant="plain" aria-label="Actions">
+                          <EllipsisVIcon />
+                        </Button>
+                      </Td>
+                    </Tr>
+                    <Tr isExpanded={isRowExpanded}>
+                      <Td />
+                      <Td colSpan={3}>
+                        <ExpandableRowContent>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <div>
+                              <div style={{ fontWeight: 600 }}>Service(s)</div>
+                              <div>{report.service}</div>
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 600 }}>Task creator</div>
+                              <div>{report.creator}</div>
+                            </div>
+                            <div>
+                              <div style={{ fontWeight: 600 }}>Frequency</div>
+                              <div>{report.frequency}</div>
+                            </div>
+                          </div>
+                        </ExpandableRowContent>
+                      </Td>
+                    </Tr>
+                  </Tbody>
+                );
+              })}
+            </Table>
+          </Tab>
+          <Tab eventKey={1} title={<TabTitleText>Report history</TabTitleText>}>
+            <div style={{ padding: '16px' }} />
+          </Tab>
+        </Tabs>
+      </div>
+    </DrawerPanelContent>
+  );
+
   return (
     <>
+      <Modal
+        isOpen={isScheduleWizardOpen}
+        onClose={() => setIsScheduleWizardOpen(false)}
+        aria-label="Schedule recurring report"
+        variant="large"
+        hasNoBodyWrapper
+      >
+        <Wizard
+          header={
+            <WizardHeader
+              title="Schedule recurring report"
+              description="Lorem ipsum dolor sit amet"
+              onClose={() => setIsScheduleWizardOpen(false)}
+            />
+          }
+          onClose={() => setIsScheduleWizardOpen(false)}
+          onSave={() => setIsScheduleWizardOpen(false)}
+          height="calc(100vh - 350px)"
+          isVisitRequired
+        >
+          <WizardStep name="Name and type" id="step-1" footer={<ScheduleWizardFooter isNextDisabled={!wizardReportName.trim() || !wizardFileType} />}>
+            <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Name and type</Title>
+            <Form>
+              <FormGroup label="Report name" fieldId="report-name">
+                <TextInput id="report-name" placeholder="Enter a report name" value={wizardReportName} onChange={(_e, val) => setWizardReportName(val)} />
+              </FormGroup>
+              <FormGroup label="File type" fieldId="file-type">
+                <Dropdown
+                  isOpen={wizardFileTypeOpen}
+                  onSelect={() => setWizardFileTypeOpen(false)}
+                  onOpenChange={setWizardFileTypeOpen}
+                  toggle={(toggleRef) => (
+                    <MenuToggle ref={toggleRef} onClick={() => setWizardFileTypeOpen(!wizardFileTypeOpen)} isExpanded={wizardFileTypeOpen} isFullWidth>
+                      {wizardFileType || 'Select a type'}
+                    </MenuToggle>
+                  )}
+                >
+                  <DropdownList>
+                    <DropdownItem onClick={() => setWizardFileType('JSON')}>JSON</DropdownItem>
+                    <DropdownItem onClick={() => setWizardFileType('CSV')}>CSV</DropdownItem>
+                  </DropdownList>
+                </Dropdown>
+              </FormGroup>
+            </Form>
+          </WizardStep>
+          {wizardInstances.map((inst, idx) => (
+            <WizardStep
+              key={`instance-${idx}`}
+              name={`Report instance ${idx + 1}: Service and task`}
+              id={`step-instance-${idx}`}
+              footer={<ScheduleWizardFooter canAddReport={!!(inst.service && inst.task)} isNextDisabled={!inst.service || !inst.task} />}
+            >
+              <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Report instance {idx + 1}: Service and task</Title>
+              <Form>
+                <FormGroup label="Service" fieldId={`wizard-service-${idx}`}>
+                  <Dropdown
+                    isOpen={inst.serviceOpen}
+                    onSelect={() => updateWizardInstance(idx, { serviceOpen: false })}
+                    onOpenChange={(open) => updateWizardInstance(idx, { serviceOpen: open })}
+                    toggle={(toggleRef) => (
+                      <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { serviceOpen: !inst.serviceOpen })} isExpanded={inst.serviceOpen} isFullWidth>
+                        {inst.service || 'Select a service'}
+                      </MenuToggle>
+                    )}
+                  >
+                    <DropdownList>
+                      <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Cost Management', task: '' })}>Cost Management</DropdownItem>
+                      <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Subscription Services', task: '' })}>Subscription Services</DropdownItem>
+                      <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Red Hat Lightspeed', task: '' })}>Red Hat Lightspeed</DropdownItem>
+                    </DropdownList>
+                  </Dropdown>
+                </FormGroup>
+                <FormGroup label="Task" fieldId={`wizard-task-${idx}`}>
+                  <Dropdown
+                    isOpen={inst.taskOpen}
+                    onSelect={() => updateWizardInstance(idx, { taskOpen: false })}
+                    onOpenChange={(open) => updateWizardInstance(idx, { taskOpen: open })}
+                    toggle={(toggleRef) => (
+                      <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { taskOpen: !inst.taskOpen })} isExpanded={inst.taskOpen} isFullWidth isDisabled={!inst.service}>
+                        {inst.task || 'Select a task'}
+                      </MenuToggle>
+                    )}
+                  >
+                    <DropdownList>
+                      {inst.service === 'Subscription Services' && <>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'RHEL usage report' })}>RHEL usage report</DropdownItem>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'OpenShift usage report' })}>OpenShift usage report</DropdownItem>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Ansible usage report' })}>Ansible usage report</DropdownItem>
+                      </>}
+                      {inst.service === 'Cost Management' && <>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Cost management report' })}>Cost management report</DropdownItem>
+                      </>}
+                      {inst.service === 'Red Hat Lightspeed' && <>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Inventory report' })}>Inventory report</DropdownItem>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Vulnerability report' })}>Vulnerability report</DropdownItem>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Compliance report' })}>Compliance report</DropdownItem>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Advisories' })}>Advisories</DropdownItem>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Malware report' })}>Malware report</DropdownItem>
+                      </>}
+                    </DropdownList>
+                  </Dropdown>
+                </FormGroup>
+              </Form>
+            </WizardStep>
+          ))}
+          <WizardStep name="Frequency" id="step-frequency" footer={<ScheduleWizardBackNextFooter isNextDisabled={!allCronValid} />}>
+            <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>Frequency</Title>
+            <Form>
+              <FormGroup label="Recurrence setting" fieldId="cron-setting" labelIcon={
+                <Button variant="plain" aria-label="Recurrence setting help" style={{ padding: 0 }}>
+                  <QuestionCircleIcon />
+                </Button>
+              }>
+                <Flex style={{ gap: '16px', flexWrap: 'nowrap' }}>
+                  <FlexItem style={{ flex: 1 }}>
+                    <TextInput id="cron-minute" placeholder="0-59, *, -, /" value={cronMinute} onChange={(_e, val) => setCronMinute(val)} validated={cronMinute && !cronMinuteValidation.valid ? 'error' : 'default'} />
+                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Minute</div>
+                    {cronMinute && cronMinuteValidation.message && <HelperText><HelperTextItem variant="error">{cronMinuteValidation.message}</HelperTextItem></HelperText>}
+                  </FlexItem>
+                  <FlexItem style={{ flex: 1 }}>
+                    <TextInput id="cron-hour" placeholder="0-23, *, -, /" value={cronHour} onChange={(_e, val) => setCronHour(val)} validated={cronHour && !cronHourValidation.valid ? 'error' : 'default'} />
+                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Hour</div>
+                    {cronHour && cronHourValidation.message && <HelperText><HelperTextItem variant="error">{cronHourValidation.message}</HelperTextItem></HelperText>}
+                  </FlexItem>
+                  <FlexItem style={{ flex: 1 }}>
+                    <TextInput id="cron-day-of-month" placeholder="1-31, *, -, /" value={cronDayOfMonth} onChange={(_e, val) => setCronDayOfMonth(val)} validated={cronDayOfMonth && !cronDayOfMonthValidation.valid ? 'error' : 'default'} />
+                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Day of month</div>
+                    {cronDayOfMonth && cronDayOfMonthValidation.message && <HelperText><HelperTextItem variant="error">{cronDayOfMonthValidation.message}</HelperTextItem></HelperText>}
+                  </FlexItem>
+                  <FlexItem style={{ flex: 1 }}>
+                    <TextInput id="cron-month" placeholder="1-12, Jan-Dec, *, -, /" value={cronMonth} onChange={(_e, val) => setCronMonth(val)} validated={cronMonth && !cronMonthValidation.valid ? 'error' : 'default'} />
+                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Month</div>
+                    {cronMonth && cronMonthValidation.message && <HelperText><HelperTextItem variant="error">{cronMonthValidation.message}</HelperTextItem></HelperText>}
+                  </FlexItem>
+                  <FlexItem style={{ flex: 1 }}>
+                    <TextInput id="cron-day-of-week" placeholder="0-6, Sun-Sat, *, -, /" value={cronDayOfWeek} onChange={(_e, val) => setCronDayOfWeek(val)} validated={cronDayOfWeek && !cronDayOfWeekValidation.valid ? 'error' : 'default'} />
+                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Day of the week</div>
+                    {cronDayOfWeek && cronDayOfWeekValidation.message && <HelperText><HelperTextItem variant="error">{cronDayOfWeekValidation.message}</HelperTextItem></HelperText>}
+                  </FlexItem>
+                </Flex>
+              </FormGroup>
+              {allCronValid && (
+                <Alert variant="info" isInline title={cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek)} />
+              )}
+              <FormGroup label="Time Zone" fieldId="cron-timezone">
+                <Dropdown
+                  isOpen={cronTimezoneOpen}
+                  onSelect={() => setCronTimezoneOpen(false)}
+                  onOpenChange={setCronTimezoneOpen}
+                  toggle={(toggleRef) => (
+                    <MenuToggle ref={toggleRef} onClick={() => setCronTimezoneOpen(!cronTimezoneOpen)} isExpanded={cronTimezoneOpen} isFullWidth>
+                      {cronTimezone}
+                    </MenuToggle>
+                  )}
+                >
+                  <DropdownList>
+                    <DropdownItem onClick={() => setCronTimezone('Eastern Standard Time (EST)')}>Eastern Standard Time (EST)</DropdownItem>
+                    <DropdownItem onClick={() => setCronTimezone('Central Standard Time (CST)')}>Central Standard Time (CST)</DropdownItem>
+                    <DropdownItem onClick={() => setCronTimezone('Mountain Standard Time (MST)')}>Mountain Standard Time (MST)</DropdownItem>
+                    <DropdownItem onClick={() => setCronTimezone('Pacific Standard Time (PST)')}>Pacific Standard Time (PST)</DropdownItem>
+                    <DropdownItem onClick={() => setCronTimezone('Coordinated Universal Time (UTC)')}>Coordinated Universal Time (UTC)</DropdownItem>
+                  </DropdownList>
+                </Dropdown>
+              </FormGroup>
+            </Form>
+          </WizardStep>
+          <WizardStep name="Review" id="step-review" footer={<ScheduleWizardLastFooter />}>
+            <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Review</Title>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: '8px' }}>Report name and type:</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', rowGap: '4px' }}>
+                  <span style={{ fontWeight: 600 }}>Name</span><span>{wizardReportName || '—'}</span>
+                  <span style={{ fontWeight: 600 }}>Type</span><span>{wizardFileType || '—'}</span>
+                </div>
+              </div>
+              {wizardInstances.map((inst, idx) => (
+                <div key={idx}>
+                  <div style={{ fontWeight: 600, marginBottom: '8px' }}>Report instance {idx + 1}:</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', rowGap: '4px' }}>
+                    <span style={{ fontWeight: 600 }}>Service</span><span>{inst.service || '—'}</span>
+                    <span style={{ fontWeight: 600 }}>Task name</span><span>{inst.task || '—'}</span>
+                  </div>
+                </div>
+              ))}
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: '8px' }}>Frequency:</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', rowGap: '4px' }}>
+                  <span style={{ fontWeight: 600 }}>Recurrence setting</span>
+                  <span>
+                    {cronMinute && cronHour && cronDayOfMonth && cronMonth && cronDayOfWeek
+                      ? `${cronMinute}, ${cronHour}, ${cronDayOfMonth}, ${cronMonth}, ${cronDayOfWeek} (${allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : '—'})`
+                      : '—'}
+                  </span>
+                  <span style={{ fontWeight: 600 }}>Time zone</span><span>{cronTimezone}</span>
+                </div>
+              </div>
+            </div>
+          </WizardStep>
+        </Wizard>
+      </Modal>
       <Page
         mainContainerId={pageId}
         masthead={masthead}
         sidebar={sidebarOpen && !isPageWithoutNav && Sidebar}
         skipToContent={PageSkipToContent}
       >
-        {/* Notification Drawer (outer, right-side) */}
-        <Drawer isExpanded={isNotificationDrawerOpen} isInline position="right">
-          <DrawerContent panelContent={notificationDrawerContent}>
-            {/* Help Drawer (inner, left-side) */}
-            <Drawer isExpanded={isDrawerExpanded} isInline>
-              <DrawerContent panelContent={drawerContent}>
-                {children}
+        {/* Scheduler Drawer (outermost, right-side, global) */}
+        <Drawer isExpanded={isSchedulerPanelOpen} isInline position="right">
+          <DrawerContent panelContent={schedulerDrawerContent}>
+            {/* Notification Drawer (middle, right-side) */}
+            <Drawer isExpanded={isNotificationDrawerOpen} isInline position="right">
+              <DrawerContent panelContent={notificationDrawerContent}>
+                {/* Help Drawer (inner, left-side) */}
+                <Drawer isExpanded={isDrawerExpanded} isInline>
+                  <DrawerContent panelContent={drawerContent}>
+                    {children}
+                  </DrawerContent>
+                </Drawer>
               </DrawerContent>
             </Drawer>
           </DrawerContent>
@@ -1992,7 +2697,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItem onClick={() => { navigate('/subscriptions/insights'); setIsLogoDropdownOpen(false); }}>
                                             Resource Optimization
                                           </MenuItem>
-                                          <MenuItem onClick={() => { navigate('/alert-manager'); setIsLogoDropdownOpen(false); }}>
+                                          <MenuItem onClick={() => { navigate('/subscription-usage'); setIsLogoDropdownOpen(false); }}>
                                             Subscriptions Usage
                                           </MenuItem>
                                         </MenuList>
@@ -2003,7 +2708,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         <Divider />
                                         <MenuList>
                                           <MenuItem isDisabled>Cost Management</MenuItem>
-                                          <MenuItem onClick={() => { navigate('/alert-manager'); setIsLogoDropdownOpen(false); }}>
+                                          <MenuItem onClick={() => { navigate('/subscription-usage'); setIsLogoDropdownOpen(false); }}>
                                             Subscriptions Usage
                                           </MenuItem>
                                         </MenuList>
@@ -2013,7 +2718,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                       <MenuGroup label="Ansible" labelHeadingLevel="h2">
                                         <Divider />
                                         <MenuList>
-                                          <MenuItem onClick={() => { navigate('/alert-manager'); setIsLogoDropdownOpen(false); }}>
+                                          <MenuItem onClick={() => { navigate('/subscription-usage'); setIsLogoDropdownOpen(false); }}>
                                             Subscriptions Usage
                                           </MenuItem>
                                         </MenuList>
@@ -2035,7 +2740,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           <MenuItem onClick={() => { navigate('/event-log'); setIsLogoDropdownOpen(false); }}>
                                             Manifests
                                           </MenuItem>
-                                          <MenuItem onClick={() => { navigate('/alert-manager'); setIsLogoDropdownOpen(false); }}>
+                                          <MenuItem onClick={() => { navigate('/subscription-usage'); setIsLogoDropdownOpen(false); }}>
                                             Subscriptions Usage
                                           </MenuItem>
                                         </MenuList>
@@ -2052,7 +2757,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               description: 'Configure and manage system alerts and notifications',
                                               category: 'Console Settings',
                                               onClick: () => {
-                                                navigate('/alert-manager');
+                                                navigate('/subscription-usage');
                                                 setIsLogoDropdownOpen(false);
                                               }
                                             },
@@ -2187,7 +2892,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               description: 'Configure and manage system alerts and notifications',
                                               category: 'Console Settings',
                                               onClick: () => {
-                                                navigate('/alert-manager');
+                                                navigate('/subscription-usage');
                                                 setIsLogoDropdownOpen(false);
                                               }
                                             },
@@ -2409,7 +3114,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         itemId="alert-manager-settings"
                                         description="Mary to add a description here eventually"
                                         onClick={() => {
-                                          navigate('/alert-manager');
+                                          navigate('/subscription-usage');
                                           setIsLogoDropdownOpen(false);
                                         }}
                                         actions={
@@ -2448,6 +3153,28 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         }
                                       >
                                         Data Integration | Settings
+                                      </MenuItem>
+                                      <MenuItem 
+                                        itemId="scheduler-settings"
+                                        description="Configure and manage scheduled jobs and automation tasks"
+                                        onClick={() => {
+                                          openSchedulerPanel();
+                                          setIsLogoDropdownOpen(false);
+                                        }}
+                                        actions={
+                                          <MenuItemAction
+                                            icon={<StarIcon />}
+                                            actionId="favorite"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              toggleFavorite('scheduler-settings');
+                                            }}
+                                            isFavorited={favoritedItems.has('scheduler-settings')}
+                                            aria-label={favoritedItems.has('scheduler-settings') ? "Remove from favorites" : "Add to favorites"}
+                                          />
+                                        }
+                                      >
+                                        Scheduler | Settings
                                       </MenuItem>
                                       <MenuItem 
                                         itemId="event-log-settings"
@@ -2792,7 +3519,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                                                                   itemId="console-alert-manager"
                                         description="Configure and manage system alerts, notifications, and escalation policies"
                                         onClick={() => {
-                                          navigate('/alert-manager');
+                                          navigate('/subscription-usage');
                                           setIsLogoDropdownOpen(false);
                                         }}
                                         actions={
@@ -2831,6 +3558,28 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                           }
                                         >
                                           Data Integration
+                                        </MenuItem>
+                                        <MenuItem 
+                                          itemId="console-scheduler"
+                                          description="Configure and manage scheduled jobs and automation tasks"
+                                          onClick={() => {
+                                            openSchedulerPanel();
+                                            setIsLogoDropdownOpen(false);
+                                          }}
+                                          actions={
+                                            <MenuItemAction
+                                              icon={<StarIcon />}
+                                              actionId="favorite"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleFavorite('console-scheduler');
+                                              }}
+                                              isFavorited={favoritedItems.has('console-scheduler')}
+                                              aria-label={favoritedItems.has('console-scheduler') ? "Remove from favorites" : "Add to favorites"}
+                                            />
+                                          }
+                                        >
+                                          Scheduler
                                         </MenuItem>
                                       </MenuList>
                                     </MenuGroup>
