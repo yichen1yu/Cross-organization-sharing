@@ -194,14 +194,9 @@ const GoldImages: React.FunctionComponent = () => {
                         </div>
                       </Td>
                       <Td style={{ textAlign: 'right', verticalAlign: 'top' }}>
-                        <Button
-                          variant="link"
-                          isInline
-                          component={Link}
-                          to={`/cloud-inventory/cloud-accounts?provider=${encodeURIComponent(p.name)}`}
-                        >
+                        <Link to={`/cloud-inventory/cloud-accounts?provider=${encodeURIComponent(p.name)}`}>
                           View cloud accounts
-                        </Button>
+                        </Link>
                       </Td>
                     </Tr>
                 ))}

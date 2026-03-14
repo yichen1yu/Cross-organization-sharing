@@ -32,6 +32,7 @@ import {
   FlexItem,
   Form,
   FormGroup,
+  FormGroupLabelHelp,
   FormSelect,
   FormSelectOption,
   HelperText,
@@ -2095,7 +2096,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         onClose={() => setIsScheduleWizardOpen(false)}
         aria-label="Schedule recurring report"
         variant="large"
-        hasNoBodyWrapper
       >
         <Wizard
           header={
@@ -2198,10 +2198,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           <WizardStep name="Frequency" id="step-frequency" footer={<ScheduleWizardBackNextFooter isNextDisabled={!allCronValid} />}>
             <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>Frequency</Title>
             <Form>
-              <FormGroup label="Recurrence setting" fieldId="cron-setting" labelIcon={
-                <Button variant="plain" aria-label="Recurrence setting help" style={{ padding: 0 }}>
-                  <QuestionCircleIcon />
-                </Button>
+              <FormGroup label="Recurrence setting" fieldId="cron-setting" labelHelp={
+                <FormGroupLabelHelp aria-label="Recurrence setting help" />
               }>
                 <Flex style={{ gap: '16px', flexWrap: 'nowrap' }}>
                   <FlexItem style={{ flex: 1 }}>

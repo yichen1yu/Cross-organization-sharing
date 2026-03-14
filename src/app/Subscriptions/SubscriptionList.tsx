@@ -195,14 +195,9 @@ const SubscriptionList: React.FunctionComponent = () => {
             {pageRows.map(r => (
               <Tr key={r.id}>
                 <Td>
-                  <Button
-                    variant="link"
-                    isInline
-                    component={Link}
-                    to={`/subscription-inventory/subscription/${r.id}`}
-                  >
+                  <Link to={`/subscription-inventory/subscription/${r.id}`}>
                     {r.name}
-                  </Button>
+                  </Link>
                 </Td>
                 <Td>{r.sku}</Td>
                 <Td>{r.quantity}</Td>

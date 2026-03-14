@@ -290,14 +290,9 @@ const CloudAccounts: React.FunctionComponent = () => {
                       <Button variant="link" isInline>{r.account}</Button>
                     </Td>
                     <Td dataLabel="Cloud provider">
-                      <Button
-                        variant="link"
-                        isInline
-                        component={Link}
-                        to={`/cloud-inventory/gold-images?provider=${encodeURIComponent(r.provider)}`}
-                      >
+                      <Link to={`/cloud-inventory/gold-images?provider=${encodeURIComponent(r.provider)}`}>
                         {r.provider}
-                      </Button>
+                      </Link>
                     </Td>
                     <Td dataLabel="Auto-registration">
                       <StatusWithIcon status={r.autoReg} />
@@ -307,14 +302,9 @@ const CloudAccounts: React.FunctionComponent = () => {
                     </Td>
                     <Td dataLabel="Date added">{r.dateAdded}</Td>
                     <Td dataLabel="Actions" style={{ textAlign: 'right' }}>
-                      <Button
-                        variant="link"
-                        isInline
-                        component={Link}
-                        to={`/cloud-inventory/marketplace-purchases?account=${encodeURIComponent(r.account)}`}
-                      >
+                      <Link to={`/cloud-inventory/marketplace-purchases?account=${encodeURIComponent(r.account)}`}>
                         View purchases
-                      </Button>
+                      </Link>
                     </Td>
                   </Tr>
                 ))}
