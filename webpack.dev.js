@@ -13,6 +13,8 @@ export default merge(common('development'), {
   devServer: {
     host: HOST,
     port: PORT,
+    hot: true,
+    liveReload: true,
     historyApiFallback: true,
     open: true,
     static: {
@@ -20,7 +22,17 @@ export default merge(common('development'), {
     },
     client: {
       overlay: true,
+      webSocketTransport: 'ws',
     },
+    webSocketServer: 'ws',
+    watchFiles: {
+      paths: ['src/**/*'],
+      options: { usePolling: true, interval: 1000 },
+    },
+  },
+  watchOptions: {
+    poll: 1000,
+    aggregateTimeout: 300,
   },
   module: {
     rules: [

@@ -8,7 +8,7 @@
   display: none;
 }
 .trusted-wizard-modal .pf-v6-c-wizard__main-body {
-  padding-top: 0;
+  padding-top: 24px;
 }
 /* Make wizard occupy full modal body width and remove body padding so header spans edge-to-edge */
 .trusted-wizard-modal .pf-v6-c-modal-box__body {
@@ -34,6 +34,13 @@ body { margin: 0; overflow-y: hidden; }
   padding-bottom: 32px; /* match app spacing */
   box-sizing: border-box;
   overflow-y: auto; /* show vertical scrollbar only when content overflows */
+}
+
+/* Download icon button: blue on hover and active */
+.pf-v6-c-button.pf-m-plain:hover,
+.pf-v6-c-button.pf-m-plain:focus,
+.pf-v6-c-button.pf-m-plain:active {
+  color: var(--pf-t--global--color--brand--default);
 }
 
 .pf-v6-c-content {

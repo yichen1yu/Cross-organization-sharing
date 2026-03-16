@@ -3,6 +3,8 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
 import {
   Alert,
+  AlertGroup,
+  AlertActionCloseButton,
   Avatar,
   Button,
   Card,
@@ -47,6 +49,7 @@ import {
   MenuGroup,
   Modal,
   ModalBody,
+  ModalFooter,
   ModalHeader,
   MenuItem,
   MenuItemAction,
@@ -101,6 +104,7 @@ import {
   CreditCardIcon,
   CubeIcon,
   DatabaseIcon,
+  DownloadIcon,
   CheckCircleIcon,
   EllipsisVIcon,
   ExclamationCircleIcon,
@@ -109,6 +113,8 @@ import {
   EyeIcon,
   FilterIcon,
   HelpIcon,
+  OutlinedQuestionCircleIcon,
+  PauseCircleIcon,
   InfoCircleIcon,
   ListIcon,
   PlayIcon,
@@ -126,6 +132,14 @@ import {
   WrenchIcon
 } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td, ExpandableRowContent } from '@patternfly/react-table';
+
+type SchedulerWizardOptions = { preselectedService?: string; preselectedTask?: string; preselectedFileType?: string };
+const SchedulerWizardContext = React.createContext<{
+  openSchedulerWizard: (options?: SchedulerWizardOptions) => void;
+  showToast: (title: string, description?: React.ReactNode) => void;
+}>({ openSchedulerWizard: () => {}, showToast: () => {} });
+
+export const useSchedulerWizard = () => React.useContext(SchedulerWizardContext);
 
 interface IAppLayout {
   children: React.ReactNode;
@@ -191,7 +205,44 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [schedulerPage, setSchedulerPage] = React.useState(1);
   const [schedulerExpanded, setSchedulerExpanded] = React.useState<Set<number>>(new Set());
   const [schedulerSortBy, setSchedulerSortBy] = React.useState<{ index: number; direction: 'asc' | 'desc' }>({ index: 0, direction: 'asc' });
+  const [schedulerKebabOpen, setSchedulerKebabOpen] = React.useState<number | null>(null);
+  const [historyFilterNameOpen, setHistoryFilterNameOpen] = React.useState(false);
+  const [historyFilterName, setHistoryFilterName] = React.useState('Report name');
+  const [historyFilterOpen, setHistoryFilterOpen] = React.useState(false);
+  const [historyFilter, setHistoryFilter] = React.useState('Filter');
+  const [historyPage, setHistoryPage] = React.useState(1);
+  const [historySortBy, setHistorySortBy] = React.useState<{ index: number; direction: 'asc' | 'desc' }>({ index: 0, direction: 'asc' });
+  const [pastInstancesReport, setPastInstancesReport] = React.useState<string | null>(null);
+  const [pastInstancesSortBy, setPastInstancesSortBy] = React.useState<{ index: number; direction: 'asc' | 'desc' }>({ index: 0, direction: 'asc' });
+  const [deleteReportName, setDeleteReportName] = React.useState<string | null>(null);
+  const [editingReportName, setEditingReportName] = React.useState<string | null>(null);
+  const [lockedService, setLockedService] = React.useState<string | null>(null);
+  const [lockedTask, setLockedTask] = React.useState<string | null>(null);
+  const [lockedFileType, setLockedFileType] = React.useState<string | null>(null);
   const [isScheduleWizardOpen, setIsScheduleWizardOpen] = React.useState(false);
+
+  const openSchedulerWizard = React.useCallback((options?: SchedulerWizardOptions) => {
+    setEditingReportName(null);
+    setWizardReportName('');
+    setWizardFileType(options?.preselectedFileType || '');
+    const service = options?.preselectedService || '';
+    const task = options?.preselectedTask || '';
+    setWizardInstances([{ service, task, serviceOpen: false, taskOpen: false }]);
+    setCronMinute(''); setCronHour(''); setCronDayOfMonth(''); setCronMonth(''); setCronDayOfWeek('');
+    setCronTimezone('Eastern Standard Time (EST)');
+    setLockedService(options?.preselectedService || null);
+    setLockedTask(options?.preselectedTask || null);
+    setLockedFileType(options?.preselectedFileType || null);
+    setIsScheduleWizardOpen(true);
+  }, []);
+  type ToastItem = { id: number; title: string; description?: React.ReactNode };
+  const [toasts, setToasts] = React.useState<ToastItem[]>([]);
+  const addToast = (title: string, description?: React.ReactNode) => {
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+    setToasts(prev => [...prev, { id, title, description }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 8000);
+  };
+  const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
   const [wizardReportName, setWizardReportName] = React.useState('');
   const [wizardFileType, setWizardFileType] = React.useState('');
   const [wizardFileTypeOpen, setWizardFileTypeOpen] = React.useState(false);
@@ -362,10 +413,18 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   type ReportEntry = {
     name: string;
     date: string;
-    status: 'Running' | 'Failed' | 'Completed';
+    status: 'Running' | 'Failed' | 'Completed' | 'Paused';
     service: string;
     creator: string;
     frequency: string;
+    fileType?: string;
+    task?: string;
+    cronMinute?: string;
+    cronHour?: string;
+    cronDayOfMonth?: string;
+    cronMonth?: string;
+    cronDayOfWeek?: string;
+    cronTimezone?: string;
   };
 
   const [schedulerReports, setSchedulerReports] = React.useState<ReportEntry[]>([
@@ -376,24 +435,64 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       service: 'Cost Management',
       creator: 'Allison Robinhood',
       frequency: 'Monthly on the 1st at 6:00am EST',
+      fileType: 'CSV',
+      task: 'Cost management report',
+      cronMinute: '0', cronHour: '6', cronDayOfMonth: '1', cronMonth: '*', cronDayOfWeek: '*',
+      cronTimezone: 'Eastern Standard Time (EST)',
     },
     {
       name: 'RHEL vulnerability scan summary',
       date: '25/07/2025 12:00 am EST',
       status: 'Failed',
-      service: 'Insights Vulnerability',
+      service: 'Red Hat Lightspeed',
       creator: 'Carlos Mendez',
       frequency: 'Weekly on Monday at 8:00am EST',
+      fileType: 'JSON',
+      task: 'Vulnerability report',
+      cronMinute: '0', cronHour: '8', cronDayOfMonth: '*', cronMonth: '*', cronDayOfWeek: '1',
+      cronTimezone: 'Eastern Standard Time (EST)',
     },
     {
       name: 'OpenShift cluster utilization',
       date: '26/07/2025 12:00 am EST',
       status: 'Completed',
-      service: 'OpenShift Cluster Manager',
+      service: 'Subscription Services',
       creator: 'Priya Sharma',
       frequency: 'Daily at 12:00am EST',
+      fileType: 'CSV',
+      task: 'OpenShift usage report',
+      cronMinute: '0', cronHour: '0', cronDayOfMonth: '*', cronMonth: '*', cronDayOfWeek: '*',
+      cronTimezone: 'Eastern Standard Time (EST)',
     },
   ]);
+
+  type HistoryEntry = { name: string; date: string };
+
+  const reportHistory: HistoryEntry[] = [
+    { name: 'OpenShift cluster utilization', date: 'Jul 20, 2025' },
+    { name: 'AWS monthly cost breakdown', date: 'Jul 15, 2025' },
+    { name: 'RHEL vulnerability scan summary', date: 'Jul 14, 2025' },
+    { name: 'AWS monthly cost breakdown', date: 'Jun 15, 2025' },
+  ];
+
+  type PastInstance = { time: string; status: 'Completed' | 'Failed' | 'Scheduled' };
+
+  const pastInstancesData: Record<string, PastInstance[]> = {
+    'AWS monthly cost breakdown': [],
+    'RHEL vulnerability scan summary': [
+      { time: 'Jul 21, 2025 8:00:00 AM EST', status: 'Completed' },
+      { time: 'Jul 14, 2025 8:00:00 AM EST', status: 'Failed' },
+      { time: 'Jul 7, 2025 8:00:00 AM EST', status: 'Completed' },
+      { time: 'Jun 30, 2025 8:00:00 AM EST', status: 'Completed' },
+    ],
+    'OpenShift cluster utilization': [
+      { time: 'Jul 25, 2025 12:00:00 AM EST', status: 'Completed' },
+      { time: 'Jul 24, 2025 12:00:00 AM EST', status: 'Completed' },
+      { time: 'Jul 23, 2025 12:00:00 AM EST', status: 'Completed' },
+      { time: 'Jul 22, 2025 12:00:00 AM EST', status: 'Completed' },
+      { time: 'Jul 21, 2025 12:00:00 AM EST', status: 'Completed' },
+    ],
+  };
 
   // Menu groups data for primary-detail view
   const menuGroupsData: Record<string, MenuItem[]> = {
@@ -1878,7 +1977,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     return (
       <WizardFooterWrapper>
         <Flex style={{ gap: '16px' }} alignItems={{ default: 'alignItemsCenter' }}>
-          <Button variant="secondary" isDisabled={!canAddReport} onClick={() => { addWizardInstance(); setTimeout(goToNextStep, 0); }}>Add a report instance</Button>
+          {canAddReport !== undefined && <Button variant="secondary" isDisabled={!canAddReport} onClick={() => { addWizardInstance(); setTimeout(goToNextStep, 0); }}>Add a report instance</Button>}
           <Button variant="primary" isDisabled={isNextDisabled} onClick={goToNextStep}>Next</Button>
           <Button variant="link" onClick={close}>Cancel</Button>
         </Flex>
@@ -1908,14 +2007,42 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           <Button variant="primary" onClick={() => {
             const nextDate = getNextCronDate(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek, cronTimezone);
             const naturalLang = allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : '';
-            setSchedulerReports(prev => [...prev, {
-              name: wizardReportName,
-              date: nextDate,
-              status: 'Running' as const,
-              service: wizardInstances[0]?.service || '',
-              creator: 'Current User',
-              frequency: naturalLang,
-            }]);
+            if (editingReportName) {
+              setSchedulerReports(prev => prev.map(r => r.name === editingReportName ? {
+                ...r,
+                name: wizardReportName,
+                date: nextDate,
+                service: wizardInstances[0]?.service || '',
+                frequency: naturalLang,
+                fileType: wizardFileType,
+                task: wizardInstances[0]?.task || '',
+                cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek, cronTimezone,
+              } : r));
+              addToast(
+                'Recurring report has updated successfully.',
+                `${wizardReportName} has been updated successfully.`
+              );
+            } else {
+              setSchedulerReports(prev => [...prev, {
+                name: wizardReportName,
+                date: nextDate,
+                status: 'Running' as const,
+                service: wizardInstances[0]?.service || '',
+                creator: 'Current User',
+                frequency: naturalLang,
+                fileType: wizardFileType,
+                task: wizardInstances[0]?.task || '',
+                cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek, cronTimezone,
+              }]);
+              addToast(
+                'Recurring report has created successfully.',
+                'You can find the scheduled report under Setting. The access of report will be sent via email during scheduled times. You can find it in the Global scheduler > Reports history tab as well.'
+              );
+            }
+            setEditingReportName(null);
+            setLockedService(null);
+            setLockedTask(null);
+            setLockedFileType(null);
             setIsScheduleWizardOpen(false);
           }}>Save</Button>
           <Button variant="link" onClick={close}>Cancel</Button>
@@ -1978,6 +2105,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   </ToolbarItem>
                   <ToolbarItem>
                     <Button variant="primary" onClick={() => {
+                      setEditingReportName(null);
+                      setLockedService(null);
+                      setLockedTask(null);
+                      setLockedFileType(null);
                       setWizardReportName('');
                       setWizardFileType('');
                       setWizardInstances([{ service: '', task: '', serviceOpen: false, taskOpen: false }]);
@@ -2021,6 +2152,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 const statusIcon =
                   report.status === 'Running' ? <SyncAltIcon color="#0066CC" /> :
                   report.status === 'Failed' ? <ExclamationCircleIcon color="var(--pf-t--global--color--status--danger--100)" /> :
+                  report.status === 'Paused' ? <PauseCircleIcon color="var(--pf-t--global--icon--color--subtle)" /> :
                   <CheckCircleIcon color="var(--pf-t--global--color--status--success--100)" />;
                 return (
                   <Tbody key={rowIndex} isExpanded={isRowExpanded}>
@@ -2039,20 +2171,56 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                       />
                       <Td dataLabel="Reports">
                         <div>
-                          <Button variant="link" isInline>{report.name}</Button>
+                          <Button variant="link" isInline onClick={() => { setPastInstancesReport(report.name); setPastInstancesSortBy({ index: 0, direction: 'asc' }); }}>{report.name}</Button>
                         </div>
                         <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', marginTop: '2px' }}>Next report: {report.date}</div>
                       </Td>
-                      <Td dataLabel="Latest instance status">
+                      <Td dataLabel="Latest instance status" style={{ whiteSpace: 'nowrap' }}>
                         <Flex alignItems={{ default: 'alignItemsCenter' }} style={{ gap: '8px', flexWrap: 'nowrap' }}>
-                          {statusIcon}
+                          <span style={{ display: 'inline-flex', width: '16px', justifyContent: 'center' }}>{statusIcon}</span>
                           <span>{report.status}</span>
                         </Flex>
                       </Td>
                       <Td isActionCell>
-                        <Button variant="plain" aria-label="Actions">
-                          <EllipsisVIcon />
-                        </Button>
+                        <Dropdown
+                          isOpen={schedulerKebabOpen === rowIndex}
+                          onSelect={() => setSchedulerKebabOpen(null)}
+                          onOpenChange={(isOpen) => { if (!isOpen) setSchedulerKebabOpen(null); }}
+                          popperProps={{ position: 'right' }}
+                          style={{ minWidth: '150px' }}
+                          toggle={(toggleRef) => (
+                            <MenuToggle
+                              ref={toggleRef}
+                              variant="plain"
+                              onClick={() => setSchedulerKebabOpen(schedulerKebabOpen === rowIndex ? null : rowIndex)}
+                              isExpanded={schedulerKebabOpen === rowIndex}
+                              aria-label="Row actions"
+                            >
+                              <EllipsisVIcon />
+                            </MenuToggle>
+                          )}
+                          shouldFocusToggleOnSelect
+                        >
+                          <DropdownList>
+                            <DropdownItem key="edit" onClick={() => {
+                              setEditingReportName(report.name);
+                              setWizardReportName(report.name);
+                              setWizardFileType(report.fileType || '');
+                              setWizardInstances([{ service: report.service, task: report.task || '', serviceOpen: false, taskOpen: false }]);
+                              setCronMinute(report.cronMinute || '');
+                              setCronHour(report.cronHour || '');
+                              setCronDayOfMonth(report.cronDayOfMonth || '');
+                              setCronMonth(report.cronMonth || '');
+                              setCronDayOfWeek(report.cronDayOfWeek || '');
+                              setCronTimezone(report.cronTimezone || 'Eastern Standard Time (EST)');
+                              setIsScheduleWizardOpen(true);
+                            }}>Edit</DropdownItem>
+                            <DropdownItem key="pause" onClick={() => {
+                              setSchedulerReports(prev => prev.map(r => r.name === report.name ? { ...r, status: r.status === 'Paused' ? 'Running' : 'Paused' } : r));
+                            }}>{report.status === 'Paused' ? 'Resume' : 'Pause'}</DropdownItem>
+                            <DropdownItem key="delete" style={{ color: 'var(--pf-t--global--color--status--danger--default)' }} onClick={() => setDeleteReportName(report.name)}>Delete</DropdownItem>
+                          </DropdownList>
+                        </Dropdown>
                       </Td>
                     </Tr>
                     <Tr isExpanded={isRowExpanded}>
@@ -2081,8 +2249,80 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               })}
             </Table>
           </Tab>
-          <Tab eventKey={1} title={<TabTitleText>Report history</TabTitleText>}>
-            <div style={{ padding: '16px' }} />
+          <Tab eventKey={1} title={<TabTitleText>Report history <Tooltip content="Each report will contains all scheduled instances in one zip file."><OutlinedQuestionCircleIcon style={{ marginLeft: '6px', cursor: 'pointer', color: 'var(--pf-t--global--icon--color--subtle)' }} /></Tooltip></TabTitleText>}>
+            <Toolbar style={{ paddingLeft: '16px', paddingRight: '16px', marginTop: '24px' }}>
+              <ToolbarContent style={{ paddingLeft: 0, paddingRight: 0, flexWrap: 'nowrap' }}>
+                <ToolbarGroup>
+                  <ToolbarItem>
+                    <Dropdown
+                      isOpen={historyFilterNameOpen}
+                      onSelect={() => setHistoryFilterNameOpen(false)}
+                      onOpenChange={setHistoryFilterNameOpen}
+                      toggle={(toggleRef) => (
+                        <MenuToggle ref={toggleRef} onClick={() => setHistoryFilterNameOpen(!historyFilterNameOpen)} variant="default">
+                          <FilterIcon style={{ marginRight: '6px' }} />
+                          {historyFilterName}
+                        </MenuToggle>
+                      )}
+                      popperProps={{ appendTo: 'inline' }}
+                    >
+                      <DropdownList>
+                        <DropdownItem onClick={() => setHistoryFilterName('Report name')}>Report name</DropdownItem>
+                        <DropdownItem onClick={() => setHistoryFilterName('Status')}>Status</DropdownItem>
+                        <DropdownItem onClick={() => setHistoryFilterName('File type')}>File type</DropdownItem>
+                      </DropdownList>
+                    </Dropdown>
+                  </ToolbarItem>
+                  <ToolbarItem>
+                    <Dropdown
+                      isOpen={historyFilterOpen}
+                      onSelect={() => setHistoryFilterOpen(false)}
+                      onOpenChange={setHistoryFilterOpen}
+                      toggle={(toggleRef) => (
+                        <MenuToggle ref={toggleRef} onClick={() => setHistoryFilterOpen(!historyFilterOpen)} variant="default">
+                          {historyFilter}
+                        </MenuToggle>
+                      )}
+                      popperProps={{ appendTo: 'inline' }}
+                    >
+                      <DropdownList>
+                        <DropdownItem onClick={() => setHistoryFilter('Filter')}>Filter</DropdownItem>
+                      </DropdownList>
+                    </Dropdown>
+                  </ToolbarItem>
+                </ToolbarGroup>
+                <ToolbarGroup align={{ default: 'alignEnd' }}>
+                  <ToolbarItem>
+                    <Button variant="plain" aria-label="Previous page" isDisabled={historyPage <= 1} onClick={() => setHistoryPage(p => Math.max(1, p - 1))}>
+                      &lsaquo;
+                    </Button>
+                    <Button variant="plain" aria-label="Next page" onClick={() => setHistoryPage(p => p + 1)}>
+                      &rsaquo;
+                    </Button>
+                  </ToolbarItem>
+                </ToolbarGroup>
+              </ToolbarContent>
+            </Toolbar>
+            <Table aria-label="Report history table" variant="compact">
+              <Thead>
+                <Tr>
+                  <Th>Report name</Th>
+                  <Th>Date</Th>
+                  <Th screenReaderText="Download" />
+                </Tr>
+              </Thead>
+              <Tbody>
+                {reportHistory.map((entry, idx) => (
+                  <Tr key={idx}>
+                    <Td dataLabel="Report name">{entry.name}</Td>
+                    <Td dataLabel="Date">{entry.date}</Td>
+                    <Td isActionCell>
+                      <Button variant="plain" aria-label="Download report" icon={<DownloadIcon />} onClick={() => addToast('Report download successfully', `${entry.name} has downloaded successfully.`)} />
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
           </Tab>
         </Tabs>
       </div>
@@ -2090,23 +2330,118 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   return (
+    <SchedulerWizardContext.Provider value={{ openSchedulerWizard, showToast: addToast }}>
     <>
+      <AlertGroup isToast isLiveRegion>
+        {toasts.map(t => (
+          <Alert key={t.id} variant="success" title={t.title} actionClose={<AlertActionCloseButton onClose={() => removeToast(t.id)} />}>
+            {t.description}
+          </Alert>
+        ))}
+      </AlertGroup>
+      <Modal
+        isOpen={pastInstancesReport !== null}
+        onClose={() => setPastInstancesReport(null)}
+        aria-label="Past instances"
+        variant="small"
+      >
+        <ModalHeader
+          title={<Flex alignItems={{ default: 'alignItemsCenter' }} style={{ gap: '8px' }}><span>{pastInstancesReport}</span><Tooltip content="Each report will contains all scheduled instances in one zip file."><OutlinedQuestionCircleIcon style={{ cursor: 'pointer', color: 'var(--pf-t--global--icon--color--subtle)', fontSize: '16px' }} /></Tooltip></Flex>}
+          description="History"
+        />
+        <ModalBody>
+          {(pastInstancesData[pastInstancesReport || ''] || []).length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 16px', color: 'var(--pf-t--global--text--color--subtle)' }}>
+              No report has been generated yet.
+            </div>
+          ) : (
+            <Table aria-label="Past instances table" variant="compact">
+              <Thead>
+                <Tr>
+                  <Th sort={{ sortBy: pastInstancesSortBy, onSort: (_e, index, direction) => setPastInstancesSortBy({ index, direction }), columnIndex: 0 }}>
+                    Time
+                  </Th>
+                  <Th sort={{ sortBy: pastInstancesSortBy, onSort: (_e, index, direction) => setPastInstancesSortBy({ index, direction }), columnIndex: 1 }}>
+                    Status
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {[...(pastInstancesData[pastInstancesReport || ''] || [])].sort((a, b) => {
+                  const dir = pastInstancesSortBy.direction === 'asc' ? 1 : -1;
+                  if (pastInstancesSortBy.index === 0) return dir * a.time.localeCompare(b.time);
+                  return dir * a.status.localeCompare(b.status);
+                }).map((inst, idx) => {
+                  const icon =
+                    inst.status === 'Failed' ? <ExclamationCircleIcon color="var(--pf-t--global--color--status--danger--100)" /> :
+                    inst.status === 'Scheduled' ? <ClockIcon color="var(--pf-t--global--icon--color--subtle)" /> :
+                    <CheckCircleIcon color="var(--pf-t--global--color--status--success--100)" />;
+                  return (
+                    <Tr key={idx}>
+                      <Td dataLabel="Time">{inst.time}</Td>
+                      <Td dataLabel="Status">
+                        <Flex alignItems={{ default: 'alignItemsCenter' }} style={{ gap: '8px', flexWrap: 'nowrap' }}>
+                          {icon}
+                          <span>{inst.status}</span>
+                        </Flex>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          )}
+        </ModalBody>
+      </Modal>
+      <Modal
+        isOpen={deleteReportName !== null}
+        onClose={() => setDeleteReportName(null)}
+        aria-label="Delete scheduled report"
+        variant="small"
+      >
+        <ModalHeader title="Delete this scheduled recurring report?" titleIconVariant="warning" />
+        <ModalBody>
+          Are you sure you want to delete this scheduled recurring report? Once the report is being deleted, all of its upcoming scheduled reports will be deleted. The action cannot be undone.
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="primary" onClick={() => {
+            const name = deleteReportName;
+            setSchedulerReports(prev => prev.filter(r => r.name !== name));
+            setDeleteReportName(null);
+            addToast(
+              'Recurring report has deleted successfully.',
+              `${name} has been deleted successfully.`
+            );
+          }}>Delete</Button>
+          <Button variant="link" onClick={() => setDeleteReportName(null)}>Cancel</Button>
+        </ModalFooter>
+      </Modal>
       <Modal
         isOpen={isScheduleWizardOpen}
-        onClose={() => setIsScheduleWizardOpen(false)}
+        onClose={() => { setIsScheduleWizardOpen(false); setLockedService(null); setLockedTask(null); setLockedFileType(null); }}
         aria-label="Schedule recurring report"
         variant="large"
+        className="trusted-wizard-modal"
       >
         <Wizard
           header={
             <WizardHeader
               title="Schedule recurring report"
               description="Lorem ipsum dolor sit amet"
-              onClose={() => setIsScheduleWizardOpen(false)}
+              onClose={() => { setIsScheduleWizardOpen(false); setLockedService(null); setLockedTask(null); setLockedFileType(null); }}
             />
           }
-          onClose={() => setIsScheduleWizardOpen(false)}
-          onSave={() => setIsScheduleWizardOpen(false)}
+          onClose={() => { setIsScheduleWizardOpen(false); setLockedService(null); setLockedTask(null); setLockedFileType(null); }}
+          onSave={() => {
+            addToast(
+              'Recurring report has created successfully.',
+              'You can find the scheduled report under Setting. The access of report will be sent via email during scheduled times. You can find it in the Global scheduler > Reports history tab as well.'
+            );
+            setIsScheduleWizardOpen(false);
+            setLockedService(null);
+            setLockedTask(null);
+            setLockedFileType(null);
+          }}
           height="calc(100vh - 350px)"
           isVisitRequired
         >
@@ -2122,7 +2457,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   onSelect={() => setWizardFileTypeOpen(false)}
                   onOpenChange={setWizardFileTypeOpen}
                   toggle={(toggleRef) => (
-                    <MenuToggle ref={toggleRef} onClick={() => setWizardFileTypeOpen(!wizardFileTypeOpen)} isExpanded={wizardFileTypeOpen} isFullWidth>
+                    <MenuToggle ref={toggleRef} onClick={() => setWizardFileTypeOpen(!wizardFileTypeOpen)} isExpanded={wizardFileTypeOpen} isFullWidth isDisabled={!!lockedFileType}>
                       {wizardFileType || 'Select a type'}
                     </MenuToggle>
                   )}
@@ -2150,7 +2485,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     onSelect={() => updateWizardInstance(idx, { serviceOpen: false })}
                     onOpenChange={(open) => updateWizardInstance(idx, { serviceOpen: open })}
                     toggle={(toggleRef) => (
-                      <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { serviceOpen: !inst.serviceOpen })} isExpanded={inst.serviceOpen} isFullWidth>
+                      <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { serviceOpen: !inst.serviceOpen })} isExpanded={inst.serviceOpen} isFullWidth isDisabled={!!lockedService}>
                         {inst.service || 'Select a service'}
                       </MenuToggle>
                     )}
@@ -2168,7 +2503,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     onSelect={() => updateWizardInstance(idx, { taskOpen: false })}
                     onOpenChange={(open) => updateWizardInstance(idx, { taskOpen: open })}
                     toggle={(toggleRef) => (
-                      <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { taskOpen: !inst.taskOpen })} isExpanded={inst.taskOpen} isFullWidth isDisabled={!inst.service}>
+                      <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { taskOpen: !inst.taskOpen })} isExpanded={inst.taskOpen} isFullWidth isDisabled={!inst.service || !!lockedTask}>
                         {inst.task || 'Select a task'}
                       </MenuToggle>
                     )}
@@ -2178,6 +2513,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                         <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'RHEL usage report' })}>RHEL usage report</DropdownItem>
                         <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'OpenShift usage report' })}>OpenShift usage report</DropdownItem>
                         <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Ansible usage report' })}>Ansible usage report</DropdownItem>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Subscription inventory report' })}>Subscription inventory report</DropdownItem>
                       </>}
                       {inst.service === 'Cost Management' && <>
                         <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Cost management report' })}>Cost management report</DropdownItem>
@@ -3921,7 +4257,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       
 
     </>
+    </SchedulerWizardContext.Provider>
   );
 };
 
 export { AppLayout };
+

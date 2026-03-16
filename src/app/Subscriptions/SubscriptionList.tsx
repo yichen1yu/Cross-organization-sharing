@@ -6,12 +6,16 @@ import {
   CardHeader,
   Content,
   Divider,
+  Dropdown,
+  DropdownItem,
+  DropdownList,
   Flex,
   FlexItem,
   Grid,
   GridItem,
   Label,
   LabelGroup,
+  MenuToggle,
   PageSection,
   Pagination,
   SearchInput,
@@ -22,6 +26,7 @@ import {
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
+import { useSchedulerWizard } from '@app/AppLayout/AppLayout';
 import { subscriptionsData } from './subscriptionsData';
 
 // Source of truth for rows
@@ -31,6 +36,8 @@ const SubscriptionList: React.FunctionComponent = () => {
   const [query, setQuery] = React.useState('');
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(10);
+  const [isExportOpen, setIsExportOpen] = React.useState(false);
+  const { openSchedulerWizard, showToast } = useSchedulerWizard();
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -168,6 +175,25 @@ const SubscriptionList: React.FunctionComponent = () => {
                 onChange={(_e, v) => { setQuery(v); setPage(1); }}
                 onClear={() => { setQuery(''); setPage(1); }}
               />
+            </ToolbarItem>
+            <ToolbarItem>
+              <Dropdown
+                isOpen={isExportOpen}
+                onSelect={() => setIsExportOpen(false)}
+                onOpenChange={setIsExportOpen}
+                toggle={(toggleRef) => (
+                  <MenuToggle ref={toggleRef} onClick={() => setIsExportOpen(!isExportOpen)} isExpanded={isExportOpen} variant="secondary">
+                    Export
+                  </MenuToggle>
+                )}
+                popperProps={{ appendTo: 'inline' }}
+              >
+                <DropdownList>
+                  <DropdownItem onClick={() => showToast('Export preparing for download', <><div>downloading export subscriptions_inventory.csv</div><Button variant="link" isInline style={{ marginTop: '8px' }} onClick={() => openSchedulerWizard({ preselectedService: 'Subscription Services', preselectedTask: 'Subscription inventory report', preselectedFileType: 'CSV' })}>Make this a recurring task</Button></>)}>Export to CSV</DropdownItem>
+                  <DropdownItem onClick={() => showToast('Export preparing for download', <><div>downloading export subscriptions_inventory.json</div><Button variant="link" isInline style={{ marginTop: '8px' }} onClick={() => openSchedulerWizard({ preselectedService: 'Subscription Services', preselectedTask: 'Subscription inventory report', preselectedFileType: 'JSON' })}>Make this a recurring task</Button></>)}>Export to JSON</DropdownItem>
+                  <DropdownItem onClick={() => openSchedulerWizard({ preselectedService: 'Subscription Services' })}>Set up recurring jobs</DropdownItem>
+                </DropdownList>
+              </Dropdown>
             </ToolbarItem>
             <ToolbarItem align={{ default: 'alignEnd' }}>
               <Pagination
