@@ -189,8 +189,8 @@ const SubscriptionList: React.FunctionComponent = () => {
                 popperProps={{ appendTo: 'inline' }}
               >
                 <DropdownList>
-                  <DropdownItem onClick={() => showToast('Export preparing for download', <><div>downloading export subscriptions_inventory.csv</div><Button variant="link" isInline style={{ marginTop: '8px' }} onClick={() => openSchedulerWizard({ preselectedService: 'Subscription Services', preselectedTask: 'Subscription inventory report', preselectedFileType: 'CSV' })}>Make this a recurring task</Button></>)}>Export to CSV</DropdownItem>
-                  <DropdownItem onClick={() => showToast('Export preparing for download', <><div>downloading export subscriptions_inventory.json</div><Button variant="link" isInline style={{ marginTop: '8px' }} onClick={() => openSchedulerWizard({ preselectedService: 'Subscription Services', preselectedTask: 'Subscription inventory report', preselectedFileType: 'JSON' })}>Make this a recurring task</Button></>)}>Export to JSON</DropdownItem>
+                  <DropdownItem onClick={() => showToast('Export preparing for download', <><div>downloading export subscriptions_inventory.csv</div><Button variant="link" isInline style={{ marginTop: '8px' }} onClick={() => openSchedulerWizard({ preselectedService: 'Subscription Services', preselectedTask: 'Subscription inventory report', preselectedFileType: 'CSV' })}>Make this a recurring report</Button></>)}>Export to CSV</DropdownItem>
+                  <DropdownItem onClick={() => showToast('Export preparing for download', <><div>downloading export subscriptions_inventory.json</div><Button variant="link" isInline style={{ marginTop: '8px' }} onClick={() => openSchedulerWizard({ preselectedService: 'Subscription Services', preselectedTask: 'Subscription inventory report', preselectedFileType: 'JSON' })}>Make this a recurring report</Button></>)}>Export to JSON</DropdownItem>
                   <DropdownItem onClick={() => openSchedulerWizard({ preselectedService: 'Subscription Services' })}>Set up recurring jobs</DropdownItem>
                 </DropdownList>
               </Dropdown>

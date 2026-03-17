@@ -129,11 +129,13 @@ import {
   TimesIcon,
   UserIcon,
   UsersIcon,
+  MinusCircleIcon,
+  PlusCircleIcon,
   WrenchIcon
 } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td, ExpandableRowContent } from '@patternfly/react-table';
 
-type SchedulerWizardOptions = { preselectedService?: string; preselectedTask?: string; preselectedFileType?: string };
+type SchedulerWizardOptions = { preselectedService?: string; preselectedTask?: string; preselectedFileType?: string; lockService?: boolean; lockTask?: boolean; lockFileType?: boolean };
 const SchedulerWizardContext = React.createContext<{
   openSchedulerWizard: (options?: SchedulerWizardOptions) => void;
   showToast: (title: string, description?: React.ReactNode) => void;
@@ -229,10 +231,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     const task = options?.preselectedTask || '';
     setWizardInstances([{ service, task, serviceOpen: false, taskOpen: false }]);
     setCronMinute(''); setCronHour(''); setCronDayOfMonth(''); setCronMonth(''); setCronDayOfWeek('');
-    setCronTimezone('Eastern Standard Time (EST)');
-    setLockedService(options?.preselectedService || null);
-    setLockedTask(options?.preselectedTask || null);
-    setLockedFileType(options?.preselectedFileType || null);
+    setCronTimezone('Eastern Time (ET)');
+    setLockedService(options?.lockService ? (options.preselectedService || null) : null);
+    setLockedTask(options?.lockTask ? (options.preselectedTask || null) : null);
+    setLockedFileType(options?.lockFileType ? (options.preselectedFileType || null) : null);
     setIsScheduleWizardOpen(true);
   }, []);
   type ToastItem = { id: number; title: string; description?: React.ReactNode };
@@ -254,7 +256,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [cronDayOfMonth, setCronDayOfMonth] = React.useState('');
   const [cronMonth, setCronMonth] = React.useState('');
   const [cronDayOfWeek, setCronDayOfWeek] = React.useState('');
-  const [cronTimezone, setCronTimezone] = React.useState('Eastern Standard Time (EST)');
+  const [cronTimezone, setCronTimezone] = React.useState('Eastern Time (ET)');
   const [cronTimezoneOpen, setCronTimezoneOpen] = React.useState(false);
 
   const validateCronField = (value: string, type: 'minute' | 'hour' | 'dayOfMonth' | 'month' | 'dayOfWeek'): { valid: boolean; message?: string } => {
@@ -264,7 +266,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       hour: { min: 0, max: 23 },
       dayOfMonth: { min: 1, max: 31 },
       month: { min: 1, max: 12, names: /^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)$/i },
-      dayOfWeek: { min: 0, max: 6, names: /^(sun|mon|tue|wed|thu|fri|sat)$/i },
+      dayOfWeek: { min: 0, max: 6, names: /^(sun|sunday|mon|monday|tue|tuesday|wed|wednesday|thu|thursday|fri|friday|sat|saturday)$/i },
     };
     const { min, max, names } = ranges[type];
     const parts = value.split(',');
@@ -406,10 +408,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     const hh12 = next.getHours() === 0 ? 12 : next.getHours() > 12 ? next.getHours() - 12 : next.getHours();
     const ampm = next.getHours() >= 12 ? 'pm' : 'am';
     const mins = String(next.getMinutes()).padStart(2, '0');
-    const tz = timezone.match(/\(([^)]+)\)/)?.[1] || 'EST';
+    const tz = timezone.match(/\(([^)]+)\)/)?.[1] || 'ET';
     return `${dd}/${mm}/${yyyy} ${hh12}:${mins} ${ampm} ${tz}`;
   };
 
+  type ReportInstance = { service: string; task: string };
   type ReportEntry = {
     name: string;
     date: string;
@@ -419,6 +422,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     frequency: string;
     fileType?: string;
     task?: string;
+    instances?: ReportInstance[];
     cronMinute?: string;
     cronHour?: string;
     cronDayOfMonth?: string;
@@ -430,39 +434,39 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [schedulerReports, setSchedulerReports] = React.useState<ReportEntry[]>([
     {
       name: 'AWS monthly cost breakdown',
-      date: '25/07/2025 12:00 am EST',
+      date: '25/07/2025 12:00 am ET',
       status: 'Running',
       service: 'Cost Management',
       creator: 'Allison Robinhood',
-      frequency: 'Monthly on the 1st at 6:00am EST',
+      frequency: 'Monthly on the 1st at 6:00am ET',
       fileType: 'CSV',
       task: 'Cost management report',
       cronMinute: '0', cronHour: '6', cronDayOfMonth: '1', cronMonth: '*', cronDayOfWeek: '*',
-      cronTimezone: 'Eastern Standard Time (EST)',
+      cronTimezone: 'Eastern Time (ET)',
     },
     {
       name: 'RHEL vulnerability scan summary',
-      date: '25/07/2025 12:00 am EST',
+      date: '25/07/2025 12:00 am ET',
       status: 'Failed',
       service: 'Red Hat Lightspeed',
       creator: 'Carlos Mendez',
-      frequency: 'Weekly on Monday at 8:00am EST',
+      frequency: 'Weekly on Monday at 8:00am ET',
       fileType: 'JSON',
       task: 'Vulnerability report',
       cronMinute: '0', cronHour: '8', cronDayOfMonth: '*', cronMonth: '*', cronDayOfWeek: '1',
-      cronTimezone: 'Eastern Standard Time (EST)',
+      cronTimezone: 'Eastern Time (ET)',
     },
     {
       name: 'OpenShift cluster utilization',
-      date: '26/07/2025 12:00 am EST',
+      date: '26/07/2025 12:00 am ET',
       status: 'Completed',
       service: 'Subscription Services',
       creator: 'Priya Sharma',
-      frequency: 'Daily at 12:00am EST',
+      frequency: 'Daily at 12:00am ET',
       fileType: 'CSV',
       task: 'OpenShift usage report',
       cronMinute: '0', cronHour: '0', cronDayOfMonth: '*', cronMonth: '*', cronDayOfWeek: '*',
-      cronTimezone: 'Eastern Standard Time (EST)',
+      cronTimezone: 'Eastern Time (ET)',
     },
   ]);
 
@@ -470,9 +474,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const reportHistory: HistoryEntry[] = [
     { name: 'OpenShift cluster utilization', date: 'Jul 20, 2025' },
-    { name: 'AWS monthly cost breakdown', date: 'Jul 15, 2025' },
+    { name: 'RHEL vulnerability scan summary', date: 'Jul 15, 2025' },
     { name: 'RHEL vulnerability scan summary', date: 'Jul 14, 2025' },
-    { name: 'AWS monthly cost breakdown', date: 'Jun 15, 2025' },
+    { name: 'OpenShift cluster utilization', date: 'Jun 15, 2025' },
   ];
 
   type PastInstance = { time: string; status: 'Completed' | 'Failed' | 'Scheduled' };
@@ -480,17 +484,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const pastInstancesData: Record<string, PastInstance[]> = {
     'AWS monthly cost breakdown': [],
     'RHEL vulnerability scan summary': [
-      { time: 'Jul 21, 2025 8:00:00 AM EST', status: 'Completed' },
-      { time: 'Jul 14, 2025 8:00:00 AM EST', status: 'Failed' },
-      { time: 'Jul 7, 2025 8:00:00 AM EST', status: 'Completed' },
-      { time: 'Jun 30, 2025 8:00:00 AM EST', status: 'Completed' },
+      { time: 'Jul 21, 2025 8:00:00 AM ET', status: 'Completed' },
+      { time: 'Jul 14, 2025 8:00:00 AM ET', status: 'Failed' },
+      { time: 'Jul 7, 2025 8:00:00 AM ET', status: 'Completed' },
+      { time: 'Jun 30, 2025 8:00:00 AM ET', status: 'Completed' },
     ],
     'OpenShift cluster utilization': [
-      { time: 'Jul 25, 2025 12:00:00 AM EST', status: 'Completed' },
-      { time: 'Jul 24, 2025 12:00:00 AM EST', status: 'Completed' },
-      { time: 'Jul 23, 2025 12:00:00 AM EST', status: 'Completed' },
-      { time: 'Jul 22, 2025 12:00:00 AM EST', status: 'Completed' },
-      { time: 'Jul 21, 2025 12:00:00 AM EST', status: 'Completed' },
+      { time: 'Jul 25, 2025 12:00:00 AM ET', status: 'Completed' },
+      { time: 'Jul 24, 2025 12:00:00 AM ET', status: 'Completed' },
+      { time: 'Jul 23, 2025 12:00:00 AM ET', status: 'Completed' },
+      { time: 'Jul 22, 2025 12:00:00 AM ET', status: 'Completed' },
+      { time: 'Jul 21, 2025 12:00:00 AM ET', status: 'Completed' },
     ],
   };
 
@@ -1972,12 +1976,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     setWizardInstances(prev => [...prev, { service: '', task: '', serviceOpen: false, taskOpen: false }]);
   };
 
-  const ScheduleWizardFooter = ({ isNextDisabled, canAddReport }: { isNextDisabled?: boolean; canAddReport?: boolean }) => {
-    const { goToNextStep, close } = useWizardContext();
+  const removeWizardInstance = (index: number) => {
+    setWizardInstances(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const ScheduleWizardFooter = ({ isNextDisabled, canAddReport, showBack }: { isNextDisabled?: boolean; canAddReport?: boolean; showBack?: boolean }) => {
+    const { goToNextStep, goToPrevStep, close } = useWizardContext();
     return (
       <WizardFooterWrapper>
         <Flex style={{ gap: '16px' }} alignItems={{ default: 'alignItemsCenter' }}>
           {canAddReport !== undefined && <Button variant="secondary" isDisabled={!canAddReport} onClick={() => { addWizardInstance(); setTimeout(goToNextStep, 0); }}>Add a report instance</Button>}
+          {showBack && <Button variant="secondary" onClick={goToPrevStep}>Back</Button>}
           <Button variant="primary" isDisabled={isNextDisabled} onClick={goToNextStep}>Next</Button>
           <Button variant="link" onClick={close}>Cancel</Button>
         </Flex>
@@ -2007,6 +2016,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           <Button variant="primary" onClick={() => {
             const nextDate = getNextCronDate(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek, cronTimezone);
             const naturalLang = allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : '';
+            const savedInstances = wizardInstances.map(inst => ({ service: inst.service, task: inst.task }));
             if (editingReportName) {
               setSchedulerReports(prev => prev.map(r => r.name === editingReportName ? {
                 ...r,
@@ -2016,6 +2026,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 frequency: naturalLang,
                 fileType: wizardFileType,
                 task: wizardInstances[0]?.task || '',
+                instances: savedInstances,
                 cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek, cronTimezone,
               } : r));
               addToast(
@@ -2032,6 +2043,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 frequency: naturalLang,
                 fileType: wizardFileType,
                 task: wizardInstances[0]?.task || '',
+                instances: savedInstances,
                 cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek, cronTimezone,
               }]);
               addToast(
@@ -2113,7 +2125,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                       setWizardFileType('');
                       setWizardInstances([{ service: '', task: '', serviceOpen: false, taskOpen: false }]);
                       setCronMinute(''); setCronHour(''); setCronDayOfMonth(''); setCronMonth(''); setCronDayOfWeek('');
-                      setCronTimezone('Eastern Standard Time (EST)');
+                      setCronTimezone('Eastern Time (ET)');
                       setIsScheduleWizardOpen(true);
                     }}>Create new</Button>
                   </ToolbarItem>
@@ -2206,13 +2218,16 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                               setEditingReportName(report.name);
                               setWizardReportName(report.name);
                               setWizardFileType(report.fileType || '');
-                              setWizardInstances([{ service: report.service, task: report.task || '', serviceOpen: false, taskOpen: false }]);
+                              const instances = report.instances && report.instances.length > 0
+                                ? report.instances.map(inst => ({ service: inst.service, task: inst.task, serviceOpen: false, taskOpen: false }))
+                                : [{ service: report.service, task: report.task || '', serviceOpen: false, taskOpen: false }];
+                              setWizardInstances(instances);
                               setCronMinute(report.cronMinute || '');
                               setCronHour(report.cronHour || '');
                               setCronDayOfMonth(report.cronDayOfMonth || '');
                               setCronMonth(report.cronMonth || '');
                               setCronDayOfWeek(report.cronDayOfWeek || '');
-                              setCronTimezone(report.cronTimezone || 'Eastern Standard Time (EST)');
+                              setCronTimezone(report.cronTimezone || 'Eastern Time (ET)');
                               setIsScheduleWizardOpen(true);
                             }}>Edit</DropdownItem>
                             <DropdownItem key="pause" onClick={() => {
@@ -2230,11 +2245,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div>
                               <div style={{ fontWeight: 600 }}>Service(s)</div>
-                              <div>{report.service}</div>
+                              <div>{report.instances && report.instances.length > 0
+                                ? Array.from(new Set(report.instances.map(i => i.service))).join(', ')
+                                : report.service}</div>
                             </div>
                             <div>
-                              <div style={{ fontWeight: 600 }}>Task creator</div>
-                              <div>{report.creator}</div>
+                              <div style={{ fontWeight: 600 }}>File type</div>
+                              <div>{report.fileType}</div>
                             </div>
                             <div>
                               <div style={{ fontWeight: 600 }}>Frequency</div>
@@ -2443,7 +2460,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             setLockedFileType(null);
           }}
           height="calc(100vh - 350px)"
-          isVisitRequired
+          isVisitRequired={!editingReportName}
         >
           <WizardStep name="Name and type" id="step-1" footer={<ScheduleWizardFooter isNextDisabled={!wizardReportName.trim() || !wizardFileType} />}>
             <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Name and type</Title>
@@ -2470,73 +2487,87 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </FormGroup>
             </Form>
           </WizardStep>
-          {wizardInstances.map((inst, idx) => (
-            <WizardStep
-              key={`instance-${idx}`}
-              name={`Report instance ${idx + 1}: Service and task`}
-              id={`step-instance-${idx}`}
-              footer={<ScheduleWizardFooter canAddReport={!!(inst.service && inst.task)} isNextDisabled={!inst.service || !inst.task} />}
-            >
-              <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Report instance {idx + 1}: Service and task</Title>
-              <Form>
-                <FormGroup label="Service" fieldId={`wizard-service-${idx}`}>
-                  <Dropdown
-                    isOpen={inst.serviceOpen}
-                    onSelect={() => updateWizardInstance(idx, { serviceOpen: false })}
-                    onOpenChange={(open) => updateWizardInstance(idx, { serviceOpen: open })}
-                    toggle={(toggleRef) => (
-                      <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { serviceOpen: !inst.serviceOpen })} isExpanded={inst.serviceOpen} isFullWidth isDisabled={!!lockedService}>
-                        {inst.service || 'Select a service'}
-                      </MenuToggle>
-                    )}
-                  >
-                    <DropdownList>
-                      <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Cost Management', task: '' })}>Cost Management</DropdownItem>
-                      <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Subscription Services', task: '' })}>Subscription Services</DropdownItem>
-                      <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Red Hat Lightspeed', task: '' })}>Red Hat Lightspeed</DropdownItem>
-                    </DropdownList>
-                  </Dropdown>
-                </FormGroup>
-                <FormGroup label="Task" fieldId={`wizard-task-${idx}`}>
-                  <Dropdown
-                    isOpen={inst.taskOpen}
-                    onSelect={() => updateWizardInstance(idx, { taskOpen: false })}
-                    onOpenChange={(open) => updateWizardInstance(idx, { taskOpen: open })}
-                    toggle={(toggleRef) => (
-                      <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { taskOpen: !inst.taskOpen })} isExpanded={inst.taskOpen} isFullWidth isDisabled={!inst.service || !!lockedTask}>
-                        {inst.task || 'Select a task'}
-                      </MenuToggle>
-                    )}
-                  >
-                    <DropdownList>
-                      {inst.service === 'Subscription Services' && <>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'RHEL usage report' })}>RHEL usage report</DropdownItem>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'OpenShift usage report' })}>OpenShift usage report</DropdownItem>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Ansible usage report' })}>Ansible usage report</DropdownItem>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Subscription inventory report' })}>Subscription inventory report</DropdownItem>
-                      </>}
-                      {inst.service === 'Cost Management' && <>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Cost management report' })}>Cost management report</DropdownItem>
-                      </>}
-                      {inst.service === 'Red Hat Lightspeed' && <>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Inventory report' })}>Inventory report</DropdownItem>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Vulnerability report' })}>Vulnerability report</DropdownItem>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Compliance report' })}>Compliance report</DropdownItem>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Advisories' })}>Advisories</DropdownItem>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Malware report' })}>Malware report</DropdownItem>
-                      </>}
-                    </DropdownList>
-                  </Dropdown>
-                </FormGroup>
-              </Form>
-            </WizardStep>
-          ))}
+          <WizardStep
+            name="Service and task"
+            id="step-service-task"
+            footer={<ScheduleWizardFooter showBack isNextDisabled={wizardInstances.some(inst => !inst.service || !inst.task)} />}
+          >
+            <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Service and task</Title>
+            {wizardInstances.map((inst, idx) => (
+              <div key={`instance-${idx}`} style={{ marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '16px', fontWeight: 500, color: 'var(--pf-t--global--text--color--subtle)' }}>Report instance {idx + 1}</span>
+                  {idx > 0 && (
+                    <Button variant="link" icon={<MinusCircleIcon />} style={{ paddingRight: 0 }} onClick={() => removeWizardInstance(idx)}>
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <Form>
+                  <FormGroup label="Service" fieldId={`wizard-service-${idx}`}>
+                    <Dropdown
+                      isOpen={inst.serviceOpen}
+                      onSelect={() => updateWizardInstance(idx, { serviceOpen: false })}
+                      onOpenChange={(open) => updateWizardInstance(idx, { serviceOpen: open })}
+                      toggle={(toggleRef) => (
+                        <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { serviceOpen: !inst.serviceOpen })} isExpanded={inst.serviceOpen} isFullWidth isDisabled={!!lockedService}>
+                          {inst.service || 'Select a service'}
+                        </MenuToggle>
+                      )}
+                    >
+                      <DropdownList>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Cost Management', task: '' })}>Cost Management</DropdownItem>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Subscription Services', task: '' })}>Subscription Services</DropdownItem>
+                        <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Red Hat Lightspeed', task: '' })}>Red Hat Lightspeed</DropdownItem>
+                      </DropdownList>
+                    </Dropdown>
+                  </FormGroup>
+                  <FormGroup label="Task" fieldId={`wizard-task-${idx}`}>
+                    <Dropdown
+                      isOpen={inst.taskOpen}
+                      onSelect={() => updateWizardInstance(idx, { taskOpen: false })}
+                      onOpenChange={(open) => updateWizardInstance(idx, { taskOpen: open })}
+                      toggle={(toggleRef) => (
+                        <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { taskOpen: !inst.taskOpen })} isExpanded={inst.taskOpen} isFullWidth isDisabled={!inst.service || !!lockedTask}>
+                          {inst.task || 'Select a task'}
+                        </MenuToggle>
+                      )}
+                    >
+                      <DropdownList>
+                        {inst.service === 'Subscription Services' && <>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'RHEL usage report' })}>RHEL usage report</DropdownItem>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'OpenShift usage report' })}>OpenShift usage report</DropdownItem>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Ansible usage report' })}>Ansible usage report</DropdownItem>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Subscription inventory report' })}>Subscription inventory report</DropdownItem>
+                        </>}
+                        {inst.service === 'Cost Management' && <>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Cost management report' })}>Cost management report</DropdownItem>
+                        </>}
+                        {inst.service === 'Red Hat Lightspeed' && <>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Inventory report' })}>Inventory report</DropdownItem>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Vulnerability report' })}>Vulnerability report</DropdownItem>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Compliance report' })}>Compliance report</DropdownItem>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Advisories' })}>Advisories</DropdownItem>
+                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Malware report' })}>Malware report</DropdownItem>
+                        </>}
+                      </DropdownList>
+                    </Dropdown>
+                  </FormGroup>
+                </Form>
+                {idx === wizardInstances.length - 1 && (
+                  <div style={{ marginTop: '16px' }}>
+                    <Button variant="link" icon={<PlusCircleIcon />} style={{ paddingLeft: 0 }} onClick={() => { addWizardInstance(); }}>
+                      Add an instance
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </WizardStep>
           <WizardStep name="Frequency" id="step-frequency" footer={<ScheduleWizardBackNextFooter isNextDisabled={!allCronValid} />}>
             <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>Frequency</Title>
             <Form>
-              <FormGroup label="Recurrence setting" fieldId="cron-setting" labelHelp={
-                <FormGroupLabelHelp aria-label="Recurrence setting help" />
-              }>
+              <FormGroup label="Recurrence setting" fieldId="cron-setting">
                 <Flex style={{ gap: '16px', flexWrap: 'nowrap' }}>
                   <FlexItem style={{ flex: 1 }}>
                     <TextInput id="cron-minute" placeholder="0-59, *, -, /" value={cronMinute} onChange={(_e, val) => setCronMinute(val)} validated={cronMinute && !cronMinuteValidation.valid ? 'error' : 'default'} />
@@ -2565,9 +2596,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   </FlexItem>
                 </Flex>
               </FormGroup>
-              {allCronValid && (
-                <Alert variant="info" isInline title={cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek)} />
-              )}
+              <Alert variant="info" isInline title={allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : 'Fill in the fields above to preview your schedule.'} />
               <FormGroup label="Time Zone" fieldId="cron-timezone">
                 <Dropdown
                   isOpen={cronTimezoneOpen}
@@ -2580,10 +2609,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   )}
                 >
                   <DropdownList>
-                    <DropdownItem onClick={() => setCronTimezone('Eastern Standard Time (EST)')}>Eastern Standard Time (EST)</DropdownItem>
-                    <DropdownItem onClick={() => setCronTimezone('Central Standard Time (CST)')}>Central Standard Time (CST)</DropdownItem>
-                    <DropdownItem onClick={() => setCronTimezone('Mountain Standard Time (MST)')}>Mountain Standard Time (MST)</DropdownItem>
-                    <DropdownItem onClick={() => setCronTimezone('Pacific Standard Time (PST)')}>Pacific Standard Time (PST)</DropdownItem>
+                    <DropdownItem onClick={() => setCronTimezone('Eastern Time (ET)')}>Eastern Time (ET)</DropdownItem>
+                    <DropdownItem onClick={() => setCronTimezone('Central Time (CT)')}>Central Time (CT)</DropdownItem>
+                    <DropdownItem onClick={() => setCronTimezone('Mountain Time (MT)')}>Mountain Time (MT)</DropdownItem>
+                    <DropdownItem onClick={() => setCronTimezone('Pacific Time (PT)')}>Pacific Time (PT)</DropdownItem>
                     <DropdownItem onClick={() => setCronTimezone('Coordinated Universal Time (UTC)')}>Coordinated Universal Time (UTC)</DropdownItem>
                   </DropdownList>
                 </Dropdown>
