@@ -2496,7 +2496,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             {wizardInstances.map((inst, idx) => (
               <div key={`instance-${idx}`} style={{ marginBottom: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '16px', fontWeight: 500, color: 'var(--pf-t--global--text--color--subtle)' }}>Report instance {idx + 1}</span>
+                  <span style={{ fontSize: '16px', fontWeight: 500, color: 'var(--pf-t--global--text--color--subtle)' }}>Job {idx + 1}</span>
                   {idx > 0 && (
                     <Button variant="link" icon={<MinusCircleIcon />} style={{ paddingRight: 0 }} onClick={() => removeWizardInstance(idx)}>
                       Remove
@@ -2596,7 +2596,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   </FlexItem>
                 </Flex>
               </FormGroup>
-              <Alert variant="info" isInline title={allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : 'Fill in the fields above to preview your schedule.'} />
+              <Alert variant="info" isInline title={allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : 'Fill in all of the fields above to preview your schedule.'} />
               <FormGroup label="Time Zone" fieldId="cron-timezone">
                 <Dropdown
                   isOpen={cronTimezoneOpen}
@@ -2631,7 +2631,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </div>
               {wizardInstances.map((inst, idx) => (
                 <div key={idx}>
-                  <div style={{ fontWeight: 600, marginBottom: '8px' }}>Report instance {idx + 1}:</div>
+                  <div style={{ fontWeight: 600, marginBottom: '8px' }}>Job {idx + 1}:</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', rowGap: '4px' }}>
                     <span style={{ fontWeight: 600 }}>Service</span><span>{inst.service || '—'}</span>
                     <span style={{ fontWeight: 600 }}>Task name</span><span>{inst.task || '—'}</span>
