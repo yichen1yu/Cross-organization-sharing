@@ -32,14 +32,24 @@ This guide walks through integrating your AWS account with Red Hat Hybrid Cloud 
 | S3 | Creates an S3 bucket for the CUR (or uses an existing one). |
 | CUR | Creates the CUR report named `koku` (hourly, resources, gzip, Redshift/QuickSight) pointing to your bucket. |
 | EC2 tagging | Optionally tags running EC2 instances with `com_redhat_rhel=7` and `com_redhat_rhel_addon=ELS` in chosen regions. |
-| Cost Allocation Tags | Activates the two tags in Cost Explorer. |
+| Cost Allocation Tags | Activates the two tags in Cost Explorer (when ready). |
 | IAM | Creates/updates an IAM policy and role that Red Hat can assume (using your External ID). |
+
+**Two-phase workflow**
+
+The script splits setup into two phases to handle AWS propagation delays (tags, CUR):
+
+| Phase | When | What |
+|-------|------|------|
+| **Phase 1** | Run immediately | S3, CUR, IAM, EC2 tags. Saves values to `~/.rh-cost-mgmt-state.json`. |
+| **Phase 2** | Run after ~24h | Activates Cost Allocation Tags, validates CUR delivery and IAM. |
+
+If the Red Hat wizard is re-run (generating a new External ID), use `--update-external-id` to update the IAM role without redoing the full setup.
 
 **What stays manual**
 
 - Subscribing to the correct ELS Marketplace listing (per your locale).
 - In Red Hat Hybrid Cloud Console: pasting the **Role ARN** and **External ID** into the integration wizard.
-- Waiting for CUR delivery to S3 (can take up to 24 hours).
 
 ---
 
@@ -49,7 +59,7 @@ You can skip local AWS CLI install and credential setup by running the setup scr
 
 **What you need**
 
-1. Log into the **AWS Console** (e.g. via your normal path, including Red Hat IdP → “Select a role” → choose your account/role).
+1. Log into the **AWS Console** (e.g. via your normal path, including Red Hat IdP → "Select a role" → choose your account/role).
 2. Open **AWS CloudShell**: in the AWS Console header, click the terminal icon (CloudShell) to open a browser-based shell.
 3. Run the setup script in one of two ways.
 
@@ -65,7 +75,7 @@ Replace `<BASE_URL>` with the real URL (e.g. `https://raw.githubusercontent.com/
 
 **Option B — Script not hosted (copy from repo)**
 
-If you have the script in your repo but don’t host it at a public URL:
+If you have the script in your repo but don't host it at a public URL:
 
 1. In CloudShell, create the script and paste the contents of `setup_rh_cost_mgmt.sh` (e.g. copy from your repo), then run:
 
@@ -84,8 +94,8 @@ chmod +x setup_rh_cost_mgmt.sh
 
 **After it runs**
 
-- Copy the **Role ARN** from the output and paste it (with your External ID) into the Red Hat Hybrid Cloud Console wizard.
-- The rest of the integration steps (ELS Marketplace subscription, waiting for CUR) are the same as in the rest of this guide.
+- Copy the four wizard values from the output and paste them into the Red Hat Hybrid Cloud Console wizard.
+- After ~24 hours, run `--phase2` to activate tags and validate the setup.
 
 ---
 
@@ -108,7 +118,7 @@ The scripts call the AWS API. You must be authenticated so that `aws sts get-cal
 - Then: `aws sso login --profile <profile-name>` and use `AWS_PROFILE=<profile-name>` when running the scripts.
 
 **Option B — Red Hat IdP → AWS (SAML)**  
-- If you only have a **Red Hat** login link (e.g. `https://auth.redhat.com/.../itaws`) that redirects to “Select a role” in AWS, that is **not** the value for `aws configure sso`’s “SSO start URL.”  
+- If you only have a **Red Hat** login link (e.g. `https://auth.redhat.com/.../itaws`) that redirects to "Select a role" in AWS, that is **not** the value for `aws configure sso`'s "SSO start URL."  
 - Ask your AWS admin for the **AWS SSO start URL** (`*.awsapps.com/start`) for CLI use, or use whatever method your org provides for CLI access (e.g. temporary keys, or a custom script that uses the SAML flow).
 
 **Verify**
@@ -122,7 +132,7 @@ If this fails, fix credentials (see [Troubleshooting](#8-troubleshooting)).
 ### 3.3 Get the External ID from Red Hat
 
 - In **Red Hat Hybrid Cloud Console**, start the cost/metering integration wizard.
-- It will show an **External ID**. Copy it; you’ll need it when running the setup script.
+- It will show an **External ID**. Copy it; you'll need it when running the setup script.
 
 ### 3.4 Optional: `jq`
 
@@ -132,15 +142,17 @@ If this fails, fix credentials (see [Troubleshooting](#8-troubleshooting)).
 
 ## 4. Step-by-step summary
 
-| # | Step | Automated? |
-|---|------|------------|
-| 1 | Install/configure AWS CLI and ensure credentials work | Manual |
-| 2 | Get External ID from Red Hat Hybrid Cloud Console wizard | Manual |
-| 3 | Run setup script (wizard or with bucket/region/External ID) | **Script** |
-| 4 | Copy Role ARN from script output | Manual |
-| 5 | In Red Hat wizard: paste Role ARN and External ID | Manual |
-| 6 | Subscribe to ELS Marketplace listing (per your locale) | Manual |
-| 7 | Wait for CUR to deliver to S3 (up to 24h); optionally run validate script | Manual / Script |
+| # | Step | Automated? | Phase |
+|---|------|------------|-------|
+| 1 | Install/configure AWS CLI and ensure credentials work | Manual | — |
+| 2 | Get External ID from Red Hat Hybrid Cloud Console wizard | Manual | — |
+| 3 | Run setup script — Phase 1 (wizard or with bucket/region/External ID) | **Script** | 1 |
+| 4 | Copy Role ARN + wizard values from script output | Manual | 1 |
+| 5 | In Red Hat wizard: paste Role ARN, External ID, S3 Bucket, AWS Region | Manual | 1 |
+| 6 | Subscribe to ELS Marketplace listing (per your locale) | Manual | 1 |
+| 7 | Wait ~24 hours for CUR delivery and tag discovery | Manual | — |
+| 8 | Run `--phase2` to activate tags and validate | **Script** | 2 |
+| 9 | *(If needed)* Run `--update-external-id` if Red Hat wizard was re-run | **Script** | — |
 
 ---
 
@@ -162,10 +174,10 @@ If this fails, fix credentials (see [Troubleshooting](#8-troubleshooting)).
 ### Step 2: Get External ID from Red Hat
 
 1. Open Red Hat Hybrid Cloud Console and go to the cost/metering integration (e.g. Subscriptions & Spend or Cost Management).
-2. Start the “Add AWS” or “Configure AWS” wizard.
+2. Start the "Add AWS" or "Configure AWS" wizard.
 3. The wizard will display an **External ID**. Copy and save it for the next step.
 
-### Step 3: Run the setup script
+### Step 3: Run the setup script (Phase 1)
 
 **Option A — Guided (wizard)**
 
@@ -207,34 +219,65 @@ Example:
 ./scripts/setup_rh_cost_mgmt.sh rh-bucket us-east-1 abc --output json
 ```
 
-### Step 4: Copy the Role ARN
+### Step 4: Copy the wizard values
 
-After the script finishes, it prints:
+After Phase 1 completes, the script prints all four values needed for the Red Hat wizard:
 
 - **Role ARN** (e.g. `arn:aws:iam::123456789012:role/RH_ELS_Metering_Role`)
-- **CUR location** (e.g. `s3://your-bucket/cost`)
+- **External ID** (the one you provided)
+- **S3 Bucket** name
+- **AWS Region**
 
-Copy the **Role ARN**; you will paste it into the Red Hat wizard.
+These are also saved to `~/.rh-cost-mgmt-state.json`. View them anytime with:
+
+```bash
+./scripts/setup_rh_cost_mgmt.sh --show
+```
 
 ### Step 5: Complete the Red Hat wizard
 
-1. In the Red Hat Hybrid Cloud Console integration wizard, paste the **Role ARN** and confirm the **External ID** (same one you used in the script).
+1. In the Red Hat Hybrid Cloud Console integration wizard, paste the **Role ARN**, **S3 Bucket**, and **AWS Region**, and confirm the **External ID**.
 2. Finish the wizard as prompted.
 
 ### Step 6: Subscribe to ELS Marketplace listing
 
-- In AWS (or your cloud marketplace), subscribe to the **RHEL ELS** Marketplace listing that matches your region/locale, as required by Red Hat’s documentation.
+- In AWS (or your cloud marketplace), subscribe to the **RHEL ELS** Marketplace listing that matches your region/locale, as required by Red Hat's documentation.
 
-### Step 7: Wait for CUR and optionally validate
+### Step 7: Wait ~24 hours
 
 - CUR files are delivered to your S3 bucket; this can take **up to 24 hours**.
-- Optionally run the **validation** script to verify bucket, CUR definition, Cost Allocation Tags, and IAM role (see [Script reference — Validation](#validation)).
+- Cost Allocation Tags need up to 24 hours to be discovered by Cost Explorer after EC2 instances are tagged.
+- Do **not** re-run the Red Hat wizard during this time unless there is an error — re-running generates a new External ID that requires updating the IAM role.
+
+### Step 8: Run Phase 2
+
+After ~24 hours, activate tags and validate everything:
+
+```bash
+./scripts/setup_rh_cost_mgmt.sh --phase2
+```
+
+Phase 2 checks:
+- Cost Allocation Tags are discoverable and activates them
+- CUR data has been delivered to S3
+- IAM role trust policy matches the saved External ID
+- EC2 instances are tagged correctly
+
+### Step 9: Handle External ID changes (if needed)
+
+If you re-ran the Red Hat wizard and it generated a **new** External ID, update the IAM role without re-running the full setup:
+
+```bash
+./scripts/setup_rh_cost_mgmt.sh --update-external-id <NEW_EXTERNAL_ID>
+```
+
+This updates both the IAM role and the saved state file.
 
 ---
 
 ## 6. Script reference
 
-### Setup
+### Setup (Phase 1)
 
 | Item | Description |
 |------|-------------|
@@ -242,23 +285,40 @@ Copy the **Role ARN**; you will paste it into the Red Hat wizard.
 | Usage | `./setup_rh_cost_mgmt.sh <BUCKET_NAME> <AWS_REGION> <EXTERNAL_ID> [TAG_REGIONS]` |
 | `--wizard` | Interactive prompts for bucket, region, External ID, and optional tagging regions |
 | `--plan` | Dry run: print intended actions, no AWS changes |
-| `--output json` | Print JSON with `RoleArn`, `Bucket`, `Region`, `Prefix` |
+| `--output json` | Print JSON with `RoleArn`, `ExternalId`, `Bucket`, `Region`, `Prefix` |
+| `--show` | Display saved wizard values from state file |
 | `-h` / `--help` | Show usage |
+
+### Phase 2 and maintenance
+
+| Item | Description |
+|------|-------------|
+| `--phase2` | Activate Cost Allocation Tags, validate CUR delivery, check IAM and EC2 tags |
+| `--update-external-id <ID>` | Update IAM role trust policy with a new External ID (also updates state file) |
 
 **Examples**
 
 ```bash
-# Wizard
+# Phase 1: Wizard
 ./scripts/setup_rh_cost_mgmt.sh --wizard
 
-# Direct + EC2 tagging in two regions
+# Phase 1: Direct + EC2 tagging in two regions
 ./scripts/setup_rh_cost_mgmt.sh rh-cost-mgmt-reports-123456789012-us-east-1 us-east-1 abcdef-1234 us-east-1,us-west-2
 
 # Dry run
 ./scripts/setup_rh_cost_mgmt.sh rh-bucket us-east-1 abc --plan
 
-# JSON
+# JSON output
 ./scripts/setup_rh_cost_mgmt.sh rh-bucket us-east-1 abc --output json
+
+# Phase 2: Activate tags and validate (after ~24h)
+./scripts/setup_rh_cost_mgmt.sh --phase2
+
+# Update External ID
+./scripts/setup_rh_cost_mgmt.sh --update-external-id <NEW_ID>
+
+# Show saved values
+./scripts/setup_rh_cost_mgmt.sh --show
 ```
 
 ### Validation
@@ -268,7 +328,7 @@ Copy the **Role ARN**; you will paste it into the Red Hat wizard.
 | Script | `scripts/validate_rh_cost_mgmt.sh` |
 | Usage | `./validate_rh_cost_mgmt.sh <BUCKET_NAME> <AWS_REGION> [ROLE_NAME] [EXTERNAL_ID]` |
 
-Checks: bucket/prefix and CUR objects, CUR “koku” definition, Cost Allocation Tags active, IAM role trust (Red Hat principal + External ID) and policy attached.
+Checks: bucket/prefix and CUR objects, CUR "koku" definition, Cost Allocation Tags active, IAM role trust (Red Hat principal + External ID) and policy attached.
 
 **Example**
 
@@ -315,10 +375,10 @@ The identity used to run the setup script must have:
 
 | Service | Permissions |
 |---------|-------------|
-| S3 | Create bucket, list bucket, get object (for the CUR bucket/prefix). |
+| S3 | `s3:CreateBucket`, `s3:PutBucketPolicy`, `s3:Get*`, `s3:List*` (for the CUR bucket/prefix). |
 | CUR | `cur:PutReportDefinition`, `cur:DescribeReportDefinitions` (CUR API is in **us-east-1** only). |
 | EC2 | `ec2:CreateTags`, `ec2:DescribeInstances` (only if you use TAG_REGIONS). |
-| Cost Explorer | `ce:UpdateCostAllocationTagsStatus`. |
+| Cost Explorer | `ce:UpdateCostAllocationTagsStatus`, `ce:ListCostAllocationTags`. |
 | IAM | Create/update policy and role; attach policy to role. |
 | STS | `sts:GetCallerIdentity` (for preflight and account ID). |
 
@@ -326,17 +386,17 @@ The identity used to run the setup script must have:
 
 ## 8. Troubleshooting
 
-### “I’m using CloudShell — do I need to configure credentials?”
+### "I'm using CloudShell — do I need to configure credentials?"
 
 No. CloudShell is already authenticated with the same identity you used to log into the AWS Console (including Red Hat IdP → role selection). Just run the script there.
 
-### “AWS credentials not configured or lack STS permissions”
+### "AWS credentials not configured or lack STS permissions"
 
 - Run: `aws sts get-caller-identity`. If it fails:
   - **SSO:** Run `aws sso login --profile <profile>` then use `AWS_PROFILE=<profile>` when running the script.
   - **No config:** Run `aws configure` or `aws configure sso` and ensure `~/.aws/config` and/or `~/.aws/credentials` exist and are correct.
 
-### “What do I enter for SSO start URL?”
+### "What do I enter for SSO start URL?"
 
 - Use the **AWS** SSO start URL (e.g. `https://d-xxxxxxxxxx.awsapps.com/start`), **not** a Red Hat IdP URL (e.g. `https://auth.redhat.com/.../itaws`). The Red Hat link is for browser SAML; the CLI expects the AWS Identity Center URL. Get the correct SSO start URL from your AWS administrator.
 
@@ -350,9 +410,21 @@ No. CloudShell is already authenticated with the same identity you used to log i
 
 - CUR API (`put-report-definition`, `describe-report-definitions`) is only in **us-east-1**. The script uses `us-east-1` for CUR; your bucket can be in another region (e.g. `us-east-1` or `us-west-2`). Cost Allocation Tags are updated in the **region you pass** as `<AWS_REGION>`.
 
+### Cost Allocation Tags not found
+
+- After tagging EC2 instances, it can take **up to 24 hours** for Cost Explorer to discover the tags.
+- Run Phase 1 now, wait 24 hours, then run `--phase2` to activate them.
+- Do **not** re-run the Red Hat wizard during the wait unless you encounter an error.
+
+### External ID mismatch after re-running Red Hat wizard
+
+- Each time you start a new integration in the Red Hat wizard, it generates a **new External ID**.
+- If the External ID in the IAM role doesn't match, Red Hat cannot assume the role.
+- Fix with: `./scripts/setup_rh_cost_mgmt.sh --update-external-id <NEW_ID>`
+
 ### Script fails on IAM or S3
 
-- Confirm the identity has the [required permissions](#6-required-aws-permissions).
+- Confirm the identity has the [required permissions](#7-required-aws-permissions).
 - For bucket names: use a globally unique name; common pattern is `rh-cost-mgmt-reports-<account-id>-<region>`.
 
 ---
@@ -361,8 +433,9 @@ No. CloudShell is already authenticated with the same identity you used to log i
 
 1. **Red Hat Hybrid Cloud Console** — The integration should show as configured once the wizard is completed with the correct Role ARN and External ID.
 2. **CUR data** — First CUR delivery can take up to 24 hours. Objects will appear under `s3://<bucket>/cost/`.
-3. **Validation** — Run `validate_rh_cost_mgmt.sh` with your bucket and region to verify bucket, CUR, tags, and IAM.
+3. **Phase 2** — Run `./scripts/setup_rh_cost_mgmt.sh --phase2` after ~24 hours to activate Cost Allocation Tags and validate the full setup.
 4. **ELS metering** — Ensure EC2 instances that run RHEL ELS are tagged (by the script if you used TAG_REGIONS, or manually) and that the ELS Marketplace subscription is active.
+5. **Show saved values** — Run `./scripts/setup_rh_cost_mgmt.sh --show` anytime to see the wizard values.
 
 ---
 
@@ -370,7 +443,5 @@ No. CloudShell is already authenticated with the same identity you used to log i
 
 - **Repo:** HCC-cursor-seed  
 - **Scripts:** `scripts/setup_rh_cost_mgmt.sh`, `scripts/validate_rh_cost_mgmt.sh`, `scripts/teardown_rh_cost_mgmt.sh`, `scripts/install-rh-cost-mgmt.sh`  
+- **State file:** `~/.rh-cost-mgmt-state.json`  
 - **More:** See `documentation/aws-rh-cost-mgmt/README.md` in this repo.
-
-You can download this file from your repo or copy it from:  
-`documentation/aws-rh-cost-mgmt/AWS-Red-Hat-Console-Integration-Guide.md`.
