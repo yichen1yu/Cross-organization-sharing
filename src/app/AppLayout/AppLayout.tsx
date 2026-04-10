@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   CardBody,
+  Checkbox,
   Content,
   DataList,
   DataListCell,
@@ -69,10 +70,12 @@ import {
   Page,
   PageSidebar,
   PageSidebarBody,
+  Radio,
   SearchInput,
   SkipToContent,
   Split,
   SplitItem,
+  Switch,
   Tab,
   TabAction,
   TabTitleText,
@@ -83,6 +86,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
   TextInput,
+  TimePicker,
   Tooltip,
   useWizardContext,
   Wizard,
@@ -259,6 +263,52 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [cronTimezone, setCronTimezone] = React.useState('Eastern Time (ET)');
   const [cronTimezoneOpen, setCronTimezoneOpen] = React.useState(false);
 
+  const [useVisualBuilder, setUseVisualBuilder] = React.useState(false);
+  const [vbFrequency, setVbFrequency] = React.useState<'daily' | 'weekly' | 'monthly'>('daily');
+  const [vbTime, setVbTime] = React.useState('09:00');
+  const [vbDayInterval, setVbDayInterval] = React.useState('1');
+  const [vbWeekInterval, setVbWeekInterval] = React.useState('1');
+  const [vbDaysOfWeek, setVbDaysOfWeek] = React.useState<number[]>([1]);
+  const [vbDayOfMonth, setVbDayOfMonth] = React.useState('1');
+  const [vbMonthInterval, setVbMonthInterval] = React.useState('1');
+  const [vbMonthlyMode, setVbMonthlyMode] = React.useState<'day' | 'ordinal'>('day');
+  const [vbOrdinalWeek, setVbOrdinalWeek] = React.useState('first');
+  const [vbOrdinalDay, setVbOrdinalDay] = React.useState('1');
+  const [vbOrdinalWeekOpen, setVbOrdinalWeekOpen] = React.useState(false);
+  const [vbOrdinalDayOpen, setVbOrdinalDayOpen] = React.useState(false);
+  const [vbFrequencyOpen, setVbFrequencyOpen] = React.useState(false);
+
+  const syncVisualBuilderToCron = React.useCallback(() => {
+    const [h, m] = vbTime.split(':');
+    setCronMinute(m || '0');
+    setCronHour(h || '9');
+    if (vbFrequency === 'daily') {
+      const interval = parseInt(vbDayInterval, 10);
+      setCronDayOfMonth(interval > 1 ? `*/${interval}` : '*');
+      setCronMonth('*');
+      setCronDayOfWeek('*');
+    } else if (vbFrequency === 'weekly') {
+      setCronDayOfMonth('*');
+      setCronMonth('*');
+      setCronDayOfWeek(vbDaysOfWeek.length > 0 ? [...vbDaysOfWeek].sort((a, b) => a - b).join(',') : '');
+    } else {
+      const mInterval = parseInt(vbMonthInterval, 10);
+      setCronMonth(mInterval > 1 ? `*/${mInterval}` : '*');
+      if (vbMonthlyMode === 'day') {
+        setCronDayOfMonth(vbDayOfMonth);
+        setCronDayOfWeek('*');
+      } else {
+        const ordinalMap: Record<string, string> = { first: '1-7', second: '8-14', third: '15-21', fourth: '22-28', last: '22-31' };
+        setCronDayOfMonth(ordinalMap[vbOrdinalWeek] || '1-7');
+        setCronDayOfWeek(vbOrdinalDay);
+      }
+    }
+  }, [vbTime, vbFrequency, vbDayInterval, vbDaysOfWeek, vbDayOfMonth, vbMonthInterval, vbMonthlyMode, vbOrdinalWeek, vbOrdinalDay]);
+
+  React.useEffect(() => {
+    if (useVisualBuilder) syncVisualBuilderToCron();
+  }, [useVisualBuilder, syncVisualBuilderToCron]);
+
   const validateCronField = (value: string, type: 'minute' | 'hour' | 'dayOfMonth' | 'month' | 'dayOfWeek'): { valid: boolean; message?: string } => {
     if (!value.trim()) return { valid: false };
     const ranges: Record<string, { min: number; max: number; names?: RegExp }> = {
@@ -353,6 +403,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       datePart = 'every day';
     } else if (dom === '*' && month === '*' && resolvedDow) {
       datePart = `every ${resolvedDow}`;
+    } else if (dom === '*' && month === '*' && dow.includes(',')) {
+      const names = dow.split(',').map(d => dayNames[d.trim()] || dayAbbrevs[d.trim().toLowerCase()] || d.trim()).filter(Boolean);
+      datePart = names.length > 1 ? `every ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : `every ${names[0]}`;
+    } else if (dom.startsWith('*/') && month === '*' && dow === '*') {
+      datePart = `every ${dom.slice(2)} days`;
     } else if (dow === '*' && month === '*' && dom !== '*') {
       datePart = `on day ${dom} of every month`;
     } else if (dow === '*' && resolvedMonth && dom !== '*') {
@@ -361,8 +416,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       datePart = `every day in ${resolvedMonth}`;
     } else if (resolvedDow && resolvedMonth) {
       datePart = `on ${resolvedDow}s in ${resolvedMonth}`;
-    } else if (dom.startsWith('*/')) {
-      datePart = `every ${dom.slice(2)} days`;
     } else {
       const parts: string[] = [];
       if (dom !== '*') parts.push(`day ${dom}`);
@@ -2566,37 +2619,308 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </WizardStep>
           <WizardStep name="Frequency" id="step-frequency" footer={<ScheduleWizardBackNextFooter isNextDisabled={!allCronValid} />}>
             <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>Frequency</Title>
+            <Flex style={{ marginBottom: '16px' }} alignItems={{ default: 'alignItemsCenter' }}>
+              <FlexItem>
+                <Switch
+                  id="visual-builder-toggle"
+                  label="Visual builder"
+                  isChecked={useVisualBuilder}
+                  onChange={(_event, checked) => setUseVisualBuilder(checked)}
+                />
+              </FlexItem>
+            </Flex>
             <Form>
-              <FormGroup label="Recurrence setting" fieldId="cron-setting">
-                <Flex style={{ gap: '16px', flexWrap: 'nowrap' }}>
-                  <FlexItem style={{ flex: 1 }}>
-                    <TextInput id="cron-minute" placeholder="0-59, *, -, /" value={cronMinute} onChange={(_e, val) => setCronMinute(val)} validated={cronMinute && !cronMinuteValidation.valid ? 'error' : 'default'} />
-                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Minute</div>
-                    {cronMinute && cronMinuteValidation.message && <HelperText><HelperTextItem variant="error">{cronMinuteValidation.message}</HelperTextItem></HelperText>}
-                  </FlexItem>
-                  <FlexItem style={{ flex: 1 }}>
-                    <TextInput id="cron-hour" placeholder="0-23, *, -, /" value={cronHour} onChange={(_e, val) => setCronHour(val)} validated={cronHour && !cronHourValidation.valid ? 'error' : 'default'} />
-                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Hour</div>
-                    {cronHour && cronHourValidation.message && <HelperText><HelperTextItem variant="error">{cronHourValidation.message}</HelperTextItem></HelperText>}
-                  </FlexItem>
-                  <FlexItem style={{ flex: 1 }}>
-                    <TextInput id="cron-day-of-month" placeholder="1-31, *, -, /" value={cronDayOfMonth} onChange={(_e, val) => setCronDayOfMonth(val)} validated={cronDayOfMonth && !cronDayOfMonthValidation.valid ? 'error' : 'default'} />
-                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Day of month</div>
-                    {cronDayOfMonth && cronDayOfMonthValidation.message && <HelperText><HelperTextItem variant="error">{cronDayOfMonthValidation.message}</HelperTextItem></HelperText>}
-                  </FlexItem>
-                  <FlexItem style={{ flex: 1 }}>
-                    <TextInput id="cron-month" placeholder="1-12, Jan-Dec, *, -, /" value={cronMonth} onChange={(_e, val) => setCronMonth(val)} validated={cronMonth && !cronMonthValidation.valid ? 'error' : 'default'} />
-                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Month</div>
-                    {cronMonth && cronMonthValidation.message && <HelperText><HelperTextItem variant="error">{cronMonthValidation.message}</HelperTextItem></HelperText>}
-                  </FlexItem>
-                  <FlexItem style={{ flex: 1 }}>
-                    <TextInput id="cron-day-of-week" placeholder="0-6, Sun-Sat, *, -, /" value={cronDayOfWeek} onChange={(_e, val) => setCronDayOfWeek(val)} validated={cronDayOfWeek && !cronDayOfWeekValidation.valid ? 'error' : 'default'} />
-                    <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Day of the week</div>
-                    {cronDayOfWeek && cronDayOfWeekValidation.message && <HelperText><HelperTextItem variant="error">{cronDayOfWeekValidation.message}</HelperTextItem></HelperText>}
-                  </FlexItem>
-                </Flex>
-              </FormGroup>
-              <Alert variant="info" isInline title={allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : 'Fill in all of the fields above to preview your schedule.'} />
+              {useVisualBuilder ? (
+                <>
+                  <FormGroup label="Repeat" fieldId="vb-frequency">
+                    <Dropdown
+                      isOpen={vbFrequencyOpen}
+                      onSelect={() => setVbFrequencyOpen(false)}
+                      onOpenChange={setVbFrequencyOpen}
+                      toggle={(toggleRef) => (
+                        <MenuToggle ref={toggleRef} onClick={() => setVbFrequencyOpen(!vbFrequencyOpen)} isExpanded={vbFrequencyOpen} isFullWidth>
+                          {vbFrequency === 'daily' ? 'Daily' : vbFrequency === 'weekly' ? 'Weekly' : 'Monthly'}
+                        </MenuToggle>
+                      )}
+                    >
+                      <DropdownList>
+                        <DropdownItem onClick={() => { setVbFrequency('daily'); }}>Daily</DropdownItem>
+                        <DropdownItem onClick={() => { setVbFrequency('weekly'); }}>Weekly</DropdownItem>
+                        <DropdownItem onClick={() => { setVbFrequency('monthly'); }}>Monthly</DropdownItem>
+                      </DropdownList>
+                    </Dropdown>
+                  </FormGroup>
+                  {vbFrequency !== 'monthly' && (
+                    <Flex style={{ gap: '16px', flexWrap: 'nowrap', alignItems: 'flex-end' }}>
+                      {vbFrequency === 'daily' && (
+                        <FlexItem>
+                          <FormGroup label="Every" fieldId="vb-day-interval">
+                            <Flex style={{ gap: 0, alignItems: 'center', flexWrap: 'nowrap' }}>
+                              <FlexItem>
+                                <TextInput
+                                  id="vb-day-interval-input"
+                                  type="number"
+                                  min={1}
+                                  value={vbDayInterval}
+                                  onChange={(_e, val) => {
+                                    const n = parseInt(val, 10);
+                                    if (val === '' || (n >= 1 && Number.isInteger(n))) setVbDayInterval(val);
+                                  }}
+                                  validated={vbDayInterval && parseInt(vbDayInterval, 10) >= 1 ? 'default' : 'error'}
+                                  style={{ width: '72px' }}
+                                  aria-label="Day interval"
+                                />
+                              </FlexItem>
+                              <FlexItem>day(s)</FlexItem>
+                            </Flex>
+                          </FormGroup>
+                        </FlexItem>
+                      )}
+                      {vbFrequency === 'weekly' && (
+                        <FlexItem>
+                          <FormGroup label="Every" fieldId="vb-week-interval">
+                            <Flex style={{ gap: 0, alignItems: 'center', flexWrap: 'nowrap' }}>
+                              <FlexItem>
+                                <TextInput
+                                  id="vb-week-interval-input"
+                                  type="number"
+                                  min={1}
+                                  value={vbWeekInterval}
+                                  onChange={(_e, val) => {
+                                    const n = parseInt(val, 10);
+                                    if (val === '' || (n >= 1 && Number.isInteger(n))) setVbWeekInterval(val);
+                                  }}
+                                  validated={vbWeekInterval && parseInt(vbWeekInterval, 10) >= 1 ? 'default' : 'error'}
+                                  style={{ width: '72px' }}
+                                  aria-label="Week interval"
+                                />
+                              </FlexItem>
+                              <FlexItem>week(s)</FlexItem>
+                            </Flex>
+                          </FormGroup>
+                        </FlexItem>
+                      )}
+                      <FlexItem>
+                        <FormGroup label="Time" fieldId="vb-time">
+                          <TimePicker
+                            id="vb-time-picker"
+                            time={vbTime}
+                            is24Hour
+                            menuAppendTo="parent"
+                            stepMinutes={15}
+                            onChange={(_event, time, _hour, _minute, _seconds, isValid) => {
+                              if (isValid) setVbTime(time);
+                            }}
+                          />
+                        </FormGroup>
+                      </FlexItem>
+                    </Flex>
+                  )}
+                  {vbFrequency === 'weekly' && (
+                    <FormGroup label="On days" fieldId="vb-days-of-week">
+                      <Flex style={{ gap: '16px', flexWrap: 'wrap' }}>
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+                          <FlexItem key={day}>
+                            <Checkbox
+                              id={`vb-dow-${idx}`}
+                              label={day}
+                              isChecked={vbDaysOfWeek.includes(idx)}
+                              onChange={(_event, checked) => {
+                                setVbDaysOfWeek(prev =>
+                                  checked ? [...prev, idx] : prev.filter(d => d !== idx)
+                                );
+                              }}
+                            />
+                          </FlexItem>
+                        ))}
+                      </Flex>
+                      {vbDaysOfWeek.length === 0 && (
+                        <HelperText><HelperTextItem variant="error">Select at least one day</HelperTextItem></HelperText>
+                      )}
+                    </FormGroup>
+                  )}
+                  {vbFrequency === 'monthly' && (
+                    <>
+                      <FormGroup label="Recurrence" fieldId="vb-monthly-mode">
+                        <Flex direction={{ default: 'column' }} style={{ gap: '12px' }}>
+                          <FlexItem>
+                            <Flex alignItems={{ default: 'alignItemsCenter' }} style={{ gap: '8px', flexWrap: 'nowrap' }}>
+                              <FlexItem>
+                                <Radio
+                                  id="vb-monthly-day"
+                                  name="vb-monthly-mode"
+                                  isChecked={vbMonthlyMode === 'day'}
+                                  onChange={() => setVbMonthlyMode('day')}
+                                  label=""
+                                />
+                              </FlexItem>
+                              <FlexItem style={{ whiteSpace: 'nowrap' }}>Day</FlexItem>
+                              <FlexItem>
+                                <FormSelect id="vb-day-of-month-select" value={vbDayOfMonth} onChange={(_e, val) => setVbDayOfMonth(val)} aria-label="Day of month" style={{ width: '72px' }} isDisabled={vbMonthlyMode !== 'day'}>
+                                  {Array.from({ length: 31 }, (_, i) => (
+                                    <FormSelectOption key={i + 1} value={String(i + 1)} label={String(i + 1)} />
+                                  ))}
+                                </FormSelect>
+                              </FlexItem>
+                              <FlexItem style={{ whiteSpace: 'nowrap' }}>of every</FlexItem>
+                              <FlexItem>
+                                <TextInput
+                                  id="vb-month-interval-day"
+                                  type="number"
+                                  min={1}
+                                  value={vbMonthlyMode === 'day' ? vbMonthInterval : vbMonthInterval}
+                                  onChange={(_e, val) => { const n = parseInt(val, 10); if (val === '' || (n >= 1 && Number.isInteger(n))) setVbMonthInterval(val); }}
+                                  validated={vbMonthInterval && parseInt(vbMonthInterval, 10) >= 1 ? 'default' : 'error'}
+                                  style={{ width: '72px' }}
+                                  aria-label="Month interval"
+                                  isDisabled={vbMonthlyMode !== 'day'}
+                                />
+                              </FlexItem>
+                              <FlexItem style={{ whiteSpace: 'nowrap' }}>month(s)</FlexItem>
+                            </Flex>
+                          </FlexItem>
+                          <FlexItem>
+                            <Flex alignItems={{ default: 'alignItemsCenter' }} style={{ gap: '8px', flexWrap: 'nowrap' }}>
+                              <FlexItem>
+                                <Radio
+                                  id="vb-monthly-ordinal"
+                                  name="vb-monthly-mode"
+                                  isChecked={vbMonthlyMode === 'ordinal'}
+                                  onChange={() => setVbMonthlyMode('ordinal')}
+                                  label=""
+                                />
+                              </FlexItem>
+                              <FlexItem style={{ whiteSpace: 'nowrap' }}>The</FlexItem>
+                              <FlexItem>
+                                <Dropdown
+                                  isOpen={vbOrdinalWeekOpen}
+                                  onSelect={() => setVbOrdinalWeekOpen(false)}
+                                  onOpenChange={setVbOrdinalWeekOpen}
+                                  toggle={(toggleRef) => (
+                                    <MenuToggle ref={toggleRef} onClick={() => setVbOrdinalWeekOpen(!vbOrdinalWeekOpen)} isExpanded={vbOrdinalWeekOpen} isDisabled={vbMonthlyMode !== 'ordinal'} style={{ minWidth: '110px' }}>
+                                      {vbOrdinalWeek.charAt(0).toUpperCase() + vbOrdinalWeek.slice(1)}
+                                    </MenuToggle>
+                                  )}
+                                >
+                                  <DropdownList>
+                                    {['first', 'second', 'third', 'fourth', 'last'].map(w => (
+                                      <DropdownItem key={w} onClick={() => setVbOrdinalWeek(w)}>{w.charAt(0).toUpperCase() + w.slice(1)}</DropdownItem>
+                                    ))}
+                                  </DropdownList>
+                                </Dropdown>
+                              </FlexItem>
+                              <FlexItem>
+                                <Dropdown
+                                  isOpen={vbOrdinalDayOpen}
+                                  onSelect={() => setVbOrdinalDayOpen(false)}
+                                  onOpenChange={setVbOrdinalDayOpen}
+                                  toggle={(toggleRef) => (
+                                    <MenuToggle ref={toggleRef} onClick={() => setVbOrdinalDayOpen(!vbOrdinalDayOpen)} isExpanded={vbOrdinalDayOpen} isDisabled={vbMonthlyMode !== 'ordinal'} style={{ minWidth: '130px' }}>
+                                      {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][parseInt(vbOrdinalDay, 10)]}
+                                    </MenuToggle>
+                                  )}
+                                >
+                                  <DropdownList>
+                                    {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((day, idx) => (
+                                      <DropdownItem key={day} onClick={() => setVbOrdinalDay(String(idx))}>{day}</DropdownItem>
+                                    ))}
+                                  </DropdownList>
+                                </Dropdown>
+                              </FlexItem>
+                              <FlexItem style={{ whiteSpace: 'nowrap' }}>of every</FlexItem>
+                              <FlexItem>
+                                <TextInput
+                                  id="vb-month-interval-ordinal"
+                                  type="number"
+                                  min={1}
+                                  value={vbMonthInterval}
+                                  onChange={(_e, val) => { const n = parseInt(val, 10); if (val === '' || (n >= 1 && Number.isInteger(n))) setVbMonthInterval(val); }}
+                                  validated={vbMonthInterval && parseInt(vbMonthInterval, 10) >= 1 ? 'default' : 'error'}
+                                  style={{ width: '72px' }}
+                                  aria-label="Month interval"
+                                  isDisabled={vbMonthlyMode !== 'ordinal'}
+                                />
+                              </FlexItem>
+                              <FlexItem style={{ whiteSpace: 'nowrap' }}>month(s)</FlexItem>
+                            </Flex>
+                          </FlexItem>
+                        </Flex>
+                      </FormGroup>
+                      <FormGroup label="Time" fieldId="vb-time-monthly">
+                        <TimePicker
+                          id="vb-time-picker-monthly"
+                          time={vbTime}
+                          is24Hour
+                          menuAppendTo="parent"
+                          stepMinutes={15}
+                          onChange={(_event, time, _hour, _minute, _seconds, isValid) => {
+                            if (isValid) setVbTime(time);
+                          }}
+                        />
+                      </FormGroup>
+                    </>
+                  )}
+                  <Alert variant="info" isInline title={allCronValid ? (() => {
+                    const dayNamesMap: Record<number, string> = { 0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday' };
+                    const [h, mn] = vbTime.split(':');
+                    const hNum = parseInt(h, 10);
+                    const mNum = parseInt(mn, 10);
+                    const period = hNum >= 12 ? 'PM' : 'AM';
+                    const h12 = hNum === 0 ? 12 : hNum > 12 ? hNum - 12 : hNum;
+                    const timePart = hNum === 0 && mNum === 0 ? 'At midnight' : hNum === 12 && mNum === 0 ? 'At noon' : `At ${h12}:${String(mNum).padStart(2, '0')} ${period}`;
+                    if (vbFrequency === 'weekly') {
+                      const sortedDays = [...vbDaysOfWeek].sort((a, b) => a - b);
+                      const names = sortedDays.map(d => dayNamesMap[d]);
+                      const daysPart = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}` : names[0];
+                      const weekInt = parseInt(vbWeekInterval, 10);
+                      return weekInt > 1 ? `${timePart} every ${vbWeekInterval} weeks on ${daysPart}` : `${timePart} every ${daysPart}`;
+                    }
+                    if (vbFrequency === 'monthly') {
+                      const monthInt = parseInt(vbMonthInterval, 10);
+                      const monthPart = monthInt > 1 ? `every ${vbMonthInterval} months` : 'every month';
+                      if (vbMonthlyMode === 'day') {
+                        return `${timePart} on day ${vbDayOfMonth} of ${monthPart}`;
+                      }
+                      const dayName = dayNamesMap[parseInt(vbOrdinalDay, 10)];
+                      return `${timePart} on the ${vbOrdinalWeek} ${dayName} of ${monthPart}`;
+                    }
+                    return cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek);
+                  })() : 'Configure your schedule above to see a preview.'} />
+                </>
+              ) : (
+                <>
+                  <FormGroup label="Recurrence setting" fieldId="cron-setting">
+                    <Flex style={{ gap: '16px', flexWrap: 'nowrap' }}>
+                      <FlexItem style={{ flex: 1 }}>
+                        <TextInput id="cron-minute" placeholder="0-59, *, -, /" value={cronMinute} onChange={(_e, val) => setCronMinute(val)} validated={cronMinute && !cronMinuteValidation.valid ? 'error' : 'default'} />
+                        <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Minute</div>
+                        {cronMinute && cronMinuteValidation.message && <HelperText><HelperTextItem variant="error">{cronMinuteValidation.message}</HelperTextItem></HelperText>}
+                      </FlexItem>
+                      <FlexItem style={{ flex: 1 }}>
+                        <TextInput id="cron-hour" placeholder="0-23, *, -, /" value={cronHour} onChange={(_e, val) => setCronHour(val)} validated={cronHour && !cronHourValidation.valid ? 'error' : 'default'} />
+                        <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Hour</div>
+                        {cronHour && cronHourValidation.message && <HelperText><HelperTextItem variant="error">{cronHourValidation.message}</HelperTextItem></HelperText>}
+                      </FlexItem>
+                      <FlexItem style={{ flex: 1 }}>
+                        <TextInput id="cron-day-of-month" placeholder="1-31, *, -, /" value={cronDayOfMonth} onChange={(_e, val) => setCronDayOfMonth(val)} validated={cronDayOfMonth && !cronDayOfMonthValidation.valid ? 'error' : 'default'} />
+                        <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Day of month</div>
+                        {cronDayOfMonth && cronDayOfMonthValidation.message && <HelperText><HelperTextItem variant="error">{cronDayOfMonthValidation.message}</HelperTextItem></HelperText>}
+                      </FlexItem>
+                      <FlexItem style={{ flex: 1 }}>
+                        <TextInput id="cron-month" placeholder="1-12, Jan-Dec, *, -, /" value={cronMonth} onChange={(_e, val) => setCronMonth(val)} validated={cronMonth && !cronMonthValidation.valid ? 'error' : 'default'} />
+                        <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Month</div>
+                        {cronMonth && cronMonthValidation.message && <HelperText><HelperTextItem variant="error">{cronMonthValidation.message}</HelperTextItem></HelperText>}
+                      </FlexItem>
+                      <FlexItem style={{ flex: 1 }}>
+                        <TextInput id="cron-day-of-week" placeholder="0-6, Sun-Sat, *, -, /" value={cronDayOfWeek} onChange={(_e, val) => setCronDayOfWeek(val)} validated={cronDayOfWeek && !cronDayOfWeekValidation.valid ? 'error' : 'default'} />
+                        <div style={{ fontSize: '12px', color: 'var(--pf-t--global--color--200)', marginTop: '4px' }}>Day of the week</div>
+                        {cronDayOfWeek && cronDayOfWeekValidation.message && <HelperText><HelperTextItem variant="error">{cronDayOfWeekValidation.message}</HelperTextItem></HelperText>}
+                      </FlexItem>
+                    </Flex>
+                  </FormGroup>
+                  <Alert variant="info" isInline title={allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : 'Fill in all of the fields above to preview your schedule.'} />
+                </>
+              )}
               <FormGroup label="Time Zone" fieldId="cron-timezone">
                 <Dropdown
                   isOpen={cronTimezoneOpen}
