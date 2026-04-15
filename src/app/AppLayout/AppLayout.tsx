@@ -263,7 +263,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [cronTimezone, setCronTimezone] = React.useState('Eastern Time (ET)');
   const [cronTimezoneOpen, setCronTimezoneOpen] = React.useState(false);
 
-  const [useVisualBuilder, setUseVisualBuilder] = React.useState(false);
+  const [useVisualBuilder, setUseVisualBuilder] = React.useState(true);
   const [vbFrequency, setVbFrequency] = React.useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [vbTime, setVbTime] = React.useState('09:00');
   const [vbDayInterval, setVbDayInterval] = React.useState('1');
@@ -2622,10 +2622,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             <Flex style={{ marginBottom: '16px' }} alignItems={{ default: 'alignItemsCenter' }}>
               <FlexItem>
                 <Switch
-                  id="visual-builder-toggle"
-                  label="Visual builder"
-                  isChecked={useVisualBuilder}
-                  onChange={(_event, checked) => setUseVisualBuilder(checked)}
+                  id="cron-expression-toggle"
+                  label="Cron expression"
+                  isChecked={!useVisualBuilder}
+                  onChange={(_event, checked) => setUseVisualBuilder(!checked)}
                 />
               </FlexItem>
             </Flex>
