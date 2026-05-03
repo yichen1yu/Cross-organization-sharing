@@ -42,6 +42,8 @@ import { AutomationController } from '@app/SubscriptionsSpend/AutomationControll
 import { Roles } from '@app/Roles/Roles';
 import { AlertOverriderRole } from '@app/Roles/AlertOverriderRole';
 import { Workspaces } from '@app/Workspaces/Workspaces';
+import { WorkspacesList } from '@app/Workspaces/WorkspacesList';
+import { SubscriptionWorkspaces } from '@app/Subscriptions/SubscriptionWorkspaces';
 import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
 import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { NotFound } from '@app/NotFound/NotFound';
@@ -99,11 +101,11 @@ const routes: AppRouteConfig[] = [
         label: 'Features'
       },
       {
-        element: <SubscriptionInventory />, // placeholder page
+        element: <SubscriptionWorkspaces />,
         exact: true,
         path: '/subscription-inventory/workspace',
-        title: 'Workspace | Red Hat Hybrid Cloud Console',
-        label: 'Workspace'
+        title: 'Workspaces | Red Hat Hybrid Cloud Console',
+        label: 'Workspaces'
       },
       {
         element: <Billing />, // billing account page
@@ -367,10 +369,16 @@ const routes: AppRouteConfig[] = [
     title: 'Alert overrider | Red Hat Hybrid Cloud Console',
   },
   {
-    element: <Workspaces />,
+    element: <WorkspacesList />,
     exact: true,
     path: '/workspaces',
     title: 'Workspaces | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <Workspaces />,
+    exact: true,
+    path: '/workspaces/:workspaceId',
+    title: 'Workspace | Red Hat Hybrid Cloud Console',
   },
   
   // Organization management routes

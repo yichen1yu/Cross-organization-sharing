@@ -25,52 +25,62 @@ import {
   Modal,
   Radio,
   TextInput,
-  Pagination
+  Pagination,
+  Drawer,
+  DrawerContent,
+  DrawerContentBody,
+  DrawerPanelContent,
+  DrawerHead,
+  DrawerActions,
+  DrawerCloseButton
 } from '@patternfly/react-core';
 import { AlertGroup, Alert, AlertActionCloseButton } from '@patternfly/react-core';
  
 import { Wizard, WizardStep, WizardHeader } from '@patternfly/react-core';
 import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon, SyncAltIcon } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
+import { useParams, useNavigate } from 'react-router-dom';
+
+type WorkspaceMeta = {
+  name: string;
+  hierarchy: { name: string; path?: string }[];
+};
+
+const workspaceData: Record<string, WorkspaceMeta> = {
+  'uxd': {
+    name: 'UXD',
+    hierarchy: [{ name: 'UXD' }],
+  },
+  'workspace-default': {
+    name: 'Workspace default',
+    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default' }],
+  },
+  'workspace-ungrouped-hosts': {
+    name: 'Workspace Ungrouped Hosts',
+    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace Ungrouped Hosts' }],
+  },
+  'workspace-a': {
+    name: 'Workspace A',
+    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace A' }],
+  },
+  'workspace-b': {
+    name: 'Workspace B',
+    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace B' }],
+  },
+  'workspace-c': {
+    name: 'Workspace C',
+    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace C' }],
+  },
+};
 
 const Workspaces: React.FunctionComponent = () => {
+  const { workspaceId } = useParams<{ workspaceId: string }>();
+  const wsNavigate = useNavigate();
+  const wsMeta = workspaceData[workspaceId || 'workspace-a'] || workspaceData['workspace-a'];
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
   const [roleTabKey, setRoleTabKey] = React.useState<string | number>(0);
   const [isMasterOpen, setIsMasterOpen] = React.useState(false);
-  // Selection state for table rows
-  const groupNames = ['Golden girls', 'Powerpuff girls', 'Spice girls'];
-  const [selectedRowIds, setSelectedRowIds] = React.useState<Set<number>>(new Set());
-  const areAllSelected = selectedRowIds.size === groupNames.length;
-  const areSomeSelected = selectedRowIds.size > 0 && selectedRowIds.size < groupNames.length;
-  const onToggleAll = (checked: boolean) => {
-    if (checked) setSelectedRowIds(new Set(groupNames.map((_, idx) => idx)));
-    else setSelectedRowIds(new Set());
-  };
-  const onToggleRow = (idx: number, checked: boolean) => {
-    setSelectedRowIds(prev => {
-      const next = new Set(prev);
-      if (checked) next.add(idx); else next.delete(idx);
-      return next;
-    });
-  };
-
-  // Selection and rows for "Roles assigned in parent workspaces"
-  const parentGroupNames = ['Cardiology admins', 'Radiology viewers', 'Operating room ops'];
-  const [parentSelectedRowIds, setParentSelectedRowIds] = React.useState<Set<number>>(new Set());
-  const areAllParentSelected = parentSelectedRowIds.size === parentGroupNames.length;
-  const areSomeParentSelected = parentSelectedRowIds.size > 0 && parentSelectedRowIds.size < parentGroupNames.length;
-  const [isParentMasterOpen, setIsParentMasterOpen] = React.useState(false);
-  const onToggleAllParent = (checked: boolean) => {
-    if (checked) setParentSelectedRowIds(new Set(parentGroupNames.map((_, idx) => idx)));
-    else setParentSelectedRowIds(new Set());
-  };
-  const onToggleParentRow = (idx: number, checked: boolean) => {
-    setParentSelectedRowIds(prev => {
-      const next = new Set(prev);
-      if (checked) next.add(idx); else next.delete(idx);
-      return next;
-    });
-  };
+  // Selection handlers and parent state are defined after grantedRows/parentGrantedRows below
 
   const handleTabClick = (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent | MouseEvent, tabIndex: string | number) => {
     setActiveTabKey(tabIndex);
@@ -89,25 +99,127 @@ const Workspaces: React.FunctionComponent = () => {
   const [selectedTrustedOrg, setSelectedTrustedOrg] = React.useState<string | null>(null);
   // Main page: granted access rows
   type UserEntry = { name: string; org: string };
-  type GrantedRow = { groupName: string; description: string; users: number; roles: number; lastModified: string; rolesList?: string[]; usersList?: UserEntry[]; orgName?: string };
-  const [grantedRows, setGrantedRows] = React.useState<GrantedRow[]>([
-    { groupName: 'Golden girls', description: 'Workspace administrators handling access approvals and settings', users: 4, roles: 2, lastModified: '2 days ago' },
-    { groupName: 'Seattle Grace admins', description: 'Clinical admins overseeing user lifecycle, roles, and audits', users: 3, roles: 2, lastModified: '2 days ago' },
-    { groupName: 'Spice girls', description: 'Project members with standard access to dashboards and reports', users: 5, roles: 2, lastModified: '2 days ago' }
-  ]);
-  const [parentGrantedRows] = React.useState<GrantedRow[]>([
-    { groupName: 'Cardiology admins', description: 'Manage cardiac imaging access, approvals, and workspace settings', users: 2, roles: 1, lastModified: '6 hours ago' },
-    { groupName: 'Radiology viewers', description: 'Read‑only access to imaging dashboards and reports', users: 8, roles: 1, lastModified: '1 day ago' },
-    { groupName: 'Operating room ops', description: 'Operational runbooks, device integrations, and audit oversight', users: 6, roles: 2, lastModified: '4 days ago' }
-  ]);
+  type GrantedRow = { groupName: string; description: string; users: number; roles: number; lastModified: string; rolesList: string[]; usersList: UserEntry[]; orgName?: string };
 
-  // (Drawer removed) noop handlers left to avoid references
-  const openDetails = (_row: GrantedRow) => {};
+  const initialGrantedByWorkspace: Record<string, GrantedRow[]> = {
+    'workspace-a': [
+      { groupName: 'Golden girls', description: 'Workspace administrators handling access approvals and settings', users: 4, roles: 2, lastModified: '2 days ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+      { groupName: 'Seattle Grace admins', description: 'Clinical admins overseeing user lifecycle, roles, and audits', users: 3, roles: 2, lastModified: '2 days ago', rolesList: ['User manager', 'Audit viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
+      { groupName: 'Spice girls', description: 'Project members with standard access to dashboards and reports', users: 5, roles: 2, lastModified: '2 days ago', rolesList: ['Dashboard viewer', 'Report reader'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+    ],
+    'uxd': [
+      { groupName: 'Golden girls', description: 'Org-wide administrators with full access', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+      { groupName: 'Powerpuff girls', description: 'Security and compliance oversight across all workspaces', users: 3, roles: 2, lastModified: '3 days ago', rolesList: ['Security auditor', 'Compliance reviewer'], usersList: [{ name: 'Blossom Utonium', org: 'UXD' }, { name: 'Bubbles Utonium', org: 'UXD' }, { name: 'Buttercup Utonium', org: 'UXD' }] },
+      { groupName: 'Bad Bunnies', description: 'Platform engineering team with infrastructure access', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'UXD' }, { name: 'DJ Luian', org: 'UXD' }, { name: 'Tainy Ocasio', org: 'UXD' }, { name: 'Mora Vega', org: 'UXD' }] },
+    ],
+    'workspace-default': [
+      { groupName: 'Golden girls', description: 'Default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+      { groupName: 'Spice girls', description: 'General access for standard workspace operations', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+    ],
+    'workspace-ungrouped-hosts': [
+      { groupName: 'Powerpuff girls', description: 'Monitoring ungrouped hosts and triaging assignments', users: 3, roles: 1, lastModified: '12 hours ago', rolesList: ['Host manager'], usersList: [{ name: 'Blossom Utonium', org: 'UXD' }, { name: 'Bubbles Utonium', org: 'UXD' }, { name: 'Buttercup Utonium', org: 'UXD' }] },
+      { groupName: 'Seattle Grace admins', description: 'Clinical systems ungrouped host oversight', users: 3, roles: 1, lastModified: '1 day ago', rolesList: ['Host viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
+    ],
+    'workspace-b': [
+      { groupName: 'Bad Bunnies', description: 'Infrastructure provisioning and deployment pipelines', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Deploy manager', 'Pipeline operator'], usersList: [{ name: 'Benito Martinez', org: 'UXD' }, { name: 'DJ Luian', org: 'UXD' }, { name: 'Tainy Ocasio', org: 'UXD' }, { name: 'Mora Vega', org: 'UXD' }] },
+      { groupName: 'Golden girls', description: 'Workspace administrators handling approvals', users: 4, roles: 1, lastModified: '4 days ago', rolesList: ['Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+      { groupName: 'Spice girls', description: 'QA and testing team with report access', users: 5, roles: 1, lastModified: '2 days ago', rolesList: ['Report reader'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+      { groupName: 'Cardiology admins', description: 'Cross-workspace access for cardiac monitoring systems', users: 2, roles: 1, lastModified: '6 hours ago', rolesList: ['System viewer'], usersList: [{ name: 'Cristina Yang', org: 'Cardiology' }, { name: 'Preston Burke', org: 'Cardiology' }] },
+    ],
+    'workspace-c': [
+      { groupName: 'Powerpuff girls', description: 'Dev environment access and sandbox management', users: 3, roles: 2, lastModified: '8 hours ago', rolesList: ['Sandbox admin', 'Developer'], usersList: [{ name: 'Blossom Utonium', org: 'UXD' }, { name: 'Bubbles Utonium', org: 'UXD' }, { name: 'Buttercup Utonium', org: 'UXD' }] },
+      { groupName: 'Operating room ops', description: 'Operational monitoring and incident response', users: 6, roles: 2, lastModified: '3 days ago', rolesList: ['Incident responder', 'Monitor viewer'], usersList: [{ name: 'Mark Sloan', org: 'Surgery' }, { name: 'Callie Torres', org: 'Surgery' }, { name: 'Arizona Robbins', org: 'Surgery' }, { name: 'Owen Hunt', org: 'Surgery' }, { name: 'April Kepner', org: 'Surgery' }, { name: 'Jackson Avery', org: 'Surgery' }] },
+      { groupName: 'Seattle Grace admins', description: 'Clinical admin access for integration testing', users: 3, roles: 1, lastModified: '5 days ago', rolesList: ['Integration tester'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
+    ],
+  };
+
+  const parentGrantedByWorkspace: Record<string, GrantedRow[]> = {
+    'workspace-a': [
+      { groupName: 'Cardiology admins', description: 'Manage cardiac imaging access, approvals, and workspace settings', users: 2, roles: 1, lastModified: '6 hours ago', rolesList: ['Workspace administrator'], usersList: [{ name: 'Cristina Yang', org: 'Cardiology' }, { name: 'Preston Burke', org: 'Cardiology' }] },
+      { groupName: 'Radiology viewers', description: 'Read‑only access to imaging dashboards and reports', users: 8, roles: 1, lastModified: '1 day ago', rolesList: ['Report reader'], usersList: [{ name: 'Meredith Grey', org: 'Radiology' }, { name: 'Derek Shepherd', org: 'Radiology' }, { name: 'Alex Karev', org: 'Radiology' }, { name: 'Izzie Stevens', org: 'Radiology' }, { name: 'George O\'Malley', org: 'Radiology' }, { name: 'Miranda Bailey', org: 'Radiology' }, { name: 'Richard Webber', org: 'Radiology' }, { name: 'Addison Montgomery', org: 'Radiology' }] },
+      { groupName: 'Operating room ops', description: 'Operational runbooks, device integrations, and audit oversight', users: 6, roles: 2, lastModified: '4 days ago', rolesList: ['Operations manager', 'Audit viewer'], usersList: [{ name: 'Mark Sloan', org: 'Surgery' }, { name: 'Callie Torres', org: 'Surgery' }, { name: 'Arizona Robbins', org: 'Surgery' }, { name: 'Owen Hunt', org: 'Surgery' }, { name: 'April Kepner', org: 'Surgery' }, { name: 'Jackson Avery', org: 'Surgery' }] },
+    ],
+    'uxd': [],
+    'workspace-default': [
+      { groupName: 'Golden girls', description: 'Org-wide administrators inherited from UXD root', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+      { groupName: 'Bad Bunnies', description: 'Platform engineering inherited from UXD root', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'UXD' }, { name: 'DJ Luian', org: 'UXD' }, { name: 'Tainy Ocasio', org: 'UXD' }, { name: 'Mora Vega', org: 'UXD' }] },
+    ],
+    'workspace-ungrouped-hosts': [
+      { groupName: 'Golden girls', description: 'Inherited default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+      { groupName: 'Spice girls', description: 'Inherited general access from parent workspace', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+    ],
+    'workspace-b': [
+      { groupName: 'Golden girls', description: 'Default workspace administrators inherited from parent', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+      { groupName: 'Spice girls', description: 'Inherited general access from Workspace default', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+    ],
+    'workspace-c': [
+      { groupName: 'Golden girls', description: 'Default workspace administrators inherited from parent', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+    ],
+  };
+
+  const wsKey = workspaceId || 'workspace-a';
+  const [grantedRows, setGrantedRows] = React.useState<GrantedRow[]>(initialGrantedByWorkspace[wsKey] || []);
+  const [parentGrantedRows] = React.useState<GrantedRow[]>(parentGrantedByWorkspace[wsKey] || []);
+
+  const groupNames = grantedRows.map((r) => r.groupName);
+  const [selectedRowIds, setSelectedRowIds] = React.useState<Set<number>>(new Set());
+  const areAllSelected = groupNames.length > 0 && selectedRowIds.size === groupNames.length;
+  const areSomeSelected = selectedRowIds.size > 0 && selectedRowIds.size < groupNames.length;
+  const onToggleAll = (checked: boolean) => {
+    if (checked) setSelectedRowIds(new Set(groupNames.map((_, idx) => idx)));
+    else setSelectedRowIds(new Set());
+  };
+  const onToggleRow = (idx: number, checked: boolean) => {
+    setSelectedRowIds(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(idx); else next.delete(idx);
+      return next;
+    });
+  };
+
+  const parentGroupNames = parentGrantedRows.map((r) => r.groupName);
+  const [parentSelectedRowIds, setParentSelectedRowIds] = React.useState<Set<number>>(new Set());
+  const areAllParentSelected = parentGroupNames.length > 0 && parentSelectedRowIds.size === parentGroupNames.length;
+  const areSomeParentSelected = parentSelectedRowIds.size > 0 && parentSelectedRowIds.size < parentGroupNames.length;
+  const [isParentMasterOpen, setIsParentMasterOpen] = React.useState(false);
+  const onToggleAllParent = (checked: boolean) => {
+    if (checked) setParentSelectedRowIds(new Set(parentGroupNames.map((_, idx) => idx)));
+    else setParentSelectedRowIds(new Set());
+  };
+  const onToggleParentRow = (idx: number, checked: boolean) => {
+    setParentSelectedRowIds(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(idx); else next.delete(idx);
+      return next;
+    });
+  };
+
+  // Side panel state for group details
+  const [isDetailsPanelOpen, setIsDetailsPanelOpen] = React.useState(false);
+  const [detailsPanelRow, setDetailsPanelRow] = React.useState<GrantedRow | null>(null);
+  const [detailsPanelTab, setDetailsPanelTab] = React.useState<string | number>(0);
+  const openDetails = (row: GrantedRow) => {
+    setDetailsPanelRow(row);
+    setDetailsPanelTab(0);
+    setIsDetailsPanelOpen(true);
+  };
+  const closeDetails = () => {
+    setIsDetailsPanelOpen(false);
+  };
   const trustedOrgNames = ['Acme Corp', 'Globex', 'Initech', 'Umbrella', 'Soylent'];
-  // Wizard step 2 selection (user groups table)
-  const wizardUserGroups = ['All users','Administrators','Powerpuff Girls','Spice Girls','Golden Girls','Seattle Grace admins'];
-  const wizardMembers = [11,3,5,7,2,1];
-  const [selectedWizardGroups, setSelectedWizardGroups] = React.useState<Set<number>>(new Set([5]));
+  // Wizard step 2 selection (user groups table) — varies by selected trusted org
+  const wizardGroupsByOrg: Record<string, { names: string[]; members: number[] }> = {
+    'Globex': { names: ['Engineering leads', 'Product managers', 'Design ops', 'QA engineers', 'DevOps'], members: [8, 4, 3, 6, 5] },
+    'Acme Corp': { names: ['Sales ops', 'Account managers', 'Support team', 'Logistics', 'Billing admins'], members: [6, 4, 8, 3, 2] },
+    'Initech': { names: ['Platform team', 'Security ops', 'Data analysts', 'SRE team'], members: [6, 3, 9, 4] },
+    'Umbrella': { names: ['Research leads', 'Lab techs', 'Field agents', 'Compliance'], members: [4, 8, 5, 2] },
+    'Soylent': { names: ['Operations', 'Supply chain', 'Marketing', 'Customer success', 'Finance'], members: [7, 3, 5, 4, 2] },
+  };
+  const defaultGroups = { names: ['Administrators', 'Powerpuff Girls', 'Spice Girls', 'Golden Girls', 'Bad Bunnies'], members: [3, 5, 7, 2, 4] };
+  const currentOrgGroups = wizardGroupsByOrg[selectedTrustedOrg || ''] || defaultGroups;
+  const wizardUserGroups = currentOrgGroups.names;
+  const wizardMembers = currentOrgGroups.members;
+  const [selectedWizardGroups, setSelectedWizardGroups] = React.useState<Set<number>>(new Set());
   const wizardAllSelected = selectedWizardGroups.size === wizardUserGroups.length;
   const wizardSomeSelected = selectedWizardGroups.size > 0 && selectedWizardGroups.size < wizardUserGroups.length;
   const onWizardSelectAll = (checked: boolean) => {
@@ -127,7 +239,7 @@ const Workspaces: React.FunctionComponent = () => {
     { name: 'Automation Services Catalog administrator', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 3 }
   ];
   const [roleFilter, setRoleFilter] = React.useState('');
-  const [selectedRoles, setSelectedRoles] = React.useState<Set<string>>(new Set(['RHEL Admin']));
+  const [selectedRoles, setSelectedRoles] = React.useState<Set<string>>(new Set());
   const [rolesPage, setRolesPage] = React.useState(1);
   const [rolesPerPage, setRolesPerPage] = React.useState(10);
   const filteredRoles = React.useMemo(
@@ -180,9 +292,10 @@ const Workspaces: React.FunctionComponent = () => {
       </AlertGroup>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem>IAM</BreadcrumbItem>
+          <BreadcrumbItem>Identity & Access Management</BreadcrumbItem>
           <BreadcrumbItem>User Access</BreadcrumbItem>
-          <BreadcrumbItem isActive>Workspaces</BreadcrumbItem>
+          <BreadcrumbItem to="/workspaces">Workspaces</BreadcrumbItem>
+          <BreadcrumbItem isActive>{wsMeta.name}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
       
@@ -192,13 +305,26 @@ const Workspaces: React.FunctionComponent = () => {
             onClose={() => setIsGrantWizardOpen(false)}
             onSave={() => {
               // Create one row per selected group, using a simple mapping to Users/Roles counts
-              const newRows: GrantedRow[] = Array.from(selectedWizardGroups).map(idx => ({
-                groupName: wizardUserGroups[idx],
-                description: 'Lorem ipsum',
-                users: wizardMembers[idx] ?? 1,
-                roles: selectedRoles.size || 1,
-                lastModified: 'Just now'
-              }));
+              const mockFirstNames = ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Jamie', 'Quinn', 'Sage', 'Dakota', 'Skyler'];
+              const mockLastNames = ['Chen', 'Patel', 'Kim', 'Lopez', 'Singh', 'Nguyen', 'Müller', 'Tanaka', 'Costa', 'Johansson', 'Ali', 'Novak'];
+              const orgName = grantWhere === 'outside' && selectedTrustedOrg ? selectedTrustedOrg : myOrgName;
+              const newRows: GrantedRow[] = Array.from(selectedWizardGroups).map(idx => {
+                const memberCount = wizardMembers[idx] ?? 1;
+                const users: UserEntry[] = Array.from({ length: memberCount }).map((_, i) => ({
+                  name: `${mockFirstNames[(idx * 3 + i) % mockFirstNames.length]} ${mockLastNames[(idx * 5 + i) % mockLastNames.length]}`,
+                  org: orgName,
+                }));
+                return {
+                  groupName: wizardUserGroups[idx],
+                  description: 'Lorem ipsum',
+                  users: memberCount,
+                  roles: selectedRoles.size || 1,
+                  lastModified: 'Just now',
+                  rolesList: Array.from(selectedRoles),
+                  usersList: users,
+                  orgName,
+                };
+              });
               setGrantedRows(prev => [...prev, ...newRows]);
               const firstGroupIdx = Array.from(selectedWizardGroups)[0];
               const groupName = typeof firstGroupIdx === 'number' ? wizardUserGroups[firstGroupIdx] : 'selected group';
@@ -214,7 +340,7 @@ const Workspaces: React.FunctionComponent = () => {
             }
             startIndex={1}
           >
-            <WizardStep id="grant-step-1" name="Where are you granting access?">
+            <WizardStep id="grant-step-1" name="Where are you granting access?" footer={{ isBackHidden: true, isNextDisabled: grantWhere === null }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Where are you granting access?</Title>
                 <p style={{ marginTop: 8 }}>Select where you wish to grant access.</p>
@@ -244,7 +370,7 @@ const Workspaces: React.FunctionComponent = () => {
                       onOpenChange={setIsTrustedOpen}
                       onSelect={(_e, itemId) => {
                         const name = String(itemId ?? '');
-                        if (name) setSelectedTrustedOrg(name);
+                        if (name) { setSelectedTrustedOrg(name); setSelectedWizardGroups(new Set()); }
                         setIsTrustedOpen(false);
                       }}
                       toggle={(toggleRef) => (
@@ -270,12 +396,13 @@ const Workspaces: React.FunctionComponent = () => {
                     </Dropdown>
                   </div>
                   <p style={{ marginTop: 8, color: 'var(--pf-v6-global--palette--black-700)' }}>
-                    Don’t see the trusted org you need? Establish a new trusted org connection
+                    Don’t see the trusted org you need? 
+                    <a href="/organization/trusted-organizations?tab=incoming">Check the incoming trusted organization connection requests.</a>
                   </p>
                 </div>
             </div>
             </WizardStep>
-            <WizardStep id="grant-step-2" name="Select user group(s)">
+            <WizardStep id="grant-step-2" name="Select user group(s)" footer={{ isNextDisabled: selectedWizardGroups.size === 0 }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Select user group(s) you want to grant access to</Title>
                 <p style={{ marginTop: 8 }}>
@@ -336,7 +463,7 @@ const Workspaces: React.FunctionComponent = () => {
                 </div>
               </div>
             </WizardStep>
-            <WizardStep id="grant-step-3" name="Select role(s)">
+            <WizardStep id="grant-step-3" name="Select role(s)" footer={{ isNextDisabled: selectedRoles.size === 0 }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Select role(s)</Title>
                 <p style={{ marginTop: 8 }}>Select one or more roles to link to this group.</p>
@@ -415,23 +542,102 @@ const Workspaces: React.FunctionComponent = () => {
       {/* Details side panel removed by request */}
 
       <PageSection hasBodyWrapper={false}>
-        <Title headingLevel="h1" size="2xl">Workspace A</Title>
+        <Title headingLevel="h1" size="2xl">{wsMeta.name}</Title>
         <Content>
           <p style={{ margin: 0, color: '#6a6e73' }}>Manage workspace details and settings.</p>
           <p style={{ marginTop: '4px', color: '#6a6e73' }}>
-            <strong>Workspace Hierachy:</strong>{' '}
-            <Button variant="link" isInline style={{ fontWeight: 700, padding: 0 }}>UXD</Button>
-            {' '}&gt;&nbsp;Workspace A
+            <strong>Workspace Hierarchy:</strong>{' '}
+            {wsMeta.hierarchy.map((item, idx) => (
+              <React.Fragment key={idx}>
+                {idx > 0 && <span>{' '}&gt;&nbsp;</span>}
+                {item.path ? (
+                  <Button variant="link" isInline style={{ fontWeight: 700, padding: 0 }} onClick={() => wsNavigate(item.path!)}>{item.name}</Button>
+                ) : (
+                  <span>{item.name}</span>
+                )}
+              </React.Fragment>
+            ))}
           </p>
-              </Content>
+        </Content>
       </PageSection>
       
-      <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
+      <PageSection hasBodyWrapper={false} isFilled style={{ paddingTop: 0 }}>
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick}>
           <Tab eventKey={0} title={<TabTitleText>Role assignments</TabTitleText>}>
             <PageSection style={{ paddingTop: 8, paddingBottom: 0 }}>
               <Tabs activeKey={roleTabKey} onSelect={handleRoleTabClick}>
                 <Tab eventKey={0} title={<TabTitleText>Roles assigned in this workspace</TabTitleText>}>
+                 <Drawer isExpanded={isDetailsPanelOpen} isInline position="right" style={{ minHeight: 'calc(100vh - 220px)' }}>
+                  <DrawerContent
+                    panelContent={
+                      <DrawerPanelContent defaultSize="400px" style={{ display: 'flex', flexDirection: 'column' }}>
+                        <DrawerHead>
+                          <Title headingLevel="h2" size="lg">{detailsPanelRow?.groupName}</Title>
+                          <Content component="p" style={{ marginTop: 8 }}>This is a panel description. It is helpful.</Content>
+                          <DrawerActions>
+                            <Dropdown
+                              isOpen={false}
+                              onOpenChange={() => {}}
+                              toggle={(toggleRef) => (
+                                <MenuToggle ref={toggleRef} aria-label="Panel actions" variant="plain">
+                                  <EllipsisVIcon />
+                                </MenuToggle>
+                              )}
+                              popperProps={{ position: 'right' }}
+                            >
+                              <DropdownList>
+                                <DropdownItem>Edit</DropdownItem>
+                                <DropdownItem>Remove</DropdownItem>
+                              </DropdownList>
+                            </Dropdown>
+                            <DrawerCloseButton onClick={closeDetails} />
+                          </DrawerActions>
+                        </DrawerHead>
+                        <DrawerContentBody>
+                          <Tabs activeKey={detailsPanelTab} onSelect={(_e, key) => setDetailsPanelTab(key)}>
+                            <Tab eventKey={0} title={<TabTitleText>Roles</TabTitleText>}>
+                              <Table aria-label="Roles for group" variant="compact">
+                                <Thead>
+                                  <Tr>
+                                    <Th>Roles</Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  {(detailsPanelRow?.rolesList || []).map((role, i) => (
+                                    <Tr key={i}>
+                                      <Td>{role}</Td>
+                                    </Tr>
+                                  ))}
+                                </Tbody>
+                              </Table>
+                            </Tab>
+                            <Tab eventKey={1} title={<TabTitleText>Users</TabTitleText>}>
+                              <Table aria-label="Users in group" variant="compact">
+                                <Thead>
+                                  <Tr>
+                                    <Th>Users</Th>
+                                    <Th>Organization</Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  {(detailsPanelRow?.usersList || []).map((user, i) => (
+                                    <Tr key={i}>
+                                      <Td>{user.name}</Td>
+                                      <Td>{user.org}</Td>
+                                    </Tr>
+                                  ))}
+                                </Tbody>
+                              </Table>
+                            </Tab>
+                          </Tabs>
+                          <div style={{ padding: '16px' }}>
+                            <Button variant="secondary">Edit access for this workspace</Button>
+                          </div>
+                        </DrawerContentBody>
+                      </DrawerPanelContent>
+                    }
+                  >
+                   <DrawerContentBody>
                   <PageSection style={{ paddingTop: 8, paddingBottom: 0 }}>
                     <Toolbar style={{ marginTop: 16 }}>
                       <ToolbarContent>
@@ -533,6 +739,9 @@ const Workspaces: React.FunctionComponent = () => {
                       </Tbody>
                     </Table>
                   </PageSection>
+                   </DrawerContentBody>
+                  </DrawerContent>
+                 </Drawer>
                 </Tab>
                 <Tab eventKey={1} title={<TabTitleText>Roles assigned in parent workspaces</TabTitleText>}>
                   <PageSection style={{ paddingTop: 8, paddingBottom: 0 }}>

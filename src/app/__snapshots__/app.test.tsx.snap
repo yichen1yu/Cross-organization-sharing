@@ -39,7 +39,7 @@ exports[`App tests should render default App component 1`] = `
           >
             <img
               alt="Red Hat Logo"
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Red_Hat_logo.svg/2560px-Red_Hat_logo.svg.png"
+              src="https://upload.wikimedia.org/wikipedia/commons/d/d8/Red_Hat_logo.svg"
               style="height: 40px; width: auto;"
             />
           </span>

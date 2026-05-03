@@ -73,19 +73,56 @@ const Billing: React.FunctionComponent = () => {
   const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
   type UserEntry = { name: string; org: string };
   type GrantedRow = { groupName: string; description: string; users: number; roles: number; lastModified: string; rolesList?: string[]; usersList?: UserEntry[]; orgName?: string };
-  type BillingRow = { org: string; group: string; roles: number; status: 'Granted' | 'Severed'; lastUpdated: string };
+  type BillingRow = { org: string; group: string; roles: number; status: 'Granted' | 'Severed'; lastUpdated: string; sortOrder: number };
   const [billingRows, setBillingRows] = React.useState<BillingRow[]>([
-    { org: 'Seattle Grace Hospital', group: 'Golden Girls', roles: 4, status: 'Granted', lastUpdated: '1 days ago' },
-    { org: 'AWS', group: 'Spice Girls', roles: 3, status: 'Granted', lastUpdated: '2 days ago' },
-    { org: 'Acme hospital', group: 'Powerfuff Girls', roles: 5, status: 'Severed', lastUpdated: '2 days ago' },
-    { org: 'St. Elsewhere Hospital', group: 'St. Elsewhere admin', roles: 5, status: 'Granted', lastUpdated: '5 days ago' }
+    { org: 'Seattle Grace Hospital', group: 'Golden Girls', roles: 4, status: 'Granted', lastUpdated: '1 days ago', sortOrder: 1 },
+    { org: 'AWS', group: 'Spice Girls', roles: 3, status: 'Granted', lastUpdated: '2 days ago', sortOrder: 2 },
+    { org: 'Acme hospital', group: 'Powerfuff Girls', roles: 5, status: 'Severed', lastUpdated: '2 days ago', sortOrder: 2 },
+    { org: 'St. Elsewhere Hospital', group: 'St. Elsewhere admin', roles: 5, status: 'Granted', lastUpdated: '5 days ago', sortOrder: 5 }
   ]);
+  const [activeSortIndex, setActiveSortIndex] = React.useState<number>(4);
+  const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc'>('asc');
+  const columnKeys: (keyof BillingRow)[] = ['org', 'group', 'roles', 'status', 'lastUpdated'];
+  const sortedBillingRows = React.useMemo(() => {
+    const key = columnKeys[activeSortIndex];
+    return [...billingRows].sort((a, b) => {
+      if (key === 'lastUpdated') {
+        const diff = a.sortOrder - b.sortOrder;
+        return activeSortDirection === 'asc' ? diff : -diff;
+      }
+      if (key === 'roles') {
+        return activeSortDirection === 'asc' ? a.roles - b.roles : b.roles - a.roles;
+      }
+      const aVal = String(a[key]).toLowerCase();
+      const bVal = String(b[key]).toLowerCase();
+      const cmp = aVal.localeCompare(bVal);
+      return activeSortDirection === 'asc' ? cmp : -cmp;
+    });
+  }, [billingRows, activeSortIndex, activeSortDirection]);
+  const getSortParams = (columnIndex: number) => ({
+    sortBy: { index: activeSortIndex, direction: activeSortDirection },
+    onSort: (_event: any, index: number, direction: 'asc' | 'desc') => {
+      setActiveSortIndex(index);
+      setActiveSortDirection(direction);
+    },
+    columnIndex,
+  });
+  const [openRowKebab, setOpenRowKebab] = React.useState<number | null>(null);
   const openDetails = (_row: GrantedRow) => {};
   const trustedOrgNames = ['Acme Corp', 'Globex', 'Initech', 'Umbrella', 'Soylent'];
-  // Wizard step 2 selection
-  const wizardUserGroups = ['All users','Administrators','Powerpuff Girls','Spice Girls','Golden Girls','Seattle Grace admins'];
-  const wizardMembers = [11,3,5,7,2,1];
-  const [selectedWizardGroups, setSelectedWizardGroups] = React.useState<Set<number>>(new Set([5]));
+  // Wizard step 2 selection — varies by selected trusted org
+  const wizardGroupsByOrg: Record<string, { names: string[]; members: number[] }> = {
+    'Globex': { names: ['Engineering leads', 'Product managers', 'Design ops', 'QA engineers', 'DevOps'], members: [8, 4, 3, 6, 5] },
+    'Acme Corp': { names: ['Sales ops', 'Account managers', 'Support team', 'Logistics', 'Billing admins'], members: [6, 4, 8, 3, 2] },
+    'Initech': { names: ['Platform team', 'Security ops', 'Data analysts', 'SRE team'], members: [6, 3, 9, 4] },
+    'Umbrella': { names: ['Research leads', 'Lab techs', 'Field agents', 'Compliance'], members: [4, 8, 5, 2] },
+    'Soylent': { names: ['Operations', 'Supply chain', 'Marketing', 'Customer success', 'Finance'], members: [7, 3, 5, 4, 2] },
+  };
+  const defaultGroups = { names: ['Administrators', 'Powerpuff Girls', 'Spice Girls', 'Golden Girls', 'Bad Bunnies'], members: [3, 5, 7, 2, 4] };
+  const currentOrgGroups = wizardGroupsByOrg[selectedTrustedOrg || ''] || defaultGroups;
+  const wizardUserGroups = currentOrgGroups.names;
+  const wizardMembers = currentOrgGroups.members;
+  const [selectedWizardGroups, setSelectedWizardGroups] = React.useState<Set<number>>(new Set());
   const wizardAllSelected = selectedWizardGroups.size === wizardUserGroups.length;
   const wizardSomeSelected = selectedWizardGroups.size > 0 && selectedWizardGroups.size < wizardUserGroups.length;
   const onWizardSelectAll = (checked: boolean) => {
@@ -102,7 +139,7 @@ const Billing: React.FunctionComponent = () => {
     { name: 'Subscription editor', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 5 }
   ];
   const [roleFilter, setRoleFilter] = React.useState('');
-  const [selectedRoles, setSelectedRoles] = React.useState<Set<string>>(new Set(['RHEL Admin']));
+  const [selectedRoles, setSelectedRoles] = React.useState<Set<string>>(new Set());
   const [rolesPage, setRolesPage] = React.useState(1);
   const [rolesPerPage, setRolesPerPage] = React.useState(10);
   const filteredRoles = React.useMemo(
@@ -156,17 +193,20 @@ const Billing: React.FunctionComponent = () => {
             onClose={() => setIsGrantWizardOpen(false)}
             onSave={() => {
               const orgName = grantWhere === 'outside' ? (selectedTrustedOrg || 'Selected organization') : 'Pinnacle Corp';
+              const mockFirstNames = ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Jamie', 'Quinn', 'Sage', 'Dakota', 'Skyler'];
+              const mockLastNames = ['Chen', 'Patel', 'Kim', 'Lopez', 'Singh', 'Nguyen', 'Müller', 'Tanaka', 'Costa', 'Johansson', 'Ali', 'Novak'];
               const newRows = Array.from(selectedWizardGroups).map(idx => ({
                 org: orgName,
                 group: wizardUserGroups[idx],
                 roles: selectedRoles.size || 1,
                 status: 'Granted' as const,
-                lastUpdated: 'Just now'
+                lastUpdated: 'Just now',
+                sortOrder: 0
               }));
               setBillingRows(prev => [...prev, ...newRows]);
               const firstGroupIdx = Array.from(selectedWizardGroups)[0];
               const firstGroupName = typeof firstGroupIdx === 'number' ? wizardUserGroups[firstGroupIdx] : 'Selected group';
-              addToast('Billing account share has granted', (
+              addToast('Billing account share has been granted', (
                 <span>
                   {firstGroupName} from {orgName} now has access to the billing account
                 </span>
@@ -182,7 +222,7 @@ const Billing: React.FunctionComponent = () => {
             }
             startIndex={1}
           >
-            <WizardStep id="grant-step-1" name="Where are you granting access?">
+            <WizardStep id="grant-step-1" name="Where are you granting access?" footer={{ isBackHidden: true, isNextDisabled: grantWhere === null }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Where are you granting access?</Title>
                 <p style={{ marginTop: 8 }}>Select where you wish to grant access.</p>
@@ -198,7 +238,7 @@ const Billing: React.FunctionComponent = () => {
                       onOpenChange={setIsTrustedOpen}
                       onSelect={(_e, itemId) => {
                         const name = String(itemId ?? '');
-                        if (name) setSelectedTrustedOrg(name);
+                        if (name) { setSelectedTrustedOrg(name); setSelectedWizardGroups(new Set()); }
                         setIsTrustedOpen(false);
                       }}
                       toggle={(toggleRef) => (
@@ -223,12 +263,12 @@ const Billing: React.FunctionComponent = () => {
                     </Dropdown>
                   </div>
                   <p style={{ marginTop: 8, color: 'var(--pf-v6-global--palette--black-700)' }}>
-                    Don’t see the trusted org you need? Establish a new trusted org connection
+                    Don’t see the trusted org you need? <a href="/organization/trusted-organizations?tab=incoming">Check the incoming trusted organization connection requests.</a>
                   </p>
                 </div>
               </div>
             </WizardStep>
-            <WizardStep id="grant-step-2" name="Select user group(s)">
+            <WizardStep id="grant-step-2" name="Select user group(s)" footer={{ isNextDisabled: selectedWizardGroups.size === 0 }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Select user group(s) you want to grant access to</Title>
                 <p style={{ marginTop: 8 }}>
@@ -275,7 +315,7 @@ const Billing: React.FunctionComponent = () => {
                 </div>
               </div>
             </WizardStep>
-            <WizardStep id="grant-step-3" name="Select role(s)">
+            <WizardStep id="grant-step-3" name="Select role(s)" footer={{ isNextDisabled: selectedRoles.size === 0 }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Select role(s)</Title>
                 <p style={{ marginTop: 8 }}>Select one or more roles to link to this group.</p>
@@ -368,7 +408,7 @@ const Billing: React.FunctionComponent = () => {
                   </ToolbarItem>
                   <ToolbarItem style={{ marginLeft: 'auto' }}>
 
-                    <Pagination itemCount={billingRows.length} perPage={billingRows.length} page={1} isCompact />
+                    <Pagination itemCount={sortedBillingRows.length} perPage={sortedBillingRows.length} page={1} isCompact />
                   </ToolbarItem>
                 </ToolbarContent>
               </Toolbar>
@@ -378,16 +418,16 @@ const Billing: React.FunctionComponent = () => {
                 <Thead>
                   <Tr>
                     <Th aria-label="Row select" />
-                    <Th width={30}>Organization name</Th>
-                    <Th width={25}>User group</Th>
-                    <Th width={10}>Roles</Th>
-                    <Th width={15}>Status</Th>
-                    <Th width={20}>Last updated</Th>
+                    <Th width={30} sort={getSortParams(0)}>Organization name</Th>
+                    <Th width={25} sort={getSortParams(1)}>User group</Th>
+                    <Th width={10} sort={getSortParams(2)}>Roles</Th>
+                    <Th width={15} sort={getSortParams(3)}>Status</Th>
+                    <Th width={20} sort={getSortParams(4)}>Last updated</Th>
                     <Th aria-label="Row actions"></Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {billingRows.map((row, idx) => (
+                  {sortedBillingRows.map((row, idx) => (
                     <Tr key={`${row.org}-${idx}`}>
                       <Td>
                         <Checkbox id={`select-bill-${idx}`} aria-label={`Select ${row.org}`} isChecked={selectedRowIds.has(idx)} onChange={(_e, checked) => onToggleRow(idx, !!checked)} />
@@ -406,15 +446,39 @@ const Billing: React.FunctionComponent = () => {
                       </Td>
                       <Td dataLabel="Last updated">{row.lastUpdated}</Td>
                       <Td isActionCell>
-                        <Dropdown isOpen={false} onOpenChange={() => {}} toggle={(toggleRef) => (
-                          <MenuToggle ref={toggleRef} aria-label={`Row actions for ${row.org}`} variant="plain">
-                            <EllipsisVIcon />
-                          </MenuToggle>
-                        )} popperProps={{ position: 'right' }}>
+                        <Dropdown
+                          isOpen={openRowKebab === idx}
+                          onSelect={() => setOpenRowKebab(null)}
+                          onOpenChange={(isOpen) => setOpenRowKebab(isOpen ? idx : null)}
+                          toggle={(toggleRef) => (
+                            <MenuToggle
+                              ref={toggleRef}
+                              aria-label={`Row actions for ${row.org}`}
+                              variant="plain"
+                              onClick={() => setOpenRowKebab(openRowKebab === idx ? null : idx)}
+                              isExpanded={openRowKebab === idx}
+                            >
+                              <EllipsisVIcon />
+                            </MenuToggle>
+                          )}
+                          popperProps={{ position: 'right' }}
+                        >
                           <DropdownList>
                             <DropdownItem>View</DropdownItem>
                             <DropdownItem>Edit</DropdownItem>
-                            <DropdownItem>Remove</DropdownItem>
+                            {row.status === 'Granted' && (
+                              <DropdownItem
+                                style={{ color: 'var(--pf-t--global--color--status--danger--default)' }}
+                                onClick={() => {
+                                  setBillingRows(prev => prev.filter((_, i) => i !== billingRows.indexOf(row)));
+                                  addToast('Access has been removed', (
+                                    <span>{row.group} from {row.org} no longer has access to the billing account</span>
+                                  ));
+                                }}
+                              >
+                                Remove access
+                              </DropdownItem>
+                            )}
                           </DropdownList>
                         </Dropdown>
                       </Td>

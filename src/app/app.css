@@ -22,19 +22,19 @@ body,
 #root {
   height: 100%;
 }
-body { margin: 0; overflow-y: hidden; }
-.pf-v6-c-page, .pf-v6-c-page__main { height: 100%; }
+body { margin: 0; }
 
-/* Ensure the main container fills the viewport height by default */
-#main-container,
-#primary-app-container {
-  /* Fill viewport minus PF main-section top padding and our bottom padding to prevent ghost scrollbar */
-  height: calc(100vh - var(--pf-v6-c-page__main-section--PaddingTop, 0px) - 32px);
-  background: var(--pf-v6-global--BackgroundColor--100);
-  padding-bottom: 32px; /* match app spacing */
-  box-sizing: border-box;
-  overflow-y: auto; /* show vertical scrollbar only when content overflows */
+/*
+ * Polyfill missing design tokens: @patternfly/react-styles 6.4.0 references
+ * tokens that do not yet exist in @patternfly/react-core 6.3.1's base.css.
+ * Without these, calc() expressions in the page component CSS silently fail,
+ * dropping PageSection inline padding and main-container border entirely.
+ */
+:root {
+  --pf-t--global--border--width--main--default: 1px;
+  --pf-t--global--border--color--main--default: white;
 }
+
 
 /* Download icon button: blue on hover and active */
 .pf-v6-c-button.pf-m-plain:hover,
@@ -44,7 +44,7 @@ body { margin: 0; overflow-y: hidden; }
 }
 
 .pf-v6-c-content {
-  --pf-v6-c-content--small--Color: var(--pf-t--global--color--status--danger--default); /* changes all <small> color to the semantic token for danger */
-  --pf-v6-c-content--blockquote--BorderLeftColor: var(--pf-t--global--color--nonstatus--purple--default); /* changes all <blockquote> left border color to the semantic token for non-status (purple) */
-  --pf-v6-c-content--hr--BackgroundColor: var(--pf-t--global--color--nonstatus--yellow--default); /* changes a <hr> color to the semantic token for non-status (yellow) */
+  --pf-v6-c-content--small--Color: var(--pf-t--global--color--status--danger--default);
+  --pf-v6-c-content--blockquote--BorderLeftColor: var(--pf-t--global--color--nonstatus--purple--default);
+  --pf-v6-c-content--hr--BackgroundColor: var(--pf-t--global--color--nonstatus--yellow--default);
 }

@@ -1359,7 +1359,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         <MastheadBrand data-codemods>
           <MastheadLogo data-codemods onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
             <img 
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Red_Hat_logo.svg/2560px-Red_Hat_logo.svg.png"
+              src="https://upload.wikimedia.org/wikipedia/commons/d/d8/Red_Hat_logo.svg"
               alt="Red Hat Logo"
               style={{ height: '40px', width: 'auto' }}
             />
@@ -1781,12 +1781,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     { 
       label: 'Access Management', 
       path: '/user-access', 
-      isActive: ['/user-access', '/users-and-groups', '/roles', '/workspaces', '/service-accounts'].includes(location.pathname),
+      isActive: ['/user-access', '/users-and-groups', '/roles', '/service-accounts'].includes(location.pathname) || location.pathname.startsWith('/workspaces'),
       isExpandable: true,
       subItems: [
         { label: 'Users and Groups', path: '/users-and-groups', isActive: location.pathname === '/users-and-groups' },
         { label: 'Roles', path: '/roles', isActive: location.pathname === '/roles' },
-        { label: 'Workspaces', path: '/workspaces', isActive: location.pathname === '/workspaces' },
+        { label: 'Workspaces', path: '/workspaces', isActive: location.pathname.startsWith('/workspaces') },
         // New Service accounts under Access management
         { label: 'Service Accounts', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
       ]
@@ -2983,6 +2983,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         masthead={masthead}
         sidebar={sidebarOpen && !isPageWithoutNav && Sidebar}
         skipToContent={PageSkipToContent}
+        isContentFilled
       >
         {/* Scheduler Drawer (outermost, right-side, global) */}
         <Drawer isExpanded={isSchedulerPanelOpen} isInline position="right">
