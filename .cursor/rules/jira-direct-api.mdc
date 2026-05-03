@@ -1,0 +1,54 @@
+---
+description: Jira REST API access via direct curl (Atlassian MCP blocked by Red Hat org policy)
+alwaysApply: true
+---
+
+# Jira Direct REST API Rule
+
+## Why this rule exists
+The Atlassian MCP plugin is **blocked by Red Hat organization policy**. All Jira interactions must use the direct REST API via `curl` and the helper script at `scripts/jira-api.sh`.
+
+## Connection details
+- **Base URL:** `https://redhat.atlassian.net/rest/api/3`
+- **Auth:** HTTP Basic — `yiyu@redhat.com` + token from `~/.jira-token`
+- **Search endpoint:** `POST /rest/api/3/search/jql` (the old `GET /rest/api/2/search` has been removed)
+
+## Helper script
+Source the script before using any function:
+```bash
+source scripts/jira-api.sh
+```
+
+### Available functions
+| Function | Usage |
+|---|---|
+| `jira_search "<JQL>"` | Search issues (POST /search/jql) |
+| `jira_get_issue "KEY"` | Get a single issue |
+| `jira_create_issue '<json>'` | Create an issue |
+| `jira_edit_issue "KEY" '<json>'` | Update an issue |
+| `jira_transition_issue "KEY" '<json>'` | Transition issue status |
+| `jira_get_transitions "KEY"` | List available transitions |
+| `jira_add_comment "KEY" "text"` | Add a comment (ADF format) |
+| `jira_lookup_user "name"` | Search users by name/email |
+| `jira_link_issues "type" "KEY-1" "KEY-2"` | Link two issues |
+
+## UXD custom field IDs
+| Field | ID | Type | Applies to |
+|---|---|---|---|
+| Story Points | `customfield_10028` | number | Stories only |
+| Size | `customfield_10795` | select: XS / S / M / L / XL | Epics only |
+| Activity Type | `customfield_10464` | select: Orient / Explore / Make / Monitor / Consult / Enable | All |
+| Epic Link | `customfield_10014` | string (epic key) | Stories/Tasks |
+
+## Output formatting
+- Format Jira results as **markdown tables**
+- Link issue keys to `https://issues.redhat.com/browse/{KEY}`
+- Example: `[CPUX-1234](https://issues.redhat.com/browse/CPUX-1234)`
+
+## Authentication errors
+If a `401 Unauthorized` is returned, instruct the user to regenerate their API token at:
+https://id.atlassian.com/manage-profile/security/api-tokens
+
+## Security
+- **NEVER** commit `~/.jira-token` or embed the token in code/commits
+- The token file lives outside the repo at `~/.jira-token` with `chmod 600`

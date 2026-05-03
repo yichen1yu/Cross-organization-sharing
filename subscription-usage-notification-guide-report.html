@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Subscription Usage Notification Guide Report</title>
+<style>
+  @page {
+    size: A4;
+    margin: 1.5cm 2cm;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a;
+    line-height: 1.5;
+    font-size: 11pt;
+  }
+  h1 {
+    font-size: 22pt;
+    color: #c00;
+    border-bottom: 3px solid #c00;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: #555;
+    font-size: 10pt;
+    margin-bottom: 24px;
+  }
+  h2 {
+    font-size: 14pt;
+    color: #222;
+    margin-top: 28px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 4px;
+  }
+  h3 {
+    font-size: 12pt;
+    color: #333;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 20px 0;
+    font-size: 9.5pt;
+  }
+  th {
+    background-color: #2b2b2b;
+    color: #fff;
+    font-weight: 600;
+    text-align: left;
+    padding: 7px 10px;
+  }
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  tr:nth-child(even) td {
+    background-color: #f7f7f7;
+  }
+  tr.total-row td {
+    font-weight: 700;
+    background-color: #eee;
+    border-top: 2px solid #888;
+  }
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0 24px 0;
+  }
+  .metric-card {
+    background: #f5f5f5;
+    border-left: 4px solid #c00;
+    padding: 12px 14px;
+    border-radius: 4px;
+  }
+  .metric-card.green { border-left-color: #2e7d32; }
+  .metric-card.orange { border-left-color: #e65100; }
+  .metric-card.blue { border-left-color: #1565c0; }
+  .metric-value {
+    font-size: 20pt;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+  .metric-label {
+    font-size: 9pt;
+    color: #666;
+    margin-top: 2px;
+  }
+  .insight {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: #fafafa;
+    border-left: 3px solid #1565c0;
+    font-size: 10pt;
+  }
+  .insight strong { color: #1a1a1a; }
+  .recommendation {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background: #fff8e1;
+    border-left: 3px solid #f9a825;
+    font-size: 10pt;
+  }
+  .footer {
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+    font-size: 8.5pt;
+    color: #888;
+    text-align: center;
+  }
+  .conversion-highlight {
+    color: #2e7d32;
+    font-weight: 600;
+  }
+  .dismiss-highlight {
+    color: #c62828;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<h1>Subscription Usage Notification Guide Report</h1>
+<div class="subtitle">
+  <strong>Period:</strong> March 27 &ndash; April 3, 2026 (Last 7 Days) &nbsp;&bull;&nbsp;
+  <strong>Project:</strong> console.redhat.com (ID: 402476) &nbsp;&bull;&nbsp;
+  <strong>Guide ID:</strong> 43117
+</div>
+
+<h2>Overview</h2>
+<div class="overview-grid">
+  <div class="metric-card">
+    <div class="metric-value">6,364</div>
+    <div class="metric-label">Unique Viewers</div>
+  </div>
+  <div class="metric-card green">
+    <div class="metric-value">1,042</div>
+    <div class="metric-label">Completions</div>
+  </div>
+  <div class="metric-card blue">
+    <div class="metric-value">16.4%</div>
+    <div class="metric-label">Conversion Rate</div>
+  </div>
+  <div class="metric-card orange">
+    <div class="metric-value">~10%</div>
+    <div class="metric-label">Rage Close Rate</div>
+  </div>
+</div>
+
+<table>
+  <tr>
+    <th>Metric</th>
+    <th>Value</th>
+  </tr>
+  <tr><td>Total Unique Viewers</td><td><strong>6,364</strong></td></tr>
+  <tr><td>Total Engaged Users</td><td><strong>1,051</strong></td></tr>
+  <tr><td>Total Completions</td><td><strong>1,042</strong></td></tr>
+  <tr><td>Overall Conversion Rate (View &rarr; Complete)</td><td class="conversion-highlight">16.4%</td></tr>
+  <tr><td>Dismiss Rate</td><td class="dismiss-highlight">~83%</td></tr>
+  <tr><td>Rage Close Rate</td><td>~9.8%</td></tr>
+  <tr><td>Snooze Rate</td><td>0%</td></tr>
+  <tr><td>Median Time to Engage</td><td>6 seconds</td></tr>
+</table>
+
+<h2>Daily Breakdown &mdash; Unique Users</h2>
+<table>
+  <tr>
+    <th>Date</th>
+    <th>Viewed</th>
+    <th>Completed</th>
+    <th>Dismissed</th>
+    <th>Rage Closed</th>
+    <th>Conversion</th>
+  </tr>
+  <tr><td>Mar 27</td><td>318</td><td>68</td><td>238</td><td>34</td><td>21.4%</td></tr>
+  <tr><td>Mar 28</td><td>223</td><td>45</td><td>174</td><td>17</td><td>20.2%</td></tr>
+  <tr><td>Mar 29</td><td>336</td><td>65</td><td>263</td><td>30</td><td>19.3%</td></tr>
+  <tr><td>Mar 30</td><td>1,370</td><td>219</td><td>1,129</td><td>160</td><td>16.0%</td></tr>
+  <tr><td>Mar 31</td><td>1,342</td><td>212</td><td>1,103</td><td>121</td><td>15.8%</td></tr>
+  <tr><td>Apr 1</td><td>1,287</td><td>192</td><td>1,086</td><td>128</td><td>14.9%</td></tr>
+  <tr><td>Apr 2</td><td>1,009</td><td>169</td><td>830</td><td>82</td><td>16.7%</td></tr>
+  <tr><td>Apr 3</td><td>513</td><td>83</td><td>423</td><td>56</td><td>16.2%</td></tr>
+</table>
+
+<h2>Daily Breakdown &mdash; Total Events</h2>
+<table>
+  <tr>
+    <th>Date</th>
+    <th>Viewed</th>
+    <th>Completed</th>
+    <th>Dismissed</th>
+    <th>Engaged</th>
+    <th>Step Completed</th>
+  </tr>
+  <tr><td>Mar 27</td><td>446</td><td>76</td><td>243</td><td>76</td><td>76</td></tr>
+  <tr><td>Mar 28</td><td>510</td><td>45</td><td>178</td><td>45</td><td>45</td></tr>
+  <tr><td>Mar 29</td><td>576</td><td>65</td><td>266</td><td>65</td><td>65</td></tr>
+  <tr><td>Mar 30</td><td>1,668</td><td>219</td><td>1,151</td><td>219</td><td>220</td></tr>
+  <tr><td>Mar 31</td><td>1,659</td><td>212</td><td>1,123</td><td>212</td><td>212</td></tr>
+  <tr><td>Apr 1</td><td>1,590</td><td>192</td><td>1,109</td><td>192</td><td>192</td></tr>
+  <tr><td>Apr 2</td><td>1,287</td><td>169</td><td>842</td><td>169</td><td>169</td></tr>
+  <tr><td>Apr 3</td><td>724</td><td>84</td><td>429</td><td>84</td><td>84</td></tr>
+  <tr class="total-row"><td>Total</td><td>8,460</td><td>1,062</td><td>5,341</td><td>1,062</td><td>1,063</td></tr>
+</table>
+
+<h2>Key Insights</h2>
+
+<div class="insight">
+  <strong>1. Major traffic ramp-up on Mar 30:</strong> Views jumped from ~300/day (Mar 27&ndash;29) to ~1,300/day (Mar 30 onwards), suggesting the guide targeting was expanded or a new audience segment was activated around that date.
+</div>
+<div class="insight">
+  <strong>2. 16.4% overall completion rate:</strong> About 1 in 6 users who see the guide engage with it by clicking &ldquo;Set up Notification&rdquo; or &ldquo;Learn More.&rdquo; This is a reasonable rate for an unsolicited in-app guide.
+</div>
+<div class="insight">
+  <strong>3. High dismiss rate (~83%):</strong> The majority of users close the guide without interacting. This is typical for unsolicited in-app prompts but worth monitoring over time.
+</div>
+<div class="insight">
+  <strong>4. ~10% rage close rate:</strong> Approximately 628 users rage-closed the guide over the period. This may indicate the guide is appearing at an inopportune time or is perceived as disruptive to some users.
+</div>
+<div class="insight">
+  <strong>5. Zero snooze usage:</strong> No users clicked &ldquo;Show me later,&rdquo; which could mean the snooze option isn&rsquo;t prominent enough, or users simply prefer to dismiss entirely.
+</div>
+<div class="insight">
+  <strong>6. Near-instant engagement:</strong> Median time from view to engagement is just 6 seconds, meaning users who do engage make the decision very quickly.
+</div>
+<div class="insight">
+  <strong>7. 99.1% Engaged &rarr; Completed:</strong> Virtually all users who click a CTA button complete the guide, which is expected for a single-step flow.
+</div>
+
+<h2>Recommendations</h2>
+
+<div class="recommendation">
+  <strong>Investigate the high dismiss/rage-close rates</strong> &mdash; consider adjusting when and where the guide appears (e.g., only on the Subscriptions page rather than broadly across the console).
+</div>
+<div class="recommendation">
+  <strong>Monitor the conversion trend</strong> &mdash; the early days (Mar 27&ndash;29) had higher conversion rates (~19&ndash;21%) with lower volume, suggesting more targeted audiences convert better. The broader rollout reduced conversion to ~15&ndash;17%.
+</div>
+<div class="recommendation">
+  <strong>Consider making the snooze option more prominent</strong> &mdash; this could help recapture dismissed users on a future visit rather than losing them permanently.
+</div>
+
+<div class="footer">
+  Generated from Amplitude &bull; Project: console.redhat.com (402476) &bull; Guide: Subscription Usage Notification (43117) &bull; Report Date: April 3, 2026
+</div>
+
+</body>
+</html>

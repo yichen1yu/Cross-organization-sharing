@@ -32,7 +32,8 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { useLocation } from 'react-router-dom';
 import { TreeView, TreeViewDataItem } from '@patternfly/react-core';
 import { EllipsisVIcon, FilterIcon, CheckCircleIcon, ExclamationCircleIcon, SyncAltIcon, ExclamationTriangleIcon, BellIcon } from '@patternfly/react-icons';
-import { Wizard, WizardStep, WizardHeader, Modal, Radio, TextInput, TextArea, AlertGroup, Alert, AlertActionCloseButton } from '@patternfly/react-core';
+import { Wizard, WizardStep, WizardHeader, Modal, ModalHeader, ModalBody, ModalFooter, Radio, TextInput, TextArea, AlertGroup, Alert, AlertActionCloseButton, Form, FormGroup, Popover, HelperText, HelperTextItem } from '@patternfly/react-core';
+import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 
 const TrustedOrganizations: React.FunctionComponent = () => {
   const location = useLocation();
@@ -72,6 +73,9 @@ const TrustedOrganizations: React.FunctionComponent = () => {
   const [isRemoveModalOpen, setIsRemoveModalOpen] = React.useState(false);
   const [removeTargetOrg, setRemoveTargetOrg] = React.useState<TrustedOrg | null>(null);
   const [removeSource, setRemoveSource] = React.useState<'outgoing' | 'incoming' | null>(null);
+  const [isEstablishModalOpen, setIsEstablishModalOpen] = React.useState(false);
+  const [establishOrgId, setEstablishOrgId] = React.useState('');
+  const [establishDescription, setEstablishDescription] = React.useState('');
 
   // Auto-close side panel when navigating or switching tabs
   React.useEffect(() => {
@@ -157,12 +161,11 @@ const TrustedOrganizations: React.FunctionComponent = () => {
 
   type GroupRow = { id: string; name: string; members: number; };
   const [groupRows, setGroupRows] = React.useState<GroupRow[]>([
-    { id: 'all-users', name: 'All users', members: 11 },
     { id: 'administrators', name: 'Administrators', members: 3 },
     { id: 'powerpuff-girls', name: 'Powerpuff Girs', members: 5 },
     { id: 'spice-girls', name: 'Spice Girls', members: 7 },
     { id: 'golden-girls', name: 'Golden Girls', members: 2 },
-    { id: 'seattle-grace-admins', name: 'Seattle Grace admins', members: 1 },
+    { id: 'bad-bunnies', name: 'Bad Bunnies', members: 4 },
   ]);
   const [selectedGroups, setSelectedGroups] = React.useState<Set<string>>(new Set(groupRows.map((g) => g.id)));
   const [originalSelectedGroups, setOriginalSelectedGroups] = React.useState<Set<string>>(new Set(selectedGroups));
@@ -170,10 +173,10 @@ const TrustedOrganizations: React.FunctionComponent = () => {
   // Utility to generate pseudo-random groups based on org id
   const generateGroupsForOrg = React.useCallback((org: TrustedOrg): GroupRow[] => {
     const seeds = [
-      ['All users', 'Core admins', 'Developers', 'QA team', 'Finance', 'HR'],
-      ['All members', 'Operators', 'Site Reliability', 'Security', 'Platform', 'Data science'],
-      ['Everyone', 'Admins', 'Read-only', 'Product', 'Marketing', 'Sales'],
-      ['Contributors', 'Maintainers', 'Owners', 'Partners', 'Guests', 'Support'],
+      ['Administrators', 'Powerpuff Girs', 'Spice Girls', 'Golden Girls', 'Bad Bunnies'],
+      ['Administrators', 'Golden Girls', 'Spice Girls', 'Powerpuff Girs', 'Bad Bunnies'],
+      ['Administrators', 'Spice Girls', 'Powerpuff Girs', 'Golden Girls', 'Bad Bunnies'],
+      ['Administrators', 'Golden Girls', 'Powerpuff Girs', 'Spice Girls', 'Bad Bunnies'],
     ];
     const memberRanges = [1, 3, 5, 7, 9, 11];
     // Basic hash from orgId to pick a seed set
@@ -259,7 +262,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
 
   const [outgoingData, setOutgoingData] = React.useState<TrustedOrg[]>([
     { organizationName: 'Acme Corp', orgId: '100001', status: 'Accepted', lastModified: '2025-09-01' },
-    { organizationName: 'Globex', orgId: '200045', status: 'Acceptance pending', lastModified: '2025-08-22' },
+    { organizationName: 'Wayne Enterprises', orgId: '200099', status: 'Acceptance pending', lastModified: '2025-08-22' },
     { organizationName: 'Initech', orgId: '300123', status: 'Accepted', lastModified: '2025-09-12' },
     { organizationName: 'Umbrella', orgId: '400789', status: 'Severed', lastModified: '2025-07-19' },
     { organizationName: 'Soylent', orgId: '500567', status: 'Accepted', lastModified: '2025-09-05' },
@@ -328,8 +331,13 @@ const TrustedOrganizations: React.FunctionComponent = () => {
         item.status = 'Accepted';
       }
     });
-    // Remove only the Wonka Factory row as requested
-    return result.filter((item) => item.organizationName !== 'Wonka Factory');
+    // Remove Wonka Factory and Wayne Enterprises from incoming
+    const filtered = result.filter((item) => item.organizationName !== 'Wonka Factory' && item.organizationName !== 'Wayne Enterprises');
+    // Ensure Globex is always in incoming with Acceptance pending
+    if (!filtered.some((item) => item.organizationName === 'Globex')) {
+      filtered.push({ organizationName: 'Globex', orgId: '200045', status: 'Acceptance pending', lastModified: '2025-08-22' });
+    }
+    return filtered;
   });
 
   const filteredAndSortedData = React.useMemo(() => {
@@ -847,7 +855,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                     />
                   </ToolbarItem>
                   <ToolbarItem>
-                    <Button variant="primary">Establish a trusted org</Button>
+                    <Button variant="primary" onClick={() => { setEstablishOrgId(''); setEstablishDescription(''); setIsEstablishModalOpen(true); }}>Establish a trusted org</Button>
                   </ToolbarItem>
                   <ToolbarItem variant="pagination">
                     <Pagination
@@ -875,7 +883,9 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                   {paginatedData.map((row) => (
                     <Tr key={row.orgId}>
                       <Td dataLabel="Organization name" style={{ paddingRight: '32px' }}>
-                        {row.status === 'Severed' ? (
+                        {row.status === 'Acceptance pending' ? (
+                          <span style={{ color: 'var(--pf-t--global--text--color--subtle)', fontStyle: 'italic' }}>Pending...</span>
+                        ) : row.status === 'Severed' ? (
                           <span>{row.organizationName}</span>
                         ) : (
                           <Button variant="link" isInline onClick={() => openDetails(row)}>
@@ -938,8 +948,19 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                 )}
                                 {row.status === 'Acceptance pending' && (
                                   <>
-                                    <DropdownItem>Send reminder</DropdownItem>
-                                    <DropdownItem>Cancel request</DropdownItem>
+                                    <DropdownItem onClick={() => {
+                                      setOpenKebabKey(null);
+                                      addToast(`A reminder has been sent to Organization #${row.orgId}.`);
+                                    }}>Send reminder</DropdownItem>
+                                    <DropdownItem onClick={() => {
+                                      setOpenKebabKey(null);
+                                      setOutgoingData((prev) => prev.filter((o) => o.orgId !== row.orgId));
+                                      addToast(
+                                        `The outgoing request to ${row.organizationName} has been cancelled.`,
+                                        undefined,
+                                        'info'
+                                      );
+                                    }}>Cancel request</DropdownItem>
                                   </>
                                 )}
                                 {row.status !== 'Accepted' && row.status !== 'Acceptance pending' && (
@@ -1258,8 +1279,36 @@ const TrustedOrganizations: React.FunctionComponent = () => {
               />
             }
             startIndex={1}
+            onStepChange={(_e, _current, prev) => {
+              if (prev.id === 'step-1' && acceptChoice === 'reject') {
+                setIncomingData((p) =>
+                  p.map((row) =>
+                    row.orgId === pendingWizardOrg.orgId ? { ...row, status: 'Rejected' } : row
+                  )
+                );
+                addToast(
+                  `You have rejected the trusted organization request from ${pendingWizardOrg.organizationName}.`,
+                  undefined,
+                  'info'
+                );
+                closePendingWizard();
+              }
+            }}
             onSave={() => {
-              // toast
+              if (acceptChoice === 'reject') {
+                setIncomingData((prev) =>
+                  prev.map((row) =>
+                    row.orgId === pendingWizardOrg.orgId ? { ...row, status: 'Rejected' } : row
+                  )
+                );
+                addToast(
+                  `You have rejected the trusted organization request from ${pendingWizardOrg.organizationName}.`,
+                  undefined,
+                  'info'
+                );
+                closePendingWizard();
+                return;
+              }
               addToast(
                 `You are successfully a trusted org with ${pendingWizardOrg.organizationName}.`,
                 <span>To learn more about what you can do as a trusted org, <a href="#">click here</a>.</span>
@@ -1270,10 +1319,29 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                   row.orgId === pendingWizardOrg.orgId ? { ...row, status: 'Accepted' } : row
                 )
               );
+              // If user chose to request trusted org back, add an outgoing row and show a second toast
+              if (requestTrustedChoice === 'yes') {
+                const hasActiveOutgoing = outgoingData.some((o) => o.orgId === pendingWizardOrg.orgId && o.status !== 'Severed');
+                if (!hasActiveOutgoing) {
+                  setOutgoingData((prev) => [
+                    ...prev,
+                    {
+                      organizationName: pendingWizardOrg.organizationName,
+                      orgId: pendingWizardOrg.orgId,
+                      status: 'Acceptance pending' as const,
+                      lastModified: new Date().toISOString().slice(0, 10),
+                    },
+                  ]);
+                }
+                addToast(
+                  `You have successfully sent a trusted org request to Organization #${pendingWizardOrg.orgId}`,
+                  <span>You can view your outgoing requests <a href="/organization/trusted-organizations">here</a>.</span>
+                );
+              }
               closePendingWizard();
             }}
           >
-            <WizardStep id="step-1" name="Review request">
+            <WizardStep id="step-1" name="Review request" footer={{ isBackHidden: true, isNextDisabled: acceptChoice === null || !verifyEmail.trim(), nextButtonText: acceptChoice === 'reject' ? 'Submit' : 'Next' }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">You have a request to become a trusted organization. Review the request info below:</Title>
                 <p style={{ marginTop: 8 }}>
@@ -1355,10 +1423,11 @@ const TrustedOrganizations: React.FunctionComponent = () => {
               id="step-2"
               name="Configure"
               isDisabled={false}
+              isHidden={acceptChoice === 'reject'}
               isExpandable
               steps={[
                 (
-                  <WizardStep id="config-preference" name="Preference" key="config-preference">
+                  <WizardStep id="config-preference" name="Preference" key="config-preference" footer={{ isNextDisabled: configureChoice === null }}>
                     <div style={{ padding: 16 }}>
                       <Title headingLevel="h3" size="lg">
                         Do yo wish to configure what to allow {pendingWizardOrg.organizationName} to see from your organization?
@@ -1499,7 +1568,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                               id: 'w4',
                               name: 'Workspace 4',
                               hasCheckbox: true,
-                              defaultExpanded: true,
+                              defaultExpanded: false,
                               checkProps: { checked: (() => {
                                 const ids = ['w4', ...getDescendants('w4')];
                                 const total = ids.length;
@@ -1511,7 +1580,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                   id: 'w4-1',
                                   name: 'Workspace 4-1',
                                   hasCheckbox: true,
-                                  defaultExpanded: true,
+                                  defaultExpanded: false,
                                   checkProps: { checked: (() => {
                                     const ids = ['w4-1', ...getDescendants('w4-1')];
                                     const total = ids.length;
@@ -1646,7 +1715,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                 )
               ]}
             />
-            <WizardStep id="step-3" name="Request to be a trusted organization" isDisabled={false} footer={{ nextButtonText: 'Submit' }}>
+            <WizardStep id="step-3" name="Request to be a trusted organization" isDisabled={false} isHidden={acceptChoice === 'reject'} footer={{ nextButtonText: 'Submit', isNextDisabled: requestTrustedChoice === null }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Would you like to request to become a trusted org of {pendingWizardOrg.organizationName}?</Title>
                 <p style={{ marginTop: 8 }}>This will allow them to see and grant access to your organization.</p>
@@ -1687,6 +1756,110 @@ const TrustedOrganizations: React.FunctionComponent = () => {
           </Wizard>
         </Modal>
       )}
+
+      {/* Establish a trusted org modal */}
+      <Modal
+        isOpen={isEstablishModalOpen}
+        onClose={() => setIsEstablishModalOpen(false)}
+        aria-label="Establish a trusted organization"
+        variant="medium"
+      >
+        <ModalHeader
+          title="Establish a trusted organization"
+          description="Lorem ipsum dolor sit amet, consectetur adipiscing elit"
+          help={
+            <Popover bodyContent="Learn more about establishing trusted organizations.">
+              <Button variant="plain" aria-label="Help">
+                <OutlinedQuestionCircleIcon />
+              </Button>
+            </Popover>
+          }
+        />
+        <ModalBody>
+          <Content component="p" style={{ marginBottom: 24 }}>
+            When establishing a trusted org, you are requesting access to their organization and assets. The organization will review your request and have to accept it in order for you to have access. You can review the status of all outgoing requests in the Trusted organizations page
+          </Content>
+          <Form>
+            <FormGroup
+              label="Organization ID"
+              isRequired
+              fieldId="establish-org-id"
+              labelHelp={
+                <Popover bodyContent="The unique identifier for the organization you want to establish trust with.">
+                  <Button variant="plain" aria-label="More info for Organization ID" style={{ padding: 0 }}>
+                    <OutlinedQuestionCircleIcon />
+                  </Button>
+                </Popover>
+              }
+            >
+              <TextInput
+                isRequired
+                id="establish-org-id"
+                name="establish-org-id"
+                value={establishOrgId}
+                onChange={(_event, value) => setEstablishOrgId(value)}
+                placeholder="123456"
+                validated={establishOrgId.trim() && outgoingData.some((o) => o.orgId === establishOrgId.trim() && o.status !== 'Severed') ? 'error' : 'default'}
+              />
+              <HelperText>
+                {establishOrgId.trim() && outgoingData.some((o) => o.orgId === establishOrgId.trim() && o.status !== 'Severed') ? (
+                  <HelperTextItem variant="error">
+                    This organization has an existing active trusted organization connection established.
+                  </HelperTextItem>
+                ) : (
+                  <HelperTextItem>
+                    <a href="#">Here is how to find the org ID</a>
+                  </HelperTextItem>
+                )}
+              </HelperText>
+            </FormGroup>
+            <FormGroup
+              label="Request description"
+              fieldId="establish-description"
+              labelHelp={
+                <Popover bodyContent="Provide additional context about your request.">
+                  <Button variant="plain" aria-label="More info for Request description" style={{ padding: 0 }}>
+                    <OutlinedQuestionCircleIcon />
+                  </Button>
+                </Popover>
+              }
+            >
+              <TextInput
+                id="establish-description"
+                name="establish-description"
+                value={establishDescription}
+                onChange={(_event, value) => setEstablishDescription(value)}
+                placeholder="Input field"
+              />
+            </FormGroup>
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="primary"
+            isDisabled={!establishOrgId.trim() || outgoingData.some((o) => o.orgId === establishOrgId.trim() && o.status !== 'Severed')}
+            onClick={() => {
+              setOutgoingData((prev) => [
+                ...prev,
+                {
+                  organizationName: `Org ${establishOrgId}`,
+                  orgId: establishOrgId.trim(),
+                  status: 'Acceptance pending' as const,
+                  lastModified: new Date().toISOString().slice(0, 10),
+                },
+              ]);
+              addToast(
+                `You have successfully sent a trusted org request to Organization #${establishOrgId.trim()}`,
+                <span>You can view your outgoing requests <a href="/organization/trusted-organizations">here</a>.</span>
+              );
+              setIsEstablishModalOpen(false);
+            }}
+          >
+            Send request
+          </Button>
+          <Button variant="link" onClick={() => setIsEstablishModalOpen(false)}>Cancel</Button>
+        </ModalFooter>
+      </Modal>
 
       {/* Standard modal for removing a trusted connection (outgoing) */}
       <Modal

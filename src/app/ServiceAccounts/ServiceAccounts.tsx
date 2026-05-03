@@ -107,7 +107,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
         </Flex>
       </PageSection>
 
-      <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
+      <PageSection hasBodyWrapper={false} isFilled style={{ paddingTop: 0 }}>
         <Card>
           <CardHeader>
             <Toolbar>

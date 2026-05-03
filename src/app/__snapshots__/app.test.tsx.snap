@@ -406,7 +406,7 @@ exports[`App tests should render default App component 1`] = `
       </div>
     </header>
     <div
-      class="pf-v6-c-page__main-container"
+      class="pf-v6-c-page__main-container pf-m-fill"
     >
       <main
         class="pf-v6-c-page__main"

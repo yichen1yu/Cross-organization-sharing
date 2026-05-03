@@ -1,4 +1,16 @@
 #!/usr/bin/env bash
+
+# When piped via `curl | bash`, bash reads the script from stdin incrementally
+# which breaks interactive prompts and complex constructs. Detect this case,
+# write the script to a temp file, and re-execute from disk.
+if [ -z "${__RH_COST_MGMT_REEXEC:-}" ] && [ ! -t 0 ]; then
+  _tmpscript="$(mktemp "${TMPDIR:-/tmp}/setup_rh_cost_mgmt.XXXXXX")"
+  cat > "$_tmpscript"
+  chmod +x "$_tmpscript"
+  export __RH_COST_MGMT_REEXEC=1
+  exec bash "$_tmpscript" "$@"
+fi
+
 set -euo pipefail
 
 # Red Hat Cost Management / ELS metering AWS bootstrap
@@ -490,8 +502,9 @@ post_run_summary() {
 
 # --- Parse flags ---
 
-ARGS=()
-while (( "$#" )); do
+POSITIONAL=""
+POSITIONAL_COUNT=0
+while [ $# -gt 0 ]; do
   case "${1:-}" in
     --wizard) WIZARD=1; shift ;;
     --plan) PLAN=1; shift ;;
@@ -502,7 +515,7 @@ while (( "$#" )); do
     -h|--help) usage; exit 0 ;;
     --) shift; break ;;
     -* ) die "Unknown flag: $1" ;;
-    *  ) ARGS+=("$1"); shift ;;
+    *  ) POSITIONAL="${POSITIONAL:+$POSITIONAL }$1"; POSITIONAL_COUNT=$((POSITIONAL_COUNT+1)); shift ;;
   esac
 done
 
@@ -525,7 +538,7 @@ if [[ "$PHASE2" -eq 1 ]]; then
 fi
 
 # --- Handle --plan (generic) ---
-if [[ "$PLAN" -eq 1 && "$WIZARD" -eq 0 && "${#ARGS[@]:-0}" -lt 3 ]]; then
+if [ "$PLAN" -eq 1 ] && [ "$WIZARD" -eq 0 ] && [ "$POSITIONAL_COUNT" -lt 3 ]; then
   cat <<EOF
 Plan (generic):
   - Ensure S3 bucket: s3://<BUCKET_NAME> (region: <AWS_REGION>)
@@ -543,8 +556,8 @@ EOF
   exit 0
 fi
 
-if [[ ${#ARGS[@]:-0} -gt 0 ]]; then
-  set -- "${ARGS[@]}" "$@"
+if [ "$POSITIONAL_COUNT" -gt 0 ]; then
+  set -- $POSITIONAL "$@"
 fi
 
 if [[ "$PLAN" -eq 0 || ( "$PLAN" -eq 1 && "$#" -ge 3 ) || "$WIZARD" -eq 1 ]]; then
@@ -555,12 +568,13 @@ DEFAULT_REGION="$(aws configure get region || true)"
 
 if [[ "$WIZARD" -eq 1 ]]; then
   echo "== Phase 1: Initial setup (wizard mode) =="
-  read -rp "S3 bucket name for CUR [rh-cost-mgmt-reports-$(account_id)-${DEFAULT_REGION:-us-east-1}]: " BUCKET_NAME
+  read -rp "S3 bucket name for CUR [rh-cost-mgmt-reports-$(account_id)-${DEFAULT_REGION:-us-east-1}]: " BUCKET_NAME < /dev/tty
   BUCKET_NAME="${BUCKET_NAME:-rh-cost-mgmt-reports-$(account_id)-${DEFAULT_REGION:-us-east-1}}"
-  read -rp "AWS region for bucket and CE [${DEFAULT_REGION:-us-east-1}]: " AWS_REGION
+  read -rp "AWS region for bucket and CE [${DEFAULT_REGION:-us-east-1}]: " AWS_REGION < /dev/tty
   AWS_REGION="${AWS_REGION:-${DEFAULT_REGION:-us-east-1}}"
-  read -rp "External ID (from Red Hat wizard): " EXTERNAL_ID
-  read -rp "Tagging regions (comma-separated) [leave blank to skip tagging]: " TAG_REGIONS
+  read -rp "External ID (from Red Hat wizard): " EXTERNAL_ID < /dev/tty
+  read -rp "EC2 tagging regions (comma-separated) [$AWS_REGION]: " TAG_REGIONS < /dev/tty
+  TAG_REGIONS="${TAG_REGIONS:-$AWS_REGION}"
 else
   if [[ $# -lt 3 ]]; then
     usage; exit 1

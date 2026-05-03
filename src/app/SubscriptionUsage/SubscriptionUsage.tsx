@@ -277,7 +277,7 @@ const SubscriptionUsageRHEL: React.FunctionComponent = () => {
 };
 
 const SubscriptionUsageOpenShift: React.FunctionComponent = () => (
-  <PageSection hasBodyWrapper={false} id="primary-app-container">
+  <PageSection hasBodyWrapper={false}>
     <Title headingLevel="h1" size="2xl">
       Subscription Usage - OpenShift
     </Title>
@@ -290,7 +290,7 @@ const SubscriptionUsageOpenShift: React.FunctionComponent = () => (
 );
 
 const SubscriptionUsageAnsible: React.FunctionComponent = () => (
-  <PageSection hasBodyWrapper={false} id="primary-app-container">
+  <PageSection hasBodyWrapper={false}>
     <Title headingLevel="h1" size="2xl">
       Subscription Usage - Ansible
     </Title>
