@@ -7,9 +7,10 @@ import {
   FlexItem,
   Switch,
   TextArea,
-  Title
+  Title,
+  Tooltip
 } from '@patternfly/react-core';
-import { ArrowRightIcon, CommentsIcon, GripVerticalIcon, TimesIcon, TrashIcon } from '@patternfly/react-icons';
+import { ArrowRightIcon, CommentsIcon, GripVerticalIcon, ListIcon, TimesIcon, TrashIcon } from '@patternfly/react-icons';
 import './AnnotationOverlay.css';
 
 export interface Annotation {
@@ -53,9 +54,11 @@ function saveAnnotations(store: AnnotationStore) {
 
 interface AnnotationContextType {
   annotations: Annotation[];
-  isAnnotationMode: boolean;
+  dotsVisible: boolean;
+  panelOpen: boolean;
   selectedAnnotation: number | null;
-  toggleAnnotationMode: () => void;
+  toggleDots: () => void;
+  togglePanel: () => void;
   selectAnnotation: (id: number | null) => void;
   addAnnotation: (text: string) => void;
   removeAnnotation: (id: number) => void;
@@ -64,9 +67,11 @@ interface AnnotationContextType {
 
 const AnnotationContext = React.createContext<AnnotationContextType>({
   annotations: [],
-  isAnnotationMode: false,
+  dotsVisible: false,
+  panelOpen: false,
   selectedAnnotation: null,
-  toggleAnnotationMode: () => {},
+  toggleDots: () => {},
+  togglePanel: () => {},
   selectAnnotation: () => {},
   addAnnotation: () => {},
   removeAnnotation: () => {},
@@ -80,7 +85,8 @@ export const AnnotationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const currentPath = location.pathname;
 
   const [store, setStore] = React.useState<AnnotationStore>(loadAnnotations);
-  const [isAnnotationMode, setIsAnnotationMode] = React.useState(false);
+  const [dotsVisible, setDotsVisible] = React.useState(false);
+  const [panelOpen, setPanelOpen] = React.useState(false);
   const [selectedAnnotation, setSelectedAnnotation] = React.useState<number | null>(null);
 
   const annotations = store[currentPath] || [];
@@ -99,11 +105,18 @@ export const AnnotationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setSelectedAnnotation(null);
   }, [currentPath]);
 
-  const toggleAnnotationMode = React.useCallback(() => {
-    setIsAnnotationMode(prev => {
-      if (prev) setSelectedAnnotation(null);
+  const toggleDots = React.useCallback(() => {
+    setDotsVisible(prev => {
+      if (prev) {
+        setPanelOpen(false);
+        setSelectedAnnotation(null);
+      }
       return !prev;
     });
+  }, []);
+
+  const togglePanel = React.useCallback(() => {
+    setPanelOpen(prev => !prev);
   }, []);
 
   const selectAnnotation = React.useCallback((id: number | null) => {
@@ -135,14 +148,16 @@ export const AnnotationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const value = React.useMemo(() => ({
     annotations,
-    isAnnotationMode,
+    dotsVisible,
+    panelOpen,
     selectedAnnotation,
-    toggleAnnotationMode,
+    toggleDots,
+    togglePanel,
     selectAnnotation,
     addAnnotation,
     removeAnnotation,
     updateAnnotationPosition
-  }), [annotations, isAnnotationMode, selectedAnnotation, toggleAnnotationMode, selectAnnotation, addAnnotation, removeAnnotation, updateAnnotationPosition]);
+  }), [annotations, dotsVisible, panelOpen, selectedAnnotation, toggleDots, togglePanel, selectAnnotation, addAnnotation, removeAnnotation, updateAnnotationPosition]);
 
   return (
     <AnnotationContext.Provider value={value}>
@@ -160,6 +175,7 @@ const DraggableMarker: React.FC<{
   const [isDragging, setIsDragging] = React.useState(false);
   const hasDragged = React.useRef(false);
   const dragOffset = React.useRef({ x: 0, y: 0 });
+  const markerRef = React.useRef<HTMLDivElement>(null);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -200,33 +216,43 @@ const DraggableMarker: React.FC<{
     isDragging ? 'annotation-marker--dragging' : ''
   ].filter(Boolean).join(' ');
 
-  return (
-    <div
-      className={classNames}
-      style={{ left: annotation.x, top: annotation.y }}
-      onMouseDown={handleMouseDown}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (!hasDragged.current) {
-          onSelect();
-        }
-      }}
-      role="button"
-      tabIndex={0}
-      aria-label={`Annotation ${annotation.id}: ${annotation.text}`}
-      title={annotation.text}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') onSelect();
-      }}
-    >
-      <span className="annotation-marker__pulse" />
-      {annotation.id}
+  const tooltipContent = (
+    <div>
+      <div style={{ fontWeight: 600, marginBottom: 4 }}>{annotation.author} · {annotation.timestamp}</div>
+      <div>{annotation.text}</div>
     </div>
+  );
+
+  return (
+    <>
+      <Tooltip content={tooltipContent} position="top" triggerRef={markerRef} />
+      <div
+        ref={markerRef}
+        className={classNames}
+        style={{ left: annotation.x, top: annotation.y }}
+        onMouseDown={handleMouseDown}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!hasDragged.current) {
+            onSelect();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={`Annotation ${annotation.id}: ${annotation.text}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') onSelect();
+        }}
+      >
+        <span className="annotation-marker__pulse" />
+        {annotation.id}
+      </div>
+    </>
   );
 };
 
 const AnnotationPanel: React.FC = () => {
-  const { annotations, isAnnotationMode, selectedAnnotation, selectAnnotation, addAnnotation, removeAnnotation, toggleAnnotationMode } = useAnnotations();
+  const { annotations, panelOpen, selectedAnnotation, selectAnnotation, addAnnotation, removeAnnotation, togglePanel } = useAnnotations();
   const location = useLocation();
   const [newComment, setNewComment] = React.useState('');
   const commentListRef = React.useRef<HTMLDivElement>(null);
@@ -255,7 +281,7 @@ const AnnotationPanel: React.FC = () => {
   }, [selectedAnnotation]);
 
   return (
-    <div className={`annotation-panel-overlay ${!isAnnotationMode ? 'annotation-panel-overlay--hidden' : ''}`}>
+    <div className={`annotation-panel-overlay ${!panelOpen ? 'annotation-panel-overlay--hidden' : ''}`}>
       {/* Header */}
       <Flex
         alignItems={{ default: 'alignItemsCenter' }}
@@ -271,7 +297,7 @@ const AnnotationPanel: React.FC = () => {
           </Title>
         </FlexItem>
         <FlexItem>
-          <Button variant="plain" aria-label="Close panel" onClick={toggleAnnotationMode}>
+          <Button variant="plain" aria-label="Close panel" onClick={togglePanel}>
             <TimesIcon />
           </Button>
         </FlexItem>
@@ -380,45 +406,58 @@ const AnnotationPanel: React.FC = () => {
 };
 
 export const AnnotationOverlay: React.FC = () => {
-  const { annotations, isAnnotationMode, selectedAnnotation, selectAnnotation, updateAnnotationPosition } = useAnnotations();
-
-  if (!isAnnotationMode) return <AnnotationPanel />;
+  const { annotations, dotsVisible, selectedAnnotation, selectAnnotation, updateAnnotationPosition } = useAnnotations();
 
   return (
     <>
-      <div className="annotation-overlay annotation-overlay--active">
-        {annotations.map((annotation) => (
-          <DraggableMarker
-            key={annotation.id}
-            annotation={annotation}
-            isSelected={selectedAnnotation === annotation.id}
-            onSelect={() => selectAnnotation(annotation.id === selectedAnnotation ? null : annotation.id)}
-            onPositionChange={(x, y) => updateAnnotationPosition(annotation.id, x, y)}
-          />
-        ))}
-      </div>
+      {dotsVisible && (
+        <div className="annotation-overlay annotation-overlay--active">
+          {annotations.map((annotation) => (
+            <DraggableMarker
+              key={annotation.id}
+              annotation={annotation}
+              isSelected={selectedAnnotation === annotation.id}
+              onSelect={() => selectAnnotation(annotation.id === selectedAnnotation ? null : annotation.id)}
+              onPositionChange={(x, y) => updateAnnotationPosition(annotation.id, x, y)}
+            />
+          ))}
+        </div>
+      )}
       <AnnotationPanel />
     </>
   );
 };
 
 export const AnnotationToggleBar: React.FC = () => {
-  const { isAnnotationMode, toggleAnnotationMode, annotations } = useAnnotations();
+  const { dotsVisible, panelOpen, toggleDots, togglePanel, annotations } = useAnnotations();
 
   return (
     <div className="annotation-toggle-bar">
       <CommentsIcon />
       <Switch
         id="annotation-toggle"
-        label="Design annotations"
-        isChecked={isAnnotationMode}
-        onChange={toggleAnnotationMode}
+        label="Annotations"
+        isChecked={dotsVisible}
+        onChange={toggleDots}
         isReversed
       />
-      {isAnnotationMode && (
-        <Content component="small" style={{ opacity: 0.7 }}>
-          {annotations.length} note{annotations.length !== 1 ? 's' : ''}
-        </Content>
+      {dotsVisible && (
+        <>
+          <Content component="small" style={{ opacity: 0.7 }}>
+            {annotations.length} note{annotations.length !== 1 ? 's' : ''}
+          </Content>
+          <Tooltip content={panelOpen ? 'Hide comment panel' : 'Show comment panel'}>
+            <Button
+              variant={panelOpen ? 'secondary' : 'plain'}
+              size="sm"
+              onClick={togglePanel}
+              aria-label="Toggle comment panel"
+              className="annotation-toggle-bar__panel-btn"
+            >
+              <ListIcon />
+            </Button>
+          </Tooltip>
+        </>
       )}
     </div>
   );

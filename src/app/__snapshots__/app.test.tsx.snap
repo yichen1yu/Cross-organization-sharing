@@ -2971,7 +2971,7 @@ exports[`App tests should render default App component 1`] = `
         class="pf-v6-c-switch__label"
         id="annotation-toggle-label"
       >
-        Design annotations
+        Annotations
       </span>
     </label>
   </div>

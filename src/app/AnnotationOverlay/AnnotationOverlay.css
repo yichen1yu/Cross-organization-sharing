@@ -150,6 +150,15 @@
   color: #e91e8a;
 }
 
+.annotation-toggle-bar__panel-btn {
+  border-radius: 6px !important;
+  color: #fff !important;
+}
+
+.annotation-toggle-bar__panel-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
 .annotation-comment__delete {
   opacity: 0;
   transition: opacity 0.15s ease;
