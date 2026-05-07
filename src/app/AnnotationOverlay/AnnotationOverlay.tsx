@@ -131,10 +131,13 @@ export const AnnotationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const addAnnotation = React.useCallback((text: string) => {
     updateStore(prev => {
       const newId = prev.length > 0 ? Math.max(...prev.map(a => a.id)) + 1 : 1;
+      const container = document.getElementById('primary-app-container');
+      const scrollX = container ? container.scrollLeft : window.scrollX;
+      const scrollY = container ? container.scrollTop : window.scrollY;
       return [...prev, {
         id: newId,
-        x: 200 + (newId * 70) % 400,
-        y: 150 + (newId * 90) % 350,
+        x: scrollX + 200 + (newId * 70) % 400,
+        y: scrollY + 150 + (newId * 90) % 350,
         text,
         author: 'You',
         timestamp: new Date().toLocaleString()
@@ -182,14 +185,23 @@ const DraggableMarker: React.FC<{
   const dragOffset = React.useRef({ x: 0, y: 0 });
   const markerRef = React.useRef<HTMLDivElement>(null);
 
+  const getScrollOffset = () => {
+    const container = document.getElementById('primary-app-container');
+    if (container) {
+      return { x: container.scrollLeft, y: container.scrollTop };
+    }
+    return { x: window.scrollX, y: window.scrollY };
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
     hasDragged.current = false;
+    const scroll = getScrollOffset();
     dragOffset.current = {
-      x: e.clientX - annotation.x,
-      y: e.clientY - annotation.y
+      x: (e.clientX + scroll.x) - annotation.x,
+      y: (e.clientY + scroll.y) - annotation.y
     };
   };
 
@@ -198,8 +210,9 @@ const DraggableMarker: React.FC<{
 
     const handleMouseMove = (e: MouseEvent) => {
       hasDragged.current = true;
-      const newX = e.clientX - dragOffset.current.x;
-      const newY = e.clientY - dragOffset.current.y;
+      const scroll = getScrollOffset();
+      const newX = (e.clientX + scroll.x) - dragOffset.current.x;
+      const newY = (e.clientY + scroll.y) - dragOffset.current.y;
       onPositionChange(newX, newY);
     };
 

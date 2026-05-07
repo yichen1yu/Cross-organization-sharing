@@ -1,14 +1,10 @@
 .annotation-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 0;
+  height: 0;
   z-index: 9998;
-  pointer-events: none;
-}
-
-.annotation-overlay--active {
   pointer-events: none;
 }
 
@@ -34,7 +30,7 @@
 }
 
 .annotation-marker {
-  position: fixed;
+  position: absolute;
   width: 30px;
   height: 30px;
   border-radius: 50%;

@@ -2997,7 +2997,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 {/* Help Drawer (inner, left-side) */}
                 <Drawer isExpanded={isDrawerExpanded} isInline>
                   <DrawerContent panelContent={drawerContent}>
-                    {children}
+                    <div style={{ position: 'relative' }}>
+                      <AnnotationOverlay />
+                      {children}
+                    </div>
                   </DrawerContent>
                 </Drawer>
               </DrawerContent>
@@ -4615,7 +4618,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
     </>
     </SchedulerWizardContext.Provider>
-    <AnnotationOverlay />
     <AnnotationToggleBar />
     </>
     </AnnotationProvider>
