@@ -448,19 +448,19 @@ export const AnnotationToggleBar: React.FC = () => {
       />
       {dotsVisible && (
         <>
-          <Content component="small" style={{ opacity: 0.7 }}>
+          <span className="annotation-toggle-bar__divider" />
+          <span className="annotation-toggle-bar__notes-count">
             {annotations.length} note{annotations.length !== 1 ? 's' : ''}
-          </Content>
+          </span>
           <Tooltip content={panelOpen ? 'Hide comment panel' : 'Show comment panel'}>
-            <Button
-              variant={panelOpen ? 'secondary' : 'plain'}
-              size="sm"
+            <button
+              type="button"
               onClick={togglePanel}
               aria-label="Toggle comment panel"
-              className="annotation-toggle-bar__panel-btn"
+              className={`annotation-toggle-bar__panel-btn ${panelOpen ? 'annotation-toggle-bar__panel-btn--active' : ''}`}
             >
               <ListIcon />
-            </Button>
+            </button>
           </Tooltip>
         </>
       )}

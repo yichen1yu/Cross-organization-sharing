@@ -150,13 +150,42 @@
   color: #e91e8a;
 }
 
+.annotation-toggle-bar__divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.annotation-toggle-bar__notes-count {
+  font-size: 12px;
+  opacity: 0.7;
+  white-space: nowrap;
+}
+
 .annotation-toggle-bar__panel-btn {
-  border-radius: 6px !important;
-  color: #fff !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 .annotation-toggle-bar__panel-btn:hover {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.annotation-toggle-bar__panel-btn--active {
+  background: rgba(233, 30, 138, 0.6);
+}
+
+.annotation-toggle-bar__panel-btn--active:hover {
+  background: rgba(233, 30, 138, 0.8);
 }
 
 .annotation-comment__delete {
