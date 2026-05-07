@@ -110,10 +110,15 @@ export const AnnotationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (prev) {
         setPanelOpen(false);
         setSelectedAnnotation(null);
+      } else {
+        const currentAnnotations = store[currentPath] || [];
+        if (currentAnnotations.length === 0) {
+          setPanelOpen(true);
+        }
       }
       return !prev;
     });
-  }, []);
+  }, [store, currentPath]);
 
   const togglePanel = React.useCallback(() => {
     setPanelOpen(prev => !prev);
