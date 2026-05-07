@@ -138,6 +138,7 @@ import {
   WrenchIcon
 } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td, ExpandableRowContent } from '@patternfly/react-table';
+import { AnnotationProvider, AnnotationOverlay, AnnotationToggleBar } from '@app/AnnotationOverlay/AnnotationOverlay';
 
 type SchedulerWizardOptions = { preselectedService?: string; preselectedTask?: string; preselectedFileType?: string; lockService?: boolean; lockTask?: boolean; lockFileType?: boolean };
 const SchedulerWizardContext = React.createContext<{
@@ -2400,6 +2401,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   return (
+    <AnnotationProvider>
+    <>
     <SchedulerWizardContext.Provider value={{ openSchedulerWizard, showToast: addToast }}>
     <>
       <AlertGroup isToast isLiveRegion>
@@ -4612,6 +4615,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
     </>
     </SchedulerWizardContext.Provider>
+    <AnnotationOverlay />
+    <AnnotationToggleBar />
+    </>
+    </AnnotationProvider>
   );
 };
 

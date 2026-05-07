@@ -3,187 +3,219 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Button,
-  Card,
-  CardBody,
-  CardHeader,
   Content,
-  Divider,
+  Drawer,
+  DrawerActions,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerContentBody,
+  DrawerHead,
+  DrawerPanelContent,
   Flex,
   FlexItem,
-  Label,
+  InputGroup,
+  InputGroupItem,
+  MenuToggle,
   PageSection,
+  Pagination,
+  SearchInput,
+  Select,
+  SelectOption,
+  Tab,
+  Tabs,
+  TabTitleText,
   Title
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { ExternalLinkAltIcon, UserIcon } from '@patternfly/react-icons';
+import { FilterIcon } from '@patternfly/react-icons';
+
+interface GroupData {
+  name: string;
+  description: string;
+  roles: { name: string; workspace: string }[];
+}
+
+const groups: GroupData[] = [
+  {
+    name: 'All users',
+    description: 'This group contains all users in your organization.',
+    roles: [
+      { name: 'RHEL Admin', workspace: 'UXD' },
+      { name: 'OpenShift Admin', workspace: 'UXD' }
+    ]
+  },
+  {
+    name: 'Workspace administrators',
+    description: 'This group contains blah blah blah some descriptive text here.',
+    roles: [
+      { name: 'Workspace Admin', workspace: 'UXD' }
+    ]
+  },
+  {
+    name: 'Subscriptions viewer',
+    description: 'Perform read operations on any Subscriptions resource.',
+    roles: [
+      { name: 'RHEL Admin', workspace: 'UXD' },
+      { name: 'OpenShift Admin', workspace: 'UXD' }
+    ]
+  }
+];
 
 const MyUserAccess: React.FunctionComponent = () => {
-  // Dummy data representing the user's roles and service access
-  const myRoles = [
-    { name: 'Tenant admin', scope: 'Organization (UXD)', services: ['IAM', 'Billing'], lastUpdated: '1 year ago' },
-    { name: 'Workspace admin', scope: 'Workspace A', services: ['Workspaces'], lastUpdated: '8 months ago' },
-    { name: 'RHEL inventory viewer', scope: 'Organization (UXD)', services: ['RHEL'], lastUpdated: '2 days ago' }
-  ];
+  const [activeTab, setActiveTab] = React.useState(0);
+  const [selectedGroup, setSelectedGroup] = React.useState<GroupData | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+  const [filterValue, setFilterValue] = React.useState('Group name');
+  const [searchValue, setSearchValue] = React.useState('');
 
-  const serviceAccess = [
-    { service: 'RHEL', access: 'Viewer' as const },
-    { service: 'OpenShift', access: 'None' as const },
-    { service: 'Red Hat Insights', access: 'Viewer' as const },
-    { service: 'Automation Hub', access: 'Editor' as const }
-  ];
+  const drawerPanelContent = selectedGroup ? (
+    <DrawerPanelContent widths={{ default: 'width_33' }} minSize="320px">
+      <DrawerHead>
+        <Title headingLevel="h3" size="lg">{selectedGroup.name}</Title>
+        <DrawerActions>
+          <DrawerCloseButton onClick={() => setSelectedGroup(null)} />
+        </DrawerActions>
+      </DrawerHead>
+      <div style={{ padding: '0 24px 24px' }}>
+        <Content component="p" style={{ marginBottom: 16 }}>
+          {selectedGroup.description}
+        </Content>
 
-  const rhelAssets = [
-    { asset: 'RHEL systems', permissions: ['View inventory', 'View errata'] },
-    { asset: 'Vulnerability', permissions: ['View vulnerabilities'] },
-    { asset: 'Compliance', permissions: ['View reports'] }
-  ];
+        <InputGroup style={{ marginBottom: 16 }}>
+          <InputGroupItem>
+            <SearchInput placeholder="Find by name" aria-label="Find by name" />
+          </InputGroupItem>
+        </InputGroup>
+
+        <Pagination
+          itemCount={selectedGroup.roles.length}
+          perPage={10}
+          page={1}
+          variant="top"
+          isCompact
+          style={{ marginBottom: 8 }}
+        />
+
+        <Table variant="compact">
+          <Thead>
+            <Tr>
+              <Th>Roles</Th>
+              <Th>Workspace</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {selectedGroup.roles.map((role) => (
+              <Tr key={role.name}>
+                <Td><Button variant="link" isInline>{role.name}</Button></Td>
+                <Td><Button variant="link" isInline>{role.workspace}</Button></Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </div>
+    </DrawerPanelContent>
+  ) : undefined;
 
   return (
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem>Identity & Access Management</BreadcrumbItem>
-          <BreadcrumbItem isActive>My access</BreadcrumbItem>
+          <BreadcrumbItem to="#">Identity & Access Management</BreadcrumbItem>
+          <BreadcrumbItem isActive>My Access</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      
+
       <PageSection hasBodyWrapper={false}>
-        <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
-          <FlexItem>
-            <div className="pf-m-align-self-center" style={{ minWidth: '40px' }}>
-              <UserIcon style={{ fontSize: '32px', color: '#0066cc' }} aria-label="page-header-icon" />
-            </div>
-          </FlexItem>
-          <FlexItem alignSelf={{ default: 'alignSelfStretch' }}>
-            <div style={{ borderLeft: '1px solid #d2d2d2', height: '100%', marginRight: '16px' }}></div>
-          </FlexItem>
-          <FlexItem flex={{ default: 'flex_1' }}>
-            <div>
-              <Title headingLevel="h1" size="2xl">My access</Title>
-              <Content>
-                <p style={{ margin: 0, color: '#6a6e73' }}>
-                  View the roles assigned to you and your access across Red Hat services and assets (e.g., RHEL).
-                </p>
-                <div style={{ marginTop: '12px' }}>
-                  <Button
-                    variant="link"
-                    isInline
-                    icon={<ExternalLinkAltIcon />}
-                    iconPosition="end"
-                    component="a"
-                    href="https://docs.redhat.com/en/documentation/red_hat_hybrid_cloud_console/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Learn more
-                  </Button>
-                </div>
-              </Content>
-            </div>
-          </FlexItem>
-        </Flex>
+        <Title headingLevel="h1" size="2xl">My Access</Title>
+        <Content component="p" style={{ marginTop: 4 }}>
+          View your permissions across all groups and workspaces within the Hybrid Cloud Console.
+        </Content>
       </PageSection>
 
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
-        {/* Roles and Service access side-by-side */}
-        <Flex spaceItems={{ default: 'spaceItemsMd' }}>
-          <FlexItem flex={{ default: 'flex_2' }}>
-            <Card>
-              <CardHeader>
-                <Title headingLevel="h2" size="lg">Roles assigned to me</Title>
-              </CardHeader>
-              <Divider />
-              <CardBody>
-                <Table variant="compact">
-                  <Thead>
-                    <Tr>
-                      <Th width={35}>Role</Th>
-                      <Th width={35}>Scope</Th>
-                      <Th width={20}>Services</Th>
-                      <Th width={10}>Last updated</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {myRoles.map((r) => (
-                      <Tr key={r.name}>
-                        <Td>{r.name}</Td>
-                        <Td>{r.scope}</Td>
-                        <Td>
-                          {r.services.map((s, idx) => (
-                            <Label key={s} color="blue" style={{ marginRight: idx < r.services.length - 1 ? 6 : 0 }}>{s}</Label>
-                          ))}
-                        </Td>
-                        <Td>{r.lastUpdated}</Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              </CardBody>
-            </Card>
-          </FlexItem>
+        <Drawer isExpanded={!!selectedGroup} isInline position="right">
+          <DrawerContent panelContent={drawerPanelContent}>
+            <DrawerContentBody>
+              <Tabs activeKey={activeTab} onSelect={(_e, idx) => setActiveTab(idx as number)}>
+                <Tab eventKey={0} title={<TabTitleText>My groups</TabTitleText>}>
+                  <div style={{ padding: '16px 0' }}>
+                    <Flex>
+                      <FlexItem>
+                        <InputGroup>
+                          <InputGroupItem>
+                            <Select
+                              toggle={(toggleRef) => (
+                                <MenuToggle
+                                  ref={toggleRef}
+                                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                  isExpanded={isFilterOpen}
+                                  icon={<FilterIcon />}
+                                >
+                                  {filterValue}
+                                </MenuToggle>
+                              )}
+                              isOpen={isFilterOpen}
+                              onSelect={(_e, val) => { setFilterValue(val as string); setIsFilterOpen(false); }}
+                              onOpenChange={setIsFilterOpen}
+                              selected={filterValue}
+                            >
+                              <SelectOption value="Group name">Group name</SelectOption>
+                              <SelectOption value="Description">Description</SelectOption>
+                            </Select>
+                          </InputGroupItem>
+                          <InputGroupItem isFill>
+                            <SearchInput
+                              placeholder={`Filter by ${filterValue.toLowerCase()}`}
+                              value={searchValue}
+                              onChange={(_e, val) => setSearchValue(val)}
+                              onClear={() => setSearchValue('')}
+                              aria-label="Filter groups"
+                            />
+                          </InputGroupItem>
+                        </InputGroup>
+                      </FlexItem>
+                    </Flex>
+                  </div>
 
-          <FlexItem flex={{ default: 'flex_1' }}>
-            <Card>
-              <CardHeader>
-                <Title headingLevel="h2" size="lg">Service access</Title>
-              </CardHeader>
-              <Divider />
-              <CardBody>
-                <Table variant="compact">
-                  <Thead>
-                    <Tr>
-                      <Th>Service</Th>
-                      <Th>Access</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {serviceAccess.map((s) => (
-                      <Tr key={s.service}>
-                        <Td>{s.service}</Td>
-                        <Td>
-                          {s.access === 'Editor' && <Label color="blue">Editor</Label>}
-                          {s.access === 'Viewer' && <Label color="green">Viewer</Label>}
-                          {s.access === 'None' && <Label color="grey">None</Label>}
-                        </Td>
+                  <Table variant="compact">
+                    <Thead>
+                      <Tr>
+                        <Th sort={{ sortBy: { index: 0, direction: 'asc' }, onSort: () => {}, columnIndex: 0 }}>
+                          Group name
+                        </Th>
+                        <Th>Description</Th>
                       </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              </CardBody>
-            </Card>
-          </FlexItem>
-        </Flex>
-      </PageSection>
-
-      <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
-        <Card>
-          <CardHeader>
-            <Title headingLevel="h2" size="lg">RHEL asset access</Title>
-          </CardHeader>
-          <Divider />
-          <CardBody>
-            <Table>
-              <Thead>
-                <Tr>
-                  <Th width={40}>Asset</Th>
-                  <Th width={60}>Permissions</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {rhelAssets.map((a) => (
-                  <Tr key={a.asset}>
-                    <Td>{a.asset}</Td>
-                    <Td>
-                      {a.permissions.map((p, idx) => (
-                        <Label key={p} color="blue" style={{ marginRight: idx < a.permissions.length - 1 ? 6 : 0 }}>{p}</Label>
+                    </Thead>
+                    <Tbody>
+                      {groups
+                        .filter(g => !searchValue || g.name.toLowerCase().includes(searchValue.toLowerCase()))
+                        .map((group) => (
+                        <Tr
+                          key={group.name}
+                          isClickable
+                          isRowSelected={selectedGroup?.name === group.name}
+                          onRowClick={() => setSelectedGroup(group)}
+                        >
+                          <Td>
+                            <Button variant="link" isInline onClick={() => setSelectedGroup(group)}>
+                              {group.name}
+                            </Button>
+                          </Td>
+                          <Td>{group.description}</Td>
+                        </Tr>
                       ))}
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </CardBody>
-        </Card>
+                    </Tbody>
+                  </Table>
+                </Tab>
+                <Tab eventKey={1} title={<TabTitleText>My workspaces</TabTitleText>}>
+                  <div style={{ padding: '24px 0' }}>
+                    <Content component="p">Workspace access information will appear here.</Content>
+                  </div>
+                </Tab>
+              </Tabs>
+            </DrawerContentBody>
+          </DrawerContent>
+        </Drawer>
       </PageSection>
     </>
   );
