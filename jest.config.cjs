@@ -30,6 +30,9 @@ module.exports = {
   // The test environment that will be used for testing.
   testEnvironment: "jest-fixed-jsdom",
 
+  // Setup files to run before each test
+  setupFiles: ["<rootDir>/jest.setup.js"],
+
   // Transform configuration for handling different file types
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
