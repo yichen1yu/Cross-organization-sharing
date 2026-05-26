@@ -138,7 +138,7 @@ import {
   WrenchIcon
 } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td, ExpandableRowContent } from '@patternfly/react-table';
-import { AnnotationProvider, AnnotationOverlay, AnnotationToggleBar } from '@app/AnnotationOverlay/AnnotationOverlay';
+import { AnnotationProvider, AnnotationOverlay, AnnotationPanel, AnnotationToggleBar, useAnnotations } from '@app/AnnotationOverlay/AnnotationOverlay';
 
 type SchedulerWizardOptions = { preselectedService?: string; preselectedTask?: string; preselectedFileType?: string; lockService?: boolean; lockTask?: boolean; lockFileType?: boolean };
 const SchedulerWizardContext = React.createContext<{
@@ -2981,33 +2981,37 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </WizardStep>
         </Wizard>
       </Modal>
-      <Page
-        mainContainerId={pageId}
-        masthead={masthead}
-        sidebar={sidebarOpen && !isPageWithoutNav && Sidebar}
-        skipToContent={PageSkipToContent}
-        isContentFilled
-      >
-        {/* Scheduler Drawer (outermost, right-side, global) */}
-        <Drawer isExpanded={isSchedulerPanelOpen} isInline position="right">
-          <DrawerContent panelContent={schedulerDrawerContent}>
-            {/* Notification Drawer (middle, right-side) */}
-            <Drawer isExpanded={isNotificationDrawerOpen} isInline position="right">
-              <DrawerContent panelContent={notificationDrawerContent}>
-                {/* Help Drawer (inner, left-side) */}
-                <Drawer isExpanded={isDrawerExpanded} isInline>
-                  <DrawerContent panelContent={drawerContent}>
-                    <div style={{ position: 'relative' }}>
-                      <AnnotationOverlay />
-                      {children}
-                    </div>
-                  </DrawerContent>
-                </Drawer>
-              </DrawerContent>
-            </Drawer>
-          </DrawerContent>
-        </Drawer>
-      </Page>
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden', height: '100vh' }}>
+        <Page
+          mainContainerId={pageId}
+          masthead={masthead}
+          sidebar={sidebarOpen && !isPageWithoutNav && Sidebar}
+          skipToContent={PageSkipToContent}
+          isContentFilled
+          style={{ flex: 1, minWidth: 0 }}
+        >
+          {/* Scheduler Drawer (outermost, right-side, global) */}
+          <Drawer isExpanded={isSchedulerPanelOpen} isInline position="right">
+            <DrawerContent panelContent={schedulerDrawerContent}>
+              {/* Notification Drawer (middle, right-side) */}
+              <Drawer isExpanded={isNotificationDrawerOpen} isInline position="right">
+                <DrawerContent panelContent={notificationDrawerContent}>
+                  {/* Help Drawer (inner, left-side) */}
+                  <Drawer isExpanded={isDrawerExpanded} isInline>
+                    <DrawerContent panelContent={drawerContent}>
+                      <div style={{ position: 'relative' }}>
+                        <AnnotationOverlay />
+                        {children}
+                      </div>
+                    </DrawerContent>
+                  </Drawer>
+                </DrawerContent>
+              </Drawer>
+            </DrawerContent>
+          </Drawer>
+        </Page>
+        <AnnotationPanel />
+      </div>
       
       {/* Full-width Services Drawer under Masthead */}
       {isLogoDropdownOpen && (

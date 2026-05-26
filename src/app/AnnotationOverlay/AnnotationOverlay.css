@@ -29,6 +29,8 @@
   color: var(--pf-t--global--text--color--on-dark--default);
 }
 
+/* --- Markers --- */
+
 .annotation-marker {
   position: absolute;
   width: 30px;
@@ -49,6 +51,11 @@
   pointer-events: auto;
 }
 
+.annotation-marker--comment {
+  background: #d4a017;
+  box-shadow: 0 2px 8px rgba(212, 160, 23, 0.4);
+}
+
 .annotation-marker:active {
   cursor: grabbing;
 }
@@ -57,8 +64,16 @@
   box-shadow: 0 4px 16px rgba(233, 30, 138, 0.6);
 }
 
+.annotation-marker--comment:hover {
+  box-shadow: 0 4px 16px rgba(212, 160, 23, 0.6);
+}
+
 .annotation-marker--active {
   box-shadow: 0 0 0 4px rgba(233, 30, 138, 0.25), 0 4px 16px rgba(233, 30, 138, 0.6);
+}
+
+.annotation-marker--comment.annotation-marker--active {
+  box-shadow: 0 0 0 4px rgba(212, 160, 23, 0.25), 0 4px 16px rgba(212, 160, 23, 0.6);
 }
 
 .annotation-marker--dragging {
@@ -76,31 +91,51 @@
   pointer-events: none;
 }
 
+.annotation-marker--comment .annotation-marker__pulse {
+  background: rgba(212, 160, 23, 0.3);
+}
+
 @keyframes annotation-pulse {
   0%, 100% { transform: scale(1); opacity: 0.6; }
   50% { transform: scale(1.8); opacity: 0; }
 }
 
+/* --- Panel --- */
+
 .annotation-panel-overlay {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 380px;
-  z-index: 10000;
+  width: 400px;
+  min-width: 400px;
+  height: 100%;
   background: var(--pf-t--global--background--color--primary--default);
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  border-left: 1px solid var(--pf-t--global--border--color--default);
   display: flex;
   flex-direction: column;
-  pointer-events: auto;
-  transform: translateX(0);
-  transition: transform 0.25s ease;
+  overflow: hidden;
+  transition: width 0.25s ease, min-width 0.25s ease, opacity 0.25s ease;
 }
 
 .annotation-panel-overlay--hidden {
-  transform: translateX(100%);
+  width: 0;
+  min-width: 0;
+  opacity: 0;
+  overflow: hidden;
   pointer-events: none;
 }
+
+.annotation-panel__tabs .pf-v6-c-tabs__scroll-button {
+  display: none !important;
+}
+
+.annotation-panel__tabs .pf-v6-c-tabs__list {
+  flex-wrap: nowrap;
+  overflow: visible;
+}
+
+.annotation-panel__tabs .pf-v6-c-tabs {
+  --pf-v6-c-tabs--before--border-block-end--BorderColor: var(--pf-t--global--border--color--default);
+}
+
+/* --- Note cards --- */
 
 .annotation-comment {
   padding: 12px 16px;
@@ -108,6 +143,16 @@
   background: var(--pf-t--global--background--color--secondary--default);
   border-left: 3px solid #e91e8a;
   cursor: pointer;
+}
+
+.annotation-comment--comment {
+  border-left-color: #d4a017;
+}
+
+.annotation-comment--resolved {
+  border-left-color: var(--pf-t--global--color--status--success--default);
+  cursor: default;
+  opacity: 0.8;
 }
 
 .annotation-comment:hover {
@@ -118,6 +163,12 @@
   border-left-color: #e91e8a;
   background: rgba(233, 30, 138, 0.06);
   box-shadow: 0 0 0 1px rgba(233, 30, 138, 0.2);
+}
+
+.annotation-comment--comment.annotation-comment--selected {
+  border-left-color: #d4a017;
+  background: rgba(212, 160, 23, 0.06);
+  box-shadow: 0 0 0 1px rgba(212, 160, 23, 0.2);
 }
 
 .annotation-comment__number {
@@ -134,6 +185,10 @@
   flex-shrink: 0;
 }
 
+.annotation-comment__number--comment {
+  background: #d4a017;
+}
+
 .annotation-notes-badge {
   display: inline-flex;
   align-items: center;
@@ -145,6 +200,8 @@
   font-weight: 500;
   color: #e91e8a;
 }
+
+/* --- Toggle bar elements --- */
 
 .annotation-toggle-bar__divider {
   width: 1px;
@@ -184,15 +241,45 @@
   background: rgba(233, 30, 138, 0.8);
 }
 
-.annotation-comment__delete {
+/* --- Action buttons --- */
+
+.annotation-comment__delete,
+.annotation-comment__resolve {
   opacity: 0;
   transition: opacity 0.15s ease;
 }
 
-.annotation-comment:hover .annotation-comment__delete {
+.annotation-comment:hover .annotation-comment__delete,
+.annotation-comment:hover .annotation-comment__resolve {
   opacity: 1;
 }
 
 .annotation-comment__delete:hover {
   color: var(--pf-t--global--color--status--danger--default) !important;
+}
+
+.annotation-comment__resolve:hover {
+  color: var(--pf-t--global--color--status--success--default) !important;
+}
+
+/* --- Replies --- */
+
+.annotation-comment__replies {
+  margin-top: 10px;
+  padding-left: 12px;
+  border-left: 2px solid var(--pf-t--global--border--color--default);
+}
+
+.annotation-comment__reply {
+  padding: 6px 0;
+}
+
+.annotation-comment__reply + .annotation-comment__reply {
+  border-top: 1px solid var(--pf-t--global--border--color--default);
+}
+
+.annotation-comment__reply-input {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--pf-t--global--border--color--default);
 }

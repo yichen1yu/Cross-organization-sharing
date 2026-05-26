@@ -68,17 +68,19 @@ const Billing: React.FunctionComponent = () => {
   type ToastItem = { id: number; title: string; description?: React.ReactNode };
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
   const addToast = (title: string, description?: React.ReactNode) => {
-    setToasts(prev => [...prev, { id: Date.now() + Math.floor(Math.random() * 1000), title, description }]);
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+    setToasts(prev => [...prev, { id, title, description }]);
+    setTimeout(() => removeToast(id), 8000);
   };
   const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
   type UserEntry = { name: string; org: string };
   type GrantedRow = { groupName: string; description: string; users: number; roles: number; lastModified: string; rolesList?: string[]; usersList?: UserEntry[]; orgName?: string };
-  type BillingRow = { org: string; group: string; roles: number; status: 'Granted' | 'Severed'; lastUpdated: string; sortOrder: number };
+  type BillingRow = { org: string; group: string; roles: number; roleNames: string[]; status: 'Granted' | 'Severed'; lastUpdated: string; sortOrder: number; grantWhere: 'within' | 'outside' };
   const [billingRows, setBillingRows] = React.useState<BillingRow[]>([
-    { org: 'Seattle Grace Hospital', group: 'Golden Girls', roles: 4, status: 'Granted', lastUpdated: '1 days ago', sortOrder: 1 },
-    { org: 'AWS', group: 'Spice Girls', roles: 3, status: 'Granted', lastUpdated: '2 days ago', sortOrder: 2 },
-    { org: 'Acme hospital', group: 'Powerfuff Girls', roles: 5, status: 'Severed', lastUpdated: '2 days ago', sortOrder: 2 },
-    { org: 'St. Elsewhere Hospital', group: 'St. Elsewhere admin', roles: 5, status: 'Granted', lastUpdated: '5 days ago', sortOrder: 5 }
+    { org: 'Seattle Grace Hospital', group: 'Golden Girls', roles: 4, roleNames: ['Subscription Auditor', 'Procurement Admin'], status: 'Granted', lastUpdated: '1 days ago', sortOrder: 1, grantWhere: 'outside' },
+    { org: 'AWS', group: 'Spice Girls', roles: 3, roleNames: ['Subscription Operations'], status: 'Granted', lastUpdated: '2 days ago', sortOrder: 2, grantWhere: 'outside' },
+    { org: 'Acme hospital', group: 'Powerfuff Girls', roles: 5, roleNames: ['Subscription Auditor', 'Subscription Operations', 'Procurement Admin'], status: 'Severed', lastUpdated: '2 days ago', sortOrder: 2, grantWhere: 'outside' },
+    { org: 'St. Elsewhere Hospital', group: 'St. Elsewhere admin', roles: 5, roleNames: ['Procurement Admin'], status: 'Granted', lastUpdated: '5 days ago', sortOrder: 5, grantWhere: 'outside' }
   ]);
   const [activeSortIndex, setActiveSortIndex] = React.useState<number>(4);
   const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc'>('asc');
@@ -109,12 +111,24 @@ const Billing: React.FunctionComponent = () => {
   });
   const [openRowKebab, setOpenRowKebab] = React.useState<number | null>(null);
   const openDetails = (_row: GrantedRow) => {};
-  const trustedOrgNames = ['Acme Corp', 'Globex', 'Initech', 'Umbrella', 'Soylent'];
+  const [editingRowIndex, setEditingRowIndex] = React.useState<number | null>(null);
+  const openEditWizard = (row: BillingRow, rowIndex: number) => {
+    const isOutside = row.grantWhere === 'outside';
+    setGrantWhere(isOutside ? 'outside' : 'within');
+    setSelectedTrustedOrg(isOutside ? row.org : null);
+    const groups = isOutside ? (wizardGroupsByOrg[row.org] || defaultGroups) : defaultGroups;
+    const groupIdx = groups.names.indexOf(row.group);
+    setSelectedWizardGroups(groupIdx >= 0 ? new Set([groupIdx]) : new Set());
+    setSelectedRoles(new Set(row.roleNames));
+    setEditingRowIndex(rowIndex);
+    setIsGrantWizardOpen(true);
+  };
+  const trustedOrgNames = ['Acme Corp', 'Globell', 'Initech', 'Umbrella', 'Soylent'];
   // Wizard step 2 selection — varies by selected trusted org
   const wizardGroupsByOrg: Record<string, { names: string[]; members: number[] }> = {
-    'Globex': { names: ['Engineering leads', 'Product managers', 'Design ops', 'QA engineers', 'DevOps'], members: [8, 4, 3, 6, 5] },
+    'Globell': { names: ['Engineering leads', 'Product managers', 'Design ops', 'QA engineers', 'DevOps'], members: [8, 4, 3, 6, 5] },
     'Acme Corp': { names: ['Sales ops', 'Account managers', 'Support team', 'Logistics', 'Billing admins'], members: [6, 4, 8, 3, 2] },
-    'Initech': { names: ['Platform team', 'Security ops', 'Data analysts', 'SRE team'], members: [6, 3, 9, 4] },
+    'Initech': { names: ['Platform team', 'Security ops', 'Data analysts', 'SRE team', 'Administrator'], members: [6, 3, 9, 4, 5] },
     'Umbrella': { names: ['Research leads', 'Lab techs', 'Field agents', 'Compliance'], members: [4, 8, 5, 2] },
     'Soylent': { names: ['Operations', 'Supply chain', 'Marketing', 'Customer success', 'Finance'], members: [7, 3, 5, 4, 2] },
   };
@@ -132,11 +146,9 @@ const Billing: React.FunctionComponent = () => {
   // Wizard step 3: roles
   type RoleRow = { name: string; description: string; permissions: number };
   const allRoles: RoleRow[] = [
-    { name: 'Procurement admin', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 4 },
-    { name: 'Billing account admin', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 6 },
-    { name: 'Billing account viewer', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 2 },
-    { name: 'Subscription viewer', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 3 },
-    { name: 'Subscription editor', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 5 }
+    { name: 'Subscription Auditor', description: 'Read cloud access, manifests, organization details, products, and reports', permissions: 5 },
+    { name: 'Subscription Operations', description: 'Read and write cloud access, manifests, organization, products, deployment inventories, billing details and contacts, earmarks, and request purchases', permissions: 16 },
+    { name: 'Procurement Admin', description: 'Read and write cloud access, manifests, organization, products, deployment inventories, billing details and contacts, earmarks, request purchases, approve or deny billing account sharing, edit billing details and contacts, and manage features for workspaces', permissions: 21 }
   ];
   const [roleFilter, setRoleFilter] = React.useState('');
   const [selectedRoles, setSelectedRoles] = React.useState<Set<string>>(new Set());
@@ -188,36 +200,56 @@ const Billing: React.FunctionComponent = () => {
       </PageSection>
 
       {isGrantWizardOpen && (
-        <Modal isOpen onClose={() => setIsGrantWizardOpen(false)} variant="large" aria-label="Grant access wizard" className="trusted-wizard-modal">
+        <Modal isOpen onClose={() => { setIsGrantWizardOpen(false); setEditingRowIndex(null); }} variant="large" aria-label="Grant access wizard" className="trusted-wizard-modal">
           <Wizard
-            onClose={() => setIsGrantWizardOpen(false)}
+            onClose={() => { setIsGrantWizardOpen(false); setEditingRowIndex(null); }}
             onSave={() => {
               const orgName = grantWhere === 'outside' ? (selectedTrustedOrg || 'Selected organization') : 'Pinnacle Corp';
-              const mockFirstNames = ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Jamie', 'Quinn', 'Sage', 'Dakota', 'Skyler'];
-              const mockLastNames = ['Chen', 'Patel', 'Kim', 'Lopez', 'Singh', 'Nguyen', 'Müller', 'Tanaka', 'Costa', 'Johansson', 'Ali', 'Novak'];
-              const newRows = Array.from(selectedWizardGroups).map(idx => ({
-                org: orgName,
-                group: wizardUserGroups[idx],
-                roles: selectedRoles.size || 1,
-                status: 'Granted' as const,
-                lastUpdated: 'Just now',
-                sortOrder: 0
-              }));
-              setBillingRows(prev => [...prev, ...newRows]);
-              const firstGroupIdx = Array.from(selectedWizardGroups)[0];
-              const firstGroupName = typeof firstGroupIdx === 'number' ? wizardUserGroups[firstGroupIdx] : 'Selected group';
-              addToast('Billing account share has been granted', (
-                <span>
-                  {firstGroupName} from {orgName} now has access to the billing account
-                </span>
-              ));
+              const roleNamesList = Array.from(selectedRoles);
+              if (editingRowIndex !== null) {
+                setBillingRows(prev => prev.map((r, i) => i === editingRowIndex ? {
+                  ...r,
+                  org: orgName,
+                  group: Array.from(selectedWizardGroups).map(idx => wizardUserGroups[idx])[0] || r.group,
+                  roles: selectedRoles.size || 1,
+                  roleNames: roleNamesList,
+                  lastUpdated: 'Just now',
+                  sortOrder: 0,
+                  grantWhere: grantWhere || r.grantWhere
+                } : r));
+                addToast('Billing account share has been updated', (
+                  <span>
+                    Access for {billingRows[editingRowIndex]?.group} from {orgName} has been updated
+                  </span>
+                ));
+              } else {
+                const newRows = Array.from(selectedWizardGroups).map(idx => ({
+                  org: orgName,
+                  group: wizardUserGroups[idx],
+                  roles: selectedRoles.size || 1,
+                  roleNames: roleNamesList,
+                  status: 'Granted' as const,
+                  lastUpdated: 'Just now',
+                  sortOrder: 0,
+                  grantWhere: (grantWhere || 'within') as 'within' | 'outside'
+                }));
+                setBillingRows(prev => [...prev, ...newRows]);
+                const firstGroupIdx = Array.from(selectedWizardGroups)[0];
+                const firstGroupName = typeof firstGroupIdx === 'number' ? wizardUserGroups[firstGroupIdx] : 'Selected group';
+                addToast('Billing account share has been granted', (
+                  <span>
+                    {firstGroupName} from {orgName} now has access to the billing account
+                  </span>
+                ));
+              }
+              setEditingRowIndex(null);
               setIsGrantWizardOpen(false);
             }}
             header={
               <WizardHeader
-                title={`Grant billing account access`}
+                title={editingRowIndex !== null ? 'Edit billing account access' : 'Grant billing account access'}
                 description="Pinnacle Corp (1234567890)"
-                onClose={() => setIsGrantWizardOpen(false)}
+                onClose={() => { setIsGrantWizardOpen(false); setEditingRowIndex(null); }}
               />
             }
             startIndex={1}
@@ -256,7 +288,7 @@ const Billing: React.FunctionComponent = () => {
                       popperProps={{ appendTo: () => document.body }}
                     >
                       <DropdownList>
-                        {['Acme Corp','Globex','Initech','Umbrella','Soylent'].map((name) => (
+                        {['Acme Corp','Globell','Initech','Umbrella','Soylent'].map((name) => (
                           <DropdownItem key={name} itemId={name} isSelected={selectedTrustedOrg === name}>{name}</DropdownItem>
                         ))}
                       </DropdownList>
@@ -330,22 +362,22 @@ const Billing: React.FunctionComponent = () => {
                   <Table aria-label="Select roles table" variant="compact">
                     <Thead>
                       <Tr>
-                        <Th>
+                        <Th width={10}>
                           <Checkbox id="roles-select-all" aria-label="Select all roles" isChecked={rolesAllSelected} onChange={(_e, checked) => onToggleAllRoles(!!checked)} />
                         </Th>
-                        <Th>Name</Th>
-                        <Th>Description</Th>
-                        <Th>Permissions</Th>
+                        <Th width={20}>Name</Th>
+                        <Th width={50}>Description</Th>
+                        <Th width={15}>Permissions</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
                       {rolesPageRows.map((role) => (
-                        <Tr key={role.name}>
+                        <Tr key={role.name} style={{ verticalAlign: 'middle' }}>
                           <Td>
                             <Checkbox id={`role-${role.name}`} aria-label={`Select ${role.name}`} isChecked={selectedRoles.has(role.name)} onChange={(_e, checked) => onToggleRoleRow(role.name, !!checked)} />
                           </Td>
                           <Td>{role.name}</Td>
-                          <Td>{role.description}</Td>
+                          <Td style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{role.description}</Td>
                           <Td>{role.permissions}</Td>
                         </Tr>
                       ))}
@@ -404,7 +436,16 @@ const Billing: React.FunctionComponent = () => {
                     <SearchInput aria-label={'Search'} placeholder={'Search'} value={''} onChange={() => {}} onClear={() => {}} />
                   </ToolbarItem>
                   <ToolbarItem>
-                    <Button variant="primary" onClick={() => setIsGrantWizardOpen(true)}>Grant access</Button>
+                    <Button variant="primary" onClick={() => {
+                      setGrantWhere(null);
+                      setSelectedTrustedOrg(null);
+                      setSelectedWizardGroups(new Set());
+                      setSelectedRoles(new Set());
+                      setRoleFilter('');
+                      setRolesPage(1);
+                      setEditingRowIndex(null);
+                      setIsGrantWizardOpen(true);
+                    }}>Grant access</Button>
                   </ToolbarItem>
                   <ToolbarItem style={{ marginLeft: 'auto' }}>
 
@@ -433,7 +474,7 @@ const Billing: React.FunctionComponent = () => {
                         <Checkbox id={`select-bill-${idx}`} aria-label={`Select ${row.org}`} isChecked={selectedRowIds.has(idx)} onChange={(_e, checked) => onToggleRow(idx, !!checked)} />
                       </Td>
                       <Td dataLabel="Organization name" style={{ paddingRight: '32px' }}>
-                        <Button variant="link" isInline>{row.org}</Button>
+                        {row.org}
                       </Td>
                       <Td dataLabel="User group">{row.group}</Td>
                       <Td dataLabel="Roles">{row.roles}</Td>
@@ -464,8 +505,7 @@ const Billing: React.FunctionComponent = () => {
                           popperProps={{ position: 'right' }}
                         >
                           <DropdownList>
-                            <DropdownItem>View</DropdownItem>
-                            <DropdownItem>Edit</DropdownItem>
+                            <DropdownItem onClick={() => openEditWizard(row, billingRows.indexOf(row))}>Edit</DropdownItem>
                             {row.status === 'Granted' && (
                               <DropdownItem
                                 style={{ color: 'var(--pf-t--global--color--status--danger--default)' }}

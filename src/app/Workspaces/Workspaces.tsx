@@ -206,16 +206,47 @@ const Workspaces: React.FunctionComponent = () => {
   const closeDetails = () => {
     setIsDetailsPanelOpen(false);
   };
-  const trustedOrgNames = ['Acme Corp', 'Globex', 'Initech', 'Umbrella', 'Soylent'];
+  const trustedOrgNames = ['Acme Corp', 'Globell', 'Initech', 'Umbrella', 'Soylent'];
   // Wizard step 2 selection (user groups table) — varies by selected trusted org
   const wizardGroupsByOrg: Record<string, { names: string[]; members: number[] }> = {
-    'Globex': { names: ['Engineering leads', 'Product managers', 'Design ops', 'QA engineers', 'DevOps'], members: [8, 4, 3, 6, 5] },
+    'Globell': { names: ['Engineering leads', 'Product managers', 'Design ops', 'QA engineers', 'DevOps'], members: [8, 4, 3, 6, 5] },
     'Acme Corp': { names: ['Sales ops', 'Account managers', 'Support team', 'Logistics', 'Billing admins'], members: [6, 4, 8, 3, 2] },
     'Initech': { names: ['Platform team', 'Security ops', 'Data analysts', 'SRE team'], members: [6, 3, 9, 4] },
     'Umbrella': { names: ['Research leads', 'Lab techs', 'Field agents', 'Compliance'], members: [4, 8, 5, 2] },
     'Soylent': { names: ['Operations', 'Supply chain', 'Marketing', 'Customer success', 'Finance'], members: [7, 3, 5, 4, 2] },
   };
   const defaultGroups = { names: ['Administrators', 'Powerpuff Girls', 'Spice Girls', 'Golden Girls', 'Bad Bunnies'], members: [3, 5, 7, 2, 4] };
+  const groupDescriptions: Record<string, string> = {
+    'Engineering leads': 'Technical leadership overseeing engineering projects and architecture decisions',
+    'Product managers': 'Product strategy, roadmap planning, and feature prioritization',
+    'Design ops': 'Design system management and UX process coordination',
+    'QA engineers': 'Quality assurance testing, automation, and release validation',
+    'DevOps': 'CI/CD pipelines, infrastructure automation, and deployment management',
+    'Sales ops': 'Sales process optimization and CRM administration',
+    'Account managers': 'Client relationship management and account growth',
+    'Support team': 'Customer support, ticket resolution, and escalation handling',
+    'Logistics': 'Supply chain coordination and delivery management',
+    'Billing admins': 'Invoice processing, payment management, and billing inquiries',
+    'Platform team': 'Core platform infrastructure and shared services',
+    'Security ops': 'Security monitoring, incident response, and compliance',
+    'Data analysts': 'Data reporting, business intelligence, and analytics',
+    'SRE team': 'Site reliability, uptime monitoring, and incident management',
+    'Administrator': 'Full administrative access and organization settings',
+    'Research leads': 'Research project oversight and experimental planning',
+    'Lab techs': 'Laboratory operations and technical equipment management',
+    'Field agents': 'On-site operations and field data collection',
+    'Compliance': 'Regulatory compliance monitoring and audit preparation',
+    'Operations': 'Day-to-day operational management and process oversight',
+    'Supply chain': 'Vendor coordination and supply chain logistics',
+    'Marketing': 'Marketing campaigns, content strategy, and brand management',
+    'Customer success': 'Customer onboarding, retention, and satisfaction',
+    'Finance': 'Financial planning, budgeting, and expense management',
+    'Administrators': 'Organization-wide administrative access and settings',
+    'Powerpuff Girls': 'Cross-functional team for special projects and initiatives',
+    'Spice Girls': 'Collaboration group for inter-department coordination',
+    'Golden Girls': 'Workspace administrators handling access approvals and settings',
+    'Bad Bunnies': 'Experimental projects and innovation sandbox team',
+  };
   const currentOrgGroups = wizardGroupsByOrg[selectedTrustedOrg || ''] || defaultGroups;
   const wizardUserGroups = currentOrgGroups.names;
   const wizardMembers = currentOrgGroups.members;
@@ -230,13 +261,13 @@ const Workspaces: React.FunctionComponent = () => {
   // Wizard step 3: roles table state
   type RoleRow = { name: string; description: string; permissions: number };
   const allRoles: RoleRow[] = [
-    { name: 'RHEL Admin', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 3 },
-    { name: 'OpenShift Reviewer', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 4 },
-    { name: 'Ansible Reviewer', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 3 },
-    { name: 'Automation Analytics Administrator', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 1 },
-    { name: 'Automation Analytics Editor', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 6 },
-    { name: 'Automation Analytics Viewer', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 7 },
-    { name: 'Automation Services Catalog administrator', description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do', permissions: 3 }
+    { name: 'RHEL Admin', description: 'Manage RHEL subscriptions, repositories, and system configurations', permissions: 3 },
+    { name: 'OpenShift Reviewer', description: 'View OpenShift cluster details, deployments, and usage reports', permissions: 4 },
+    { name: 'Ansible Reviewer', description: 'View Ansible automation jobs, inventories, and execution history', permissions: 3 },
+    { name: 'Automation Analytics Administrator', description: 'Full control over automation analytics settings, dashboards, and data exports', permissions: 1 },
+    { name: 'Automation Analytics Editor', description: 'Create and modify automation analytics reports, charts, and saved queries', permissions: 6 },
+    { name: 'Automation Analytics Viewer', description: 'View automation analytics dashboards, reports, and usage trends', permissions: 7 },
+    { name: 'Automation Services Catalog administrator', description: 'Manage catalog items, approval workflows, and order fulfillment settings', permissions: 3 }
   ];
   const [roleFilter, setRoleFilter] = React.useState('');
   const [selectedRoles, setSelectedRoles] = React.useState<Set<string>>(new Set());
@@ -316,7 +347,7 @@ const Workspaces: React.FunctionComponent = () => {
                 }));
                 return {
                   groupName: wizardUserGroups[idx],
-                  description: 'Lorem ipsum',
+                  description: groupDescriptions[wizardUserGroups[idx]] || 'User group for workspace access',
                   users: memberCount,
                   roles: selectedRoles.size || 1,
                   lastModified: 'Just now',
@@ -494,20 +525,20 @@ const Workspaces: React.FunctionComponent = () => {
                             onChange={(_e, checked) => onToggleAllRoles(!!checked)}
                           />
                         </Th>
-                        <Th>Name</Th>
-                        <Th>Description</Th>
-                        <Th>Permissions</Th>
+                        <Th width={20}>Name</Th>
+                        <Th width={50}>Description</Th>
+                        <Th width={15}>Permissions</Th>
                       </Tr>
                     </Thead>
                     <Tbody>
                       {rolesPageRows.map((role) => {
                         return (
-                          <Tr key={role.name}>
+                          <Tr key={role.name} style={{ verticalAlign: 'middle' }}>
                             <Td>
                               <Checkbox id={`role-${role.name}`} aria-label={`Select ${role.name}`} isChecked={selectedRoles.has(role.name)} onChange={(_e, checked) => onToggleRoleRow(role.name, !!checked)} />
                             </Td>
                             <Td>{role.name}</Td>
-                            <Td>{role.description}</Td>
+                            <Td style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{role.description}</Td>
                             <Td>{role.permissions}</Td>
                           </Tr>
                         );
@@ -680,7 +711,15 @@ const Workspaces: React.FunctionComponent = () => {
                           <SearchInput aria-label={'Search'} placeholder={'Search'} value={''} onChange={() => {}} onClear={() => {}} />
                         </ToolbarItem>
                         <ToolbarItem>
-                          <Button variant="primary" onClick={() => setIsGrantWizardOpen(true)}>Grant access</Button>
+                          <Button variant="primary" onClick={() => {
+                            setGrantWhere(null);
+                            setSelectedTrustedOrg(null);
+                            setSelectedWizardGroups(new Set());
+                            setSelectedRoles(new Set());
+                            setRoleFilter('');
+                            setRolesPage(1);
+                            setIsGrantWizardOpen(true);
+                          }}>Grant access</Button>
                         </ToolbarItem>
                       </ToolbarContent>
                     </Toolbar>

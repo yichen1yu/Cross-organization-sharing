@@ -333,9 +333,9 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     });
     // Remove Wonka Factory and Wayne Enterprises from incoming
     const filtered = result.filter((item) => item.organizationName !== 'Wonka Factory' && item.organizationName !== 'Wayne Enterprises');
-    // Ensure Globex is always in incoming with Acceptance pending
-    if (!filtered.some((item) => item.organizationName === 'Globex')) {
-      filtered.push({ organizationName: 'Globex', orgId: '200045', status: 'Acceptance pending', lastModified: '2025-08-22' });
+    // Ensure Globell is always in incoming with Acceptance pending
+    if (!filtered.some((item) => item.organizationName === 'Globell')) {
+      filtered.push({ organizationName: 'Globell', orgId: '200045', status: 'Acceptance pending', lastModified: '2025-08-22' });
     }
     return filtered;
   });
@@ -884,7 +884,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                     <Tr key={row.orgId}>
                       <Td dataLabel="Organization name" style={{ paddingRight: '32px' }}>
                         {row.status === 'Acceptance pending' ? (
-                          <span style={{ color: 'var(--pf-t--global--text--color--subtle)', fontStyle: 'italic' }}>Pending...</span>
+                          <span>{row.organizationName}</span>
                         ) : row.status === 'Severed' ? (
                           <span>{row.organizationName}</span>
                         ) : (
@@ -1335,7 +1335,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                 }
                 addToast(
                   `You have successfully sent a trusted org request to Organization #${pendingWizardOrg.orgId}`,
-                  <span>You can view your outgoing requests <a href="/organization/trusted-organizations">here</a>.</span>
+                  <span>You can view your outgoing requests in the Outgoing tab.</span>
                 );
               }
               closePendingWizard();
@@ -1842,7 +1842,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
               setOutgoingData((prev) => [
                 ...prev,
                 {
-                  organizationName: `Org ${establishOrgId}`,
+                  organizationName: establishOrgId.trim() === '547289' ? 'Beta Corp' : `Org ${establishOrgId}`,
                   orgId: establishOrgId.trim(),
                   status: 'Acceptance pending' as const,
                   lastModified: new Date().toISOString().slice(0, 10),
@@ -1850,7 +1850,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
               ]);
               addToast(
                 `You have successfully sent a trusted org request to Organization #${establishOrgId.trim()}`,
-                <span>You can view your outgoing requests <a href="/organization/trusted-organizations">here</a>.</span>
+                <span>You can view your outgoing requests in the Outgoing tab.</span>
               );
               setIsEstablishModalOpen(false);
             }}
