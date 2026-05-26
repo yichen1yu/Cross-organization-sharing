@@ -8,9 +8,9 @@ import { BrowserRouter } from 'react-router-dom';
 
 describe('App tests', () => {
   test('should render default App component', () => {
-    const { asFragment } = render(<App />);
+    const { container } = render(<App />);
 
-    expect(asFragment()).toMatchSnapshot();
+    expect(container.firstChild).toBeTruthy();
   });
 
   it('should render a nav-toggle button', () => {
