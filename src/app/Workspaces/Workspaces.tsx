@@ -39,7 +39,7 @@ import { AlertGroup, Alert, AlertActionCloseButton } from '@patternfly/react-cor
 import { Wizard, WizardStep, WizardHeader } from '@patternfly/react-core';
 import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon, SyncAltIcon } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 
 type WorkspaceMeta = {
   name: string;
@@ -325,7 +325,7 @@ const Workspaces: React.FunctionComponent = () => {
         <Breadcrumb>
           <BreadcrumbItem>Identity & Access Management</BreadcrumbItem>
           <BreadcrumbItem>User Access</BreadcrumbItem>
-          <BreadcrumbItem to="/workspaces">Workspaces</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/workspaces">Workspaces</BreadcrumbItem>
           <BreadcrumbItem isActive>{wsMeta.name}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>

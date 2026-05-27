@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -219,7 +219,7 @@ const AlertManager: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem to="/overview">Settings</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/overview">Settings</BreadcrumbItem>
           <BreadcrumbItem isActive>Alert Manager</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>

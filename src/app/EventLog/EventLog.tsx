@@ -19,6 +19,7 @@ import {
   ToolbarItem
 } from '@patternfly/react-core';
 import { ExternalLinkAltIcon, ListIcon } from '@patternfly/react-icons';
+import { Link } from 'react-router-dom';
 
 const EventLog: React.FunctionComponent = () => {
   const [searchValue, setSearchValue] = React.useState('');
@@ -40,7 +41,7 @@ const EventLog: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem to="/overview">Settings</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/overview">Settings</BreadcrumbItem>
           <BreadcrumbItem isActive>Event Log</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>

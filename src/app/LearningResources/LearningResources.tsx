@@ -20,6 +20,7 @@ import {
   Title
 } from '@patternfly/react-core';
 import { BookOpenIcon, BookmarkIcon, CubesIcon, ExternalLinkAltIcon, StarIcon } from '@patternfly/react-icons';
+import { Link } from 'react-router-dom';
 
 const LearningResources: React.FunctionComponent = () => {
   const [expandedSections, setExpandedSections] = React.useState<{[key: string]: boolean}>({
@@ -47,7 +48,7 @@ const LearningResources: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem to="/overview">Settings</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/overview">Settings</BreadcrumbItem>
           <BreadcrumbItem isActive>Learning Resources</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>

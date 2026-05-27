@@ -19,6 +19,7 @@ import {
   Title
 } from '@patternfly/react-core';
 import { DatabaseIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
+import { Link } from 'react-router-dom';
 
 const DataIntegration: React.FunctionComponent = () => {
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
@@ -31,7 +32,7 @@ const DataIntegration: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem to="/overview">Settings</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/overview">Settings</BreadcrumbItem>
           <BreadcrumbItem isActive>Data Integration</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>

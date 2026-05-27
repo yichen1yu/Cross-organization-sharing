@@ -28,6 +28,7 @@ import {
 import { Wizard, WizardStep, WizardHeader } from '@patternfly/react-core';
 import { EllipsisVIcon, AngleRightIcon, AngleDownIcon, FilterIcon, ExclamationTriangleIcon, OutlinedQuestionCircleIcon, MinusIcon, PlusIcon } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
+import { Link } from 'react-router-dom';
 
 type WorkspaceNode = {
   id: string;
@@ -550,7 +551,7 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
           <BreadcrumbItem>Subscription Services</BreadcrumbItem>
-          <BreadcrumbItem to="/subscription-inventory">Subscription Inventory</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/subscription-inventory">Subscription Inventory</BreadcrumbItem>
           <BreadcrumbItem isActive>Workspaces</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>

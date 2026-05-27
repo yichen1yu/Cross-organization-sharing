@@ -28,6 +28,7 @@ import {
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { FilterIcon } from '@patternfly/react-icons';
+import { Link } from 'react-router-dom';
 
 interface GroupData {
   name: string;
@@ -120,7 +121,7 @@ const MyUserAccess: React.FunctionComponent = () => {
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem to="#">Identity & Access Management</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="#">Identity & Access Management</BreadcrumbItem>
           <BreadcrumbItem isActive>My Access</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
