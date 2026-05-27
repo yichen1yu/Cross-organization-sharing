@@ -48,28 +48,28 @@ type WorkspaceMeta = {
 
 const workspaceData: Record<string, WorkspaceMeta> = {
   'uxd': {
-    name: 'UXD',
-    hierarchy: [{ name: 'UXD' }],
+    name: 'Pinnacle Corp',
+    hierarchy: [{ name: 'Pinnacle Corp' }],
   },
   'workspace-default': {
     name: 'Workspace default',
-    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default' }],
+    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default' }],
   },
   'workspace-ungrouped-hosts': {
     name: 'Workspace Ungrouped Hosts',
-    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace Ungrouped Hosts' }],
+    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace Ungrouped Hosts' }],
   },
   'workspace-a': {
     name: 'Workspace A',
-    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace A' }],
+    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace A' }],
   },
   'workspace-b': {
     name: 'Workspace B',
-    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace B' }],
+    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace B' }],
   },
   'workspace-c': {
     name: 'Workspace C',
-    hierarchy: [{ name: 'UXD', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace C' }],
+    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace C' }],
   },
 };
 
@@ -93,7 +93,7 @@ const Workspaces: React.FunctionComponent = () => {
   const [isGrantWizardOpen, setIsGrantWizardOpen] = React.useState(false);
   const [acceptChoice, setAcceptChoice] = React.useState<'accept' | 'reject' | null>(null);
   const [verifyEmail, setVerifyEmail] = React.useState<string>('');
-  const myOrgName = 'UXD';
+  const myOrgName = 'Pinnacle Corp';
   const [grantWhere, setGrantWhere] = React.useState<'within' | 'outside' | null>(null);
   const [isTrustedOpen, setIsTrustedOpen] = React.useState(false);
   const [selectedTrustedOrg, setSelectedTrustedOrg] = React.useState<string | null>(null);
@@ -103,31 +103,31 @@ const Workspaces: React.FunctionComponent = () => {
 
   const initialGrantedByWorkspace: Record<string, GrantedRow[]> = {
     'workspace-a': [
-      { groupName: 'Golden girls', description: 'Workspace administrators handling access approvals and settings', users: 4, roles: 2, lastModified: '2 days ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+      { groupName: 'Golden girls', description: 'Workspace administrators handling access approvals and settings', users: 4, roles: 2, lastModified: '2 days ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
       { groupName: 'Seattle Grace admins', description: 'Clinical admins overseeing user lifecycle, roles, and audits', users: 3, roles: 2, lastModified: '2 days ago', rolesList: ['User manager', 'Audit viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
-      { groupName: 'Spice girls', description: 'Project members with standard access to dashboards and reports', users: 5, roles: 2, lastModified: '2 days ago', rolesList: ['Dashboard viewer', 'Report reader'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+      { groupName: 'Spice girls', description: 'Project members with standard access to dashboards and reports', users: 5, roles: 2, lastModified: '2 days ago', rolesList: ['Dashboard viewer', 'Report reader'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
     ],
     'uxd': [
-      { groupName: 'Golden girls', description: 'Org-wide administrators with full access', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
-      { groupName: 'Powerpuff girls', description: 'Security and compliance oversight across all workspaces', users: 3, roles: 2, lastModified: '3 days ago', rolesList: ['Security auditor', 'Compliance reviewer'], usersList: [{ name: 'Blossom Utonium', org: 'UXD' }, { name: 'Bubbles Utonium', org: 'UXD' }, { name: 'Buttercup Utonium', org: 'UXD' }] },
-      { groupName: 'Bad Bunnies', description: 'Platform engineering team with infrastructure access', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'UXD' }, { name: 'DJ Luian', org: 'UXD' }, { name: 'Tainy Ocasio', org: 'UXD' }, { name: 'Mora Vega', org: 'UXD' }] },
+      { groupName: 'Golden girls', description: 'Org-wide administrators with full access', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+      { groupName: 'Powerpuff girls', description: 'Security and compliance oversight across all workspaces', users: 3, roles: 2, lastModified: '3 days ago', rolesList: ['Security auditor', 'Compliance reviewer'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
+      { groupName: 'Bad Bunnies', description: 'Platform engineering team with infrastructure access', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
     ],
     'workspace-default': [
-      { groupName: 'Golden girls', description: 'Default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
-      { groupName: 'Spice girls', description: 'General access for standard workspace operations', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+      { groupName: 'Golden girls', description: 'Default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+      { groupName: 'Spice girls', description: 'General access for standard workspace operations', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
     ],
     'workspace-ungrouped-hosts': [
-      { groupName: 'Powerpuff girls', description: 'Monitoring ungrouped hosts and triaging assignments', users: 3, roles: 1, lastModified: '12 hours ago', rolesList: ['Host manager'], usersList: [{ name: 'Blossom Utonium', org: 'UXD' }, { name: 'Bubbles Utonium', org: 'UXD' }, { name: 'Buttercup Utonium', org: 'UXD' }] },
+      { groupName: 'Powerpuff girls', description: 'Monitoring ungrouped hosts and triaging assignments', users: 3, roles: 1, lastModified: '12 hours ago', rolesList: ['Host manager'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
       { groupName: 'Seattle Grace admins', description: 'Clinical systems ungrouped host oversight', users: 3, roles: 1, lastModified: '1 day ago', rolesList: ['Host viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
     ],
     'workspace-b': [
-      { groupName: 'Bad Bunnies', description: 'Infrastructure provisioning and deployment pipelines', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Deploy manager', 'Pipeline operator'], usersList: [{ name: 'Benito Martinez', org: 'UXD' }, { name: 'DJ Luian', org: 'UXD' }, { name: 'Tainy Ocasio', org: 'UXD' }, { name: 'Mora Vega', org: 'UXD' }] },
-      { groupName: 'Golden girls', description: 'Workspace administrators handling approvals', users: 4, roles: 1, lastModified: '4 days ago', rolesList: ['Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
-      { groupName: 'Spice girls', description: 'QA and testing team with report access', users: 5, roles: 1, lastModified: '2 days ago', rolesList: ['Report reader'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+      { groupName: 'Bad Bunnies', description: 'Infrastructure provisioning and deployment pipelines', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Deploy manager', 'Pipeline operator'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
+      { groupName: 'Golden girls', description: 'Workspace administrators handling approvals', users: 4, roles: 1, lastModified: '4 days ago', rolesList: ['Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+      { groupName: 'Spice girls', description: 'QA and testing team with report access', users: 5, roles: 1, lastModified: '2 days ago', rolesList: ['Report reader'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
       { groupName: 'Cardiology admins', description: 'Cross-workspace access for cardiac monitoring systems', users: 2, roles: 1, lastModified: '6 hours ago', rolesList: ['System viewer'], usersList: [{ name: 'Cristina Yang', org: 'Cardiology' }, { name: 'Preston Burke', org: 'Cardiology' }] },
     ],
     'workspace-c': [
-      { groupName: 'Powerpuff girls', description: 'Dev environment access and sandbox management', users: 3, roles: 2, lastModified: '8 hours ago', rolesList: ['Sandbox admin', 'Developer'], usersList: [{ name: 'Blossom Utonium', org: 'UXD' }, { name: 'Bubbles Utonium', org: 'UXD' }, { name: 'Buttercup Utonium', org: 'UXD' }] },
+      { groupName: 'Powerpuff girls', description: 'Dev environment access and sandbox management', users: 3, roles: 2, lastModified: '8 hours ago', rolesList: ['Sandbox admin', 'Developer'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
       { groupName: 'Operating room ops', description: 'Operational monitoring and incident response', users: 6, roles: 2, lastModified: '3 days ago', rolesList: ['Incident responder', 'Monitor viewer'], usersList: [{ name: 'Mark Sloan', org: 'Surgery' }, { name: 'Callie Torres', org: 'Surgery' }, { name: 'Arizona Robbins', org: 'Surgery' }, { name: 'Owen Hunt', org: 'Surgery' }, { name: 'April Kepner', org: 'Surgery' }, { name: 'Jackson Avery', org: 'Surgery' }] },
       { groupName: 'Seattle Grace admins', description: 'Clinical admin access for integration testing', users: 3, roles: 1, lastModified: '5 days ago', rolesList: ['Integration tester'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
     ],
@@ -141,19 +141,19 @@ const Workspaces: React.FunctionComponent = () => {
     ],
     'uxd': [],
     'workspace-default': [
-      { groupName: 'Golden girls', description: 'Org-wide administrators inherited from UXD root', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
-      { groupName: 'Bad Bunnies', description: 'Platform engineering inherited from UXD root', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'UXD' }, { name: 'DJ Luian', org: 'UXD' }, { name: 'Tainy Ocasio', org: 'UXD' }, { name: 'Mora Vega', org: 'UXD' }] },
+      { groupName: 'Golden girls', description: 'Org-wide administrators inherited from Pinnacle Corp root', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+      { groupName: 'Bad Bunnies', description: 'Platform engineering inherited from Pinnacle Corp root', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
     ],
     'workspace-ungrouped-hosts': [
-      { groupName: 'Golden girls', description: 'Inherited default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
-      { groupName: 'Spice girls', description: 'Inherited general access from parent workspace', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+      { groupName: 'Golden girls', description: 'Inherited default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+      { groupName: 'Spice girls', description: 'Inherited general access from parent workspace', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
     ],
     'workspace-b': [
-      { groupName: 'Golden girls', description: 'Default workspace administrators inherited from parent', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
-      { groupName: 'Spice girls', description: 'Inherited general access from Workspace default', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'UXD' }, { name: 'Sporty Spice', org: 'UXD' }, { name: 'Baby Spice', org: 'UXD' }, { name: 'Ginger Spice', org: 'UXD' }, { name: 'Posh Spice', org: 'UXD' }] },
+      { groupName: 'Golden girls', description: 'Default workspace administrators inherited from parent', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+      { groupName: 'Spice girls', description: 'Inherited general access from Workspace default', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
     ],
     'workspace-c': [
-      { groupName: 'Golden girls', description: 'Default workspace administrators inherited from parent', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'UXD' }, { name: 'Dorothy Zbornak', org: 'UXD' }, { name: 'Rose Nylund', org: 'UXD' }, { name: 'Blanche Devereaux', org: 'UXD' }] },
+      { groupName: 'Golden girls', description: 'Default workspace administrators inherited from parent', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
     ],
   };
 

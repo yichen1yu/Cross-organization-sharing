@@ -40,23 +40,23 @@ const groups: GroupData[] = [
     name: 'All users',
     description: 'This group contains all users in your organization.',
     roles: [
-      { name: 'RHEL Admin', workspace: 'UXD' },
-      { name: 'OpenShift Admin', workspace: 'UXD' }
+      { name: 'RHEL Admin', workspace: 'Pinnacle Corp' },
+      { name: 'OpenShift Admin', workspace: 'Pinnacle Corp' }
     ]
   },
   {
     name: 'Workspace administrators',
     description: 'This group contains blah blah blah some descriptive text here.',
     roles: [
-      { name: 'Workspace Admin', workspace: 'UXD' }
+      { name: 'Workspace Admin', workspace: 'Pinnacle Corp' }
     ]
   },
   {
     name: 'Subscriptions viewer',
     description: 'Perform read operations on any Subscriptions resource.',
     roles: [
-      { name: 'RHEL Admin', workspace: 'UXD' },
-      { name: 'OpenShift Admin', workspace: 'UXD' }
+      { name: 'RHEL Admin', workspace: 'Pinnacle Corp' },
+      { name: 'OpenShift Admin', workspace: 'Pinnacle Corp' }
     ]
   }
 ];

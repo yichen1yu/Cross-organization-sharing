@@ -30,7 +30,7 @@ type WorkspaceNode = {
 };
 
 const allWorkspaces: WorkspaceNode[] = [
-  { id: 'uxd', slug: 'uxd', name: 'UXD', description: 'This is the root workspace.', level: 0 },
+  { id: 'uxd', slug: 'uxd', name: 'Pinnacle Corp', description: 'This is the root workspace.', level: 0 },
   { id: 'ws-default', slug: 'workspace-default', name: 'Workspace default', description: 'This is a description of Workspace default.', parentId: 'uxd', level: 1 },
   { id: 'ws-ungrouped', slug: 'workspace-ungrouped-hosts', name: 'Workspace Ungrouped Hosts', description: 'Where ungrouped systems will go.', parentId: 'ws-default', level: 2 },
   { id: 'ws-a', slug: 'workspace-a', name: 'Workspace A', description: 'This is a description of Workspace A.', parentId: 'ws-default', level: 2 },

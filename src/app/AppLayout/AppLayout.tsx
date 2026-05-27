@@ -1753,7 +1753,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     
     if (primaryNavPages.includes(currentPath)) {
       return 'primary';
-    } else if (secondaryNavPages.includes(currentPath)) {
+    } else if (secondaryNavPages.includes(currentPath) || currentPath.startsWith('/workspaces/')) {
       return 'secondary';
     }
     return 'primary'; // default fallback

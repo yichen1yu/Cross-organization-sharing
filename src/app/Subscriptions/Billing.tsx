@@ -60,7 +60,7 @@ const Billing: React.FunctionComponent = () => {
 
   // Grant access wizard (reused from Workspaces)
   const [isGrantWizardOpen, setIsGrantWizardOpen] = React.useState(false);
-  const myOrgName = 'UXD';
+  const myOrgName = 'Pinnacle Corp';
   const [grantWhere, setGrantWhere] = React.useState<'within' | 'outside' | null>(null);
   const [isTrustedOpen, setIsTrustedOpen] = React.useState(false);
   const [selectedTrustedOrg, setSelectedTrustedOrg] = React.useState<string | null>(null);
