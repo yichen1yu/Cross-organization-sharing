@@ -1422,7 +1422,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
             <WizardStep
               id="step-2"
               name="Configure"
-              isDisabled={false}
+              isDisabled={acceptChoice === null || !verifyEmail.trim()}
               isHidden={acceptChoice === 'reject'}
               isExpandable
               steps={[
@@ -1715,7 +1715,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                 )
               ]}
             />
-            <WizardStep id="step-3" name="Request to be a trusted organization" isDisabled={false} isHidden={acceptChoice === 'reject'} footer={{ nextButtonText: 'Submit', isNextDisabled: requestTrustedChoice === null }}>
+            <WizardStep id="step-3" name="Request to be a trusted organization" isDisabled={acceptChoice === null || !verifyEmail.trim() || configureChoice === null} isHidden={acceptChoice === 'reject'} footer={{ nextButtonText: 'Submit', isNextDisabled: requestTrustedChoice === null }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Would you like to request to become a trusted org of {pendingWizardOrg.organizationName}?</Title>
                 <p style={{ marginTop: 8 }}>This will allow them to see and grant access to your organization.</p>

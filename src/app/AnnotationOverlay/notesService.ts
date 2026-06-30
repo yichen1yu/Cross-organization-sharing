@@ -1,72 +1,88 @@
-import {
-  collection,
-  doc,
-  onSnapshot,
-  setDoc,
-  deleteDoc,
-  updateDoc,
-  query,
-  where,
-  Unsubscribe
-} from 'firebase/firestore';
-import { db } from './firebase';
 import { Note, Reply } from './types';
 
-const COLLECTION = 'notes';
+type Unsubscribe = () => void;
 
-export function subscribeToNotes(path: string, onUpdate: (notes: Note[]) => void): Unsubscribe {
-  const q = query(collection(db, COLLECTION), where('path', '==', path));
-  return onSnapshot(q, (snapshot) => {
-    const notes: Note[] = snapshot.docs.map(d => {
-      const data = d.data();
-      return {
-        id: data.id,
-        type: data.type,
-        x: data.x,
-        y: data.y,
-        text: data.text,
-        author: data.author,
-        timestamp: data.timestamp,
-        resolved: data.resolved || false,
-        resolvedBy: data.resolvedBy || undefined,
-        resolvedAt: data.resolvedAt || undefined,
-        replies: data.replies || []
-      } as Note;
-    });
-    onUpdate(notes);
-  });
+const store = new Map<string, Note[]>();
+const listeners = new Map<string, Set<(notes: Note[]) => void>>();
+
+function getNotesForPath(path: string): Note[] {
+  if (!store.has(path)) {
+    store.set(path, []);
+  }
+  return store.get(path)!;
 }
 
-function noteDocId(path: string, noteId: number): string {
-  return `${path.replace(/\//g, '_')}_note_${noteId}`;
+function notify(path: string) {
+  const notes = getNotesForPath(path);
+  const subs = listeners.get(path);
+  if (subs) {
+    subs.forEach((cb) => cb([...notes]));
+  }
+}
+
+export function subscribeToNotes(path: string, onUpdate: (notes: Note[]) => void): Unsubscribe {
+  if (!listeners.has(path)) {
+    listeners.set(path, new Set());
+  }
+  listeners.get(path)!.add(onUpdate);
+
+  onUpdate([...getNotesForPath(path)]);
+
+  return () => {
+    listeners.get(path)?.delete(onUpdate);
+  };
 }
 
 export async function addNoteToFirestore(path: string, note: Note): Promise<void> {
-  const docId = noteDocId(path, note.id);
-  await setDoc(doc(db, COLLECTION, docId), { ...note, path });
+  const notes = getNotesForPath(path);
+  notes.push(note);
+  notify(path);
 }
 
 export async function deleteNoteFromFirestore(path: string, noteId: number): Promise<void> {
-  const docId = noteDocId(path, noteId);
-  await deleteDoc(doc(db, COLLECTION, docId));
+  const notes = getNotesForPath(path);
+  const idx = notes.findIndex((n) => n.id === noteId);
+  if (idx !== -1) {
+    notes.splice(idx, 1);
+    notify(path);
+  }
 }
 
 export async function updateNoteInFirestore(path: string, noteId: number, updates: Partial<Note>): Promise<void> {
-  const docId = noteDocId(path, noteId);
-  await updateDoc(doc(db, COLLECTION, docId), updates);
+  const notes = getNotesForPath(path);
+  const note = notes.find((n) => n.id === noteId);
+  if (note) {
+    Object.assign(note, updates);
+    notify(path);
+  }
 }
 
 export async function addReplyToFirestore(path: string, noteId: number, replies: Reply[]): Promise<void> {
-  const docId = noteDocId(path, noteId);
-  await updateDoc(doc(db, COLLECTION, docId), { replies });
+  const notes = getNotesForPath(path);
+  const note = notes.find((n) => n.id === noteId);
+  if (note) {
+    note.replies = replies;
+    notify(path);
+  }
 }
 
 export async function resolveNoteInFirestore(path: string, noteId: number, resolvedBy: string, resolvedAt: string): Promise<void> {
-  const docId = noteDocId(path, noteId);
-  await updateDoc(doc(db, COLLECTION, docId), { resolved: true, resolvedBy, resolvedAt });
+  const notes = getNotesForPath(path);
+  const note = notes.find((n) => n.id === noteId);
+  if (note) {
+    note.resolved = true;
+    note.resolvedBy = resolvedBy;
+    note.resolvedAt = resolvedAt;
+    notify(path);
+  }
 }
 
 export async function updateNotePositionInFirestore(path: string, noteId: number, x: number, y: number): Promise<void> {
-  const docId = noteDocId(path, noteId);
-  await updateDoc(doc(db, COLLECTION, docId), { x, y });
+  const notes = getNotesForPath(path);
+  const note = notes.find((n) => n.id === noteId);
+  if (note) {
+    note.x = x;
+    note.y = y;
+    notify(path);
+  }
 }

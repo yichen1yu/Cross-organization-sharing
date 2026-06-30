@@ -254,7 +254,7 @@ const Billing: React.FunctionComponent = () => {
             }
             startIndex={1}
           >
-            <WizardStep id="grant-step-1" name="Where are you granting access?" footer={{ isBackHidden: true, isNextDisabled: grantWhere === null }}>
+            <WizardStep id="grant-step-1" name="Where are you granting access?" footer={{ isBackHidden: true, isNextDisabled: grantWhere === null || (grantWhere === 'outside' && !selectedTrustedOrg) }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Where are you granting access?</Title>
                 <p style={{ marginTop: 8 }}>Select where you wish to grant access.</p>
@@ -300,7 +300,7 @@ const Billing: React.FunctionComponent = () => {
                 </div>
               </div>
             </WizardStep>
-            <WizardStep id="grant-step-2" name="Select user group(s)" footer={{ isNextDisabled: selectedWizardGroups.size === 0 }}>
+            <WizardStep id="grant-step-2" name="Select user group(s)" isDisabled={grantWhere === null || (grantWhere === 'outside' && !selectedTrustedOrg)} footer={{ isNextDisabled: selectedWizardGroups.size === 0 }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Select user group(s) you want to grant access to</Title>
                 <p style={{ marginTop: 8 }}>
@@ -347,7 +347,7 @@ const Billing: React.FunctionComponent = () => {
                 </div>
               </div>
             </WizardStep>
-            <WizardStep id="grant-step-3" name="Select role(s)" footer={{ isNextDisabled: selectedRoles.size === 0 }}>
+            <WizardStep id="grant-step-3" name="Select role(s)" isDisabled={grantWhere === null || (grantWhere === 'outside' && !selectedTrustedOrg) || selectedWizardGroups.size === 0} footer={{ isNextDisabled: selectedRoles.size === 0 }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Select role(s)</Title>
                 <p style={{ marginTop: 8 }}>Select one or more roles to link to this group.</p>
@@ -386,7 +386,7 @@ const Billing: React.FunctionComponent = () => {
                 </div>
               </div>
             </WizardStep>
-            <WizardStep id="grant-step-4" name="Review" footer={{ nextButtonText: 'Submit' }}>
+            <WizardStep id="grant-step-4" name="Review" isDisabled={grantWhere === null || (grantWhere === 'outside' && !selectedTrustedOrg) || selectedWizardGroups.size === 0 || selectedRoles.size === 0} footer={{ nextButtonText: 'Submit' }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Review</Title>
                 <p style={{ marginTop: 8 }}>

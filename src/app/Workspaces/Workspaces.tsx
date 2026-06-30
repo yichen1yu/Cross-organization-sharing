@@ -73,6 +73,50 @@ const workspaceData: Record<string, WorkspaceMeta> = {
   },
 };
 
+type UserEntry = { name: string; org: string };
+type GrantedRow = { groupName: string; description: string; users: number; roles: number; lastModified: string; rolesList: string[]; usersList: UserEntry[]; orgName?: string };
+
+const initialGrantedByWorkspace: Record<string, GrantedRow[]> = {
+  'workspace-a': [
+    { groupName: 'Golden girls', description: 'Workspace administrators handling access approvals and settings', users: 4, roles: 2, lastModified: '2 days ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+    { groupName: 'Seattle Grace admins', description: 'Clinical admins overseeing user lifecycle, roles, and audits', users: 3, roles: 2, lastModified: '2 days ago', rolesList: ['User manager', 'Audit viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
+    { groupName: 'Spice girls', description: 'Project members with standard access to dashboards and reports', users: 5, roles: 2, lastModified: '2 days ago', rolesList: ['Dashboard viewer', 'Report reader'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
+  ],
+  'uxd': [
+    { groupName: 'Golden girls', description: 'Org-wide administrators with full access', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+    { groupName: 'Powerpuff girls', description: 'Security and compliance oversight across all workspaces', users: 3, roles: 2, lastModified: '3 days ago', rolesList: ['Security auditor', 'Compliance reviewer'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
+    { groupName: 'Bad Bunnies', description: 'Platform engineering team with infrastructure access', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
+  ],
+  'workspace-default': [
+    { groupName: 'Golden girls', description: 'Default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+    { groupName: 'Spice girls', description: 'General access for standard workspace operations', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
+  ],
+  'workspace-ungrouped-hosts': [
+    { groupName: 'Powerpuff girls', description: 'Monitoring ungrouped hosts and triaging assignments', users: 3, roles: 1, lastModified: '12 hours ago', rolesList: ['Host manager'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
+    { groupName: 'Seattle Grace admins', description: 'Clinical systems ungrouped host oversight', users: 3, roles: 1, lastModified: '1 day ago', rolesList: ['Host viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
+  ],
+  'workspace-b': [
+    { groupName: 'Bad Bunnies', description: 'Infrastructure provisioning and deployment pipelines', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Deploy manager', 'Pipeline operator'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
+    { groupName: 'Golden girls', description: 'Workspace administrators handling approvals', users: 4, roles: 1, lastModified: '4 days ago', rolesList: ['Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+    { groupName: 'Spice girls', description: 'QA and testing team with report access', users: 5, roles: 1, lastModified: '2 days ago', rolesList: ['Report reader'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
+    { groupName: 'Cardiology admins', description: 'Cross-workspace access for cardiac monitoring systems', users: 2, roles: 1, lastModified: '6 hours ago', rolesList: ['System viewer'], usersList: [{ name: 'Cristina Yang', org: 'Cardiology' }, { name: 'Preston Burke', org: 'Cardiology' }] },
+  ],
+  'workspace-c': [
+    { groupName: 'Powerpuff girls', description: 'Dev environment access and sandbox management', users: 3, roles: 2, lastModified: '8 hours ago', rolesList: ['Sandbox admin', 'Developer'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
+    { groupName: 'Operating room ops', description: 'Operational monitoring and incident response', users: 6, roles: 2, lastModified: '3 days ago', rolesList: ['Incident responder', 'Monitor viewer'], usersList: [{ name: 'Mark Sloan', org: 'Surgery' }, { name: 'Callie Torres', org: 'Surgery' }, { name: 'Arizona Robbins', org: 'Surgery' }, { name: 'Owen Hunt', org: 'Surgery' }, { name: 'April Kepner', org: 'Surgery' }, { name: 'Jackson Avery', org: 'Surgery' }] },
+    { groupName: 'Seattle Grace admins', description: 'Clinical admin access for integration testing', users: 3, roles: 1, lastModified: '5 days ago', rolesList: ['Integration tester'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
+  ],
+};
+
+const persistentGrantedStore: Record<string, GrantedRow[]> = {};
+
+function getGrantedRows(wsKey: string): GrantedRow[] {
+  if (!persistentGrantedStore[wsKey]) {
+    persistentGrantedStore[wsKey] = [...(initialGrantedByWorkspace[wsKey] || [])];
+  }
+  return persistentGrantedStore[wsKey];
+}
+
 const Workspaces: React.FunctionComponent = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const wsNavigate = useNavigate();
@@ -80,7 +124,6 @@ const Workspaces: React.FunctionComponent = () => {
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
   const [roleTabKey, setRoleTabKey] = React.useState<string | number>(0);
   const [isMasterOpen, setIsMasterOpen] = React.useState(false);
-  // Selection handlers and parent state are defined after grantedRows/parentGrantedRows below
 
   const handleTabClick = (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent | MouseEvent, tabIndex: string | number) => {
     setActiveTabKey(tabIndex);
@@ -97,9 +140,7 @@ const Workspaces: React.FunctionComponent = () => {
   const [grantWhere, setGrantWhere] = React.useState<'within' | 'outside' | null>(null);
   const [isTrustedOpen, setIsTrustedOpen] = React.useState(false);
   const [selectedTrustedOrg, setSelectedTrustedOrg] = React.useState<string | null>(null);
-  // Main page: granted access rows
-  type UserEntry = { name: string; org: string };
-  type GrantedRow = { groupName: string; description: string; users: number; roles: number; lastModified: string; rolesList: string[]; usersList: UserEntry[]; orgName?: string };
+  // Main page: granted access rows — data moved to module scope for persistence
 
   const initialGrantedByWorkspace: Record<string, GrantedRow[]> = {
     'workspace-a': [
@@ -158,7 +199,14 @@ const Workspaces: React.FunctionComponent = () => {
   };
 
   const wsKey = workspaceId || 'workspace-a';
-  const [grantedRows, setGrantedRows] = React.useState<GrantedRow[]>(initialGrantedByWorkspace[wsKey] || []);
+  const [grantedRows, setGrantedRowsLocal] = React.useState<GrantedRow[]>(() => getGrantedRows(wsKey));
+  const setGrantedRows = React.useCallback((updater: GrantedRow[] | ((prev: GrantedRow[]) => GrantedRow[])) => {
+    setGrantedRowsLocal((prev) => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      persistentGrantedStore[wsKey] = next;
+      return next;
+    });
+  }, [wsKey]);
   const [parentGrantedRows] = React.useState<GrantedRow[]>(parentGrantedByWorkspace[wsKey] || []);
 
   const groupNames = grantedRows.map((r) => r.groupName);
@@ -325,7 +373,7 @@ const Workspaces: React.FunctionComponent = () => {
         <Breadcrumb>
           <BreadcrumbItem>Identity & Access Management</BreadcrumbItem>
           <BreadcrumbItem>User Access</BreadcrumbItem>
-          <BreadcrumbItem component={Link} to="/workspaces">Workspaces</BreadcrumbItem>
+          <BreadcrumbItem render={() => <Link to="/workspaces">Workspaces</Link>} />
           <BreadcrumbItem isActive>{wsMeta.name}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
@@ -371,7 +419,7 @@ const Workspaces: React.FunctionComponent = () => {
             }
             startIndex={1}
           >
-            <WizardStep id="grant-step-1" name="Where are you granting access?" footer={{ isBackHidden: true, isNextDisabled: grantWhere === null }}>
+            <WizardStep id="grant-step-1" name="Where are you granting access?" footer={{ isBackHidden: true, isNextDisabled: grantWhere === null || (grantWhere === 'outside' && !selectedTrustedOrg) }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Where are you granting access?</Title>
                 <p style={{ marginTop: 8 }}>Select where you wish to grant access.</p>
@@ -433,7 +481,7 @@ const Workspaces: React.FunctionComponent = () => {
                 </div>
             </div>
             </WizardStep>
-            <WizardStep id="grant-step-2" name="Select user group(s)" footer={{ isNextDisabled: selectedWizardGroups.size === 0 }}>
+            <WizardStep id="grant-step-2" name="Select user group(s)" isDisabled={grantWhere === null || (grantWhere === 'outside' && !selectedTrustedOrg)} footer={{ isNextDisabled: selectedWizardGroups.size === 0 }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Select user group(s) you want to grant access to</Title>
                 <p style={{ marginTop: 8 }}>
@@ -494,7 +542,7 @@ const Workspaces: React.FunctionComponent = () => {
                 </div>
               </div>
             </WizardStep>
-            <WizardStep id="grant-step-3" name="Select role(s)" footer={{ isNextDisabled: selectedRoles.size === 0 }}>
+            <WizardStep id="grant-step-3" name="Select role(s)" isDisabled={grantWhere === null || (grantWhere === 'outside' && !selectedTrustedOrg) || selectedWizardGroups.size === 0} footer={{ isNextDisabled: selectedRoles.size === 0 }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Select role(s)</Title>
                 <p style={{ marginTop: 8 }}>Select one or more roles to link to this group.</p>
@@ -548,7 +596,7 @@ const Workspaces: React.FunctionComponent = () => {
                 </div>
               </div>
             </WizardStep>
-            <WizardStep id="grant-step-4" name="Review" footer={{ nextButtonText: 'Submit' }}>
+            <WizardStep id="grant-step-4" name="Review" isDisabled={grantWhere === null || (grantWhere === 'outside' && !selectedTrustedOrg) || selectedWizardGroups.size === 0 || selectedRoles.size === 0} footer={{ nextButtonText: 'Submit' }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Review</Title>
                 <p style={{ marginTop: 8 }}>
