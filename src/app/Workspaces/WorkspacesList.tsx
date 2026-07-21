@@ -180,6 +180,7 @@ const WorkspacesList: React.FunctionComponent = () => {
                       <DropdownList>
                         <DropdownItem>Edit</DropdownItem>
                         <DropdownItem>Move workspace</DropdownItem>
+                        <DropdownItem onClick={() => navigate(`/workspaces/${ws.slug}?grantAccess=true`)}>Grant access</DropdownItem>
                         <DropdownItem>Create subworkspace</DropdownItem>
                         <DropdownItem style={{ color: 'var(--pf-t--global--color--status--danger--default)' }}>Delete</DropdownItem>
                       </DropdownList>

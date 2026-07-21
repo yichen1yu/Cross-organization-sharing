@@ -17,6 +17,9 @@
 .trusted-wizard-modal .pf-v6-c-wizard {
   width: 100%;
 }
+.trusted-wizard-modal .pf-v6-c-wizard__outer-wrap {
+  overflow-x: hidden;
+}
 html,
 body,
 #root {

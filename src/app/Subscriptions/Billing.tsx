@@ -31,7 +31,7 @@ import {
   Alert,
   AlertActionCloseButton
 } from '@patternfly/react-core';
-import { Wizard, WizardStep, WizardHeader } from '@patternfly/react-core';
+import { Wizard, WizardStep, WizardHeader, Popover } from '@patternfly/react-core';
 import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon, SyncAltIcon } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
 
@@ -144,11 +144,11 @@ const Billing: React.FunctionComponent = () => {
     else setSelectedWizardGroups(new Set());
   };
   // Wizard step 3: roles
-  type RoleRow = { name: string; description: string; permissions: number };
+  type RoleRow = { name: string; description: string; permissions: number; permissionNames: string[] };
   const allRoles: RoleRow[] = [
-    { name: 'Subscription Auditor', description: 'Read cloud access, manifests, organization details, products, and reports', permissions: 5 },
-    { name: 'Subscription Operations', description: 'Read and write cloud access, manifests, organization, products, deployment inventories, billing details and contacts, earmarks, and request purchases', permissions: 16 },
-    { name: 'Procurement Admin', description: 'Read and write cloud access, manifests, organization, products, deployment inventories, billing details and contacts, earmarks, request purchases, approve or deny billing account sharing, edit billing details and contacts, and manage features for workspaces', permissions: 21 }
+    { name: 'Subscription Auditor', description: 'Read cloud access, manifests, organization details, products, and reports', permissions: 5, permissionNames: ['subscriptions:cloud-access:read', 'subscriptions:manifests:read', 'subscriptions:organization:read', 'subscriptions:products:read', 'subscriptions:reports:read'] },
+    { name: 'Subscription Operations', description: 'Read and write cloud access, manifests, organization, products, deployment inventories, billing details and contacts, earmarks, and request purchases', permissions: 16, permissionNames: ['subscriptions:cloud-access:read', 'subscriptions:cloud-access:write', 'subscriptions:manifests:read', 'subscriptions:manifests:write', 'subscriptions:organization:read', 'subscriptions:organization:write', 'subscriptions:products:read', 'subscriptions:products:write', 'subscriptions:inventories:read', 'subscriptions:inventories:write', 'subscriptions:billing:read', 'subscriptions:billing:write', 'subscriptions:contacts:read', 'subscriptions:contacts:write', 'subscriptions:earmarks:read', 'subscriptions:purchases:write'] },
+    { name: 'Procurement Admin', description: 'Read and write cloud access, manifests, organization, products, deployment inventories, billing details and contacts, earmarks, request purchases, approve or deny billing account sharing, edit billing details and contacts, and manage features for workspaces', permissions: 21, permissionNames: ['subscriptions:cloud-access:read', 'subscriptions:cloud-access:write', 'subscriptions:manifests:read', 'subscriptions:manifests:write', 'subscriptions:organization:read', 'subscriptions:organization:write', 'subscriptions:products:read', 'subscriptions:products:write', 'subscriptions:inventories:read', 'subscriptions:inventories:write', 'subscriptions:billing:read', 'subscriptions:billing:write', 'subscriptions:contacts:read', 'subscriptions:contacts:write', 'subscriptions:earmarks:read', 'subscriptions:purchases:write', 'subscriptions:sharing:approve', 'subscriptions:sharing:deny', 'subscriptions:billing-details:write', 'subscriptions:contacts-mgmt:write', 'subscriptions:workspace-features:write'] }
   ];
   const [roleFilter, setRoleFilter] = React.useState('');
   const [selectedRoles, setSelectedRoles] = React.useState<Set<string>>(new Set());
@@ -378,7 +378,20 @@ const Billing: React.FunctionComponent = () => {
                           </Td>
                           <Td>{role.name}</Td>
                           <Td style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{role.description}</Td>
-                          <Td>{role.permissions}</Td>
+                          <Td>
+                            <Popover
+                              headerContent={`Permissions for ${role.name}`}
+                              bodyContent={
+                                <div>
+                                  {role.permissionNames.map((p, i) => (
+                                    <div key={i} style={{ padding: '4px 0' }}>{p}</div>
+                                  ))}
+                                </div>
+                              }
+                            >
+                              <Button variant="link" isInline>{role.permissions}</Button>
+                            </Popover>
+                          </Td>
                         </Tr>
                       ))}
                     </Tbody>
@@ -409,10 +422,24 @@ const Billing: React.FunctionComponent = () => {
       )}
 
       <PageSection hasBodyWrapper={false}>
-        <Title headingLevel="h1" size="2xl">Billing account details</Title>
-        <Content>
-          <p style={{ margin: 0, color: '#6a6e73' }}>Billing account: Pinnacle Corp (1234567890)</p>
-        </Content>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <Title headingLevel="h1" size="2xl">Billing account details</Title>
+            <Content>
+              <p style={{ margin: 0, color: '#6a6e73' }}>Billing account: Pinnacle Corp (1234567890)</p>
+            </Content>
+          </div>
+          <Button variant="primary" style={{ marginRight: 16 }} onClick={() => {
+            setGrantWhere(null);
+            setSelectedTrustedOrg(null);
+            setSelectedWizardGroups(new Set());
+            setSelectedRoles(new Set());
+            setRoleFilter('');
+            setRolesPage(1);
+            setEditingRowIndex(null);
+            setIsGrantWizardOpen(true);
+          }}>Grant access</Button>
+        </div>
       </PageSection>
 
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
@@ -434,18 +461,6 @@ const Billing: React.FunctionComponent = () => {
                   </ToolbarItem>
                   <ToolbarItem>
                     <SearchInput aria-label={'Search'} placeholder={'Search'} value={''} onChange={() => {}} onClear={() => {}} />
-                  </ToolbarItem>
-                  <ToolbarItem>
-                    <Button variant="primary" onClick={() => {
-                      setGrantWhere(null);
-                      setSelectedTrustedOrg(null);
-                      setSelectedWizardGroups(new Set());
-                      setSelectedRoles(new Set());
-                      setRoleFilter('');
-                      setRolesPage(1);
-                      setEditingRowIndex(null);
-                      setIsGrantWizardOpen(true);
-                    }}>Grant access</Button>
                   </ToolbarItem>
                   <ToolbarItem style={{ marginLeft: 'auto' }}>
 

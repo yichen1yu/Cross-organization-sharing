@@ -34,12 +34,12 @@ import {
   DrawerActions,
   DrawerCloseButton
 } from '@patternfly/react-core';
-import { AlertGroup, Alert, AlertActionCloseButton } from '@patternfly/react-core';
+import { AlertGroup, Alert, AlertActionCloseButton, Popover } from '@patternfly/react-core';
  
 import { Wizard, WizardStep, WizardHeader } from '@patternfly/react-core';
 import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon, SyncAltIcon } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 
 type WorkspaceMeta = {
   name: string;
@@ -120,6 +120,7 @@ function getGrantedRows(wsKey: string): GrantedRow[] {
 const Workspaces: React.FunctionComponent = () => {
   const { workspaceId } = useParams<{ workspaceId: string }>();
   const wsNavigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const wsMeta = workspaceData[workspaceId || 'workspace-a'] || workspaceData['workspace-a'];
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
   const [roleTabKey, setRoleTabKey] = React.useState<string | number>(0);
@@ -134,6 +135,14 @@ const Workspaces: React.FunctionComponent = () => {
 
   // Grant access wizard
   const [isGrantWizardOpen, setIsGrantWizardOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (searchParams.get('grantAccess') === 'true') {
+      setIsGrantWizardOpen(true);
+      searchParams.delete('grantAccess');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
   const [acceptChoice, setAcceptChoice] = React.useState<'accept' | 'reject' | null>(null);
   const [verifyEmail, setVerifyEmail] = React.useState<string>('');
   const myOrgName = 'Pinnacle Corp';
@@ -307,15 +316,15 @@ const Workspaces: React.FunctionComponent = () => {
   };
 
   // Wizard step 3: roles table state
-  type RoleRow = { name: string; description: string; permissions: number };
+  type RoleRow = { name: string; description: string; permissions: number; permissionNames: string[] };
   const allRoles: RoleRow[] = [
-    { name: 'RHEL Admin', description: 'Manage RHEL subscriptions, repositories, and system configurations', permissions: 3 },
-    { name: 'OpenShift Reviewer', description: 'View OpenShift cluster details, deployments, and usage reports', permissions: 4 },
-    { name: 'Ansible Reviewer', description: 'View Ansible automation jobs, inventories, and execution history', permissions: 3 },
-    { name: 'Automation Analytics Administrator', description: 'Full control over automation analytics settings, dashboards, and data exports', permissions: 1 },
-    { name: 'Automation Analytics Editor', description: 'Create and modify automation analytics reports, charts, and saved queries', permissions: 6 },
-    { name: 'Automation Analytics Viewer', description: 'View automation analytics dashboards, reports, and usage trends', permissions: 7 },
-    { name: 'Automation Services Catalog administrator', description: 'Manage catalog items, approval workflows, and order fulfillment settings', permissions: 3 }
+    { name: 'RHEL Admin', description: 'Manage RHEL subscriptions, repositories, and system configurations', permissions: 3, permissionNames: ['rhel:subscriptions:write', 'rhel:repositories:write', 'rhel:configurations:write'] },
+    { name: 'OpenShift Reviewer', description: 'View OpenShift cluster details, deployments, and usage reports', permissions: 4, permissionNames: ['openshift:clusters:read', 'openshift:deployments:read', 'openshift:usage:read', 'openshift:reports:read'] },
+    { name: 'Ansible Reviewer', description: 'View Ansible automation jobs, inventories, and execution history', permissions: 3, permissionNames: ['ansible:jobs:read', 'ansible:inventories:read', 'ansible:history:read'] },
+    { name: 'Automation Analytics Administrator', description: 'Full control over automation analytics settings, dashboards, and data exports', permissions: 1, permissionNames: ['automation-analytics:*:*'] },
+    { name: 'Automation Analytics Editor', description: 'Create and modify automation analytics reports, charts, and saved queries', permissions: 6, permissionNames: ['automation-analytics:reports:write', 'automation-analytics:charts:write', 'automation-analytics:queries:write', 'automation-analytics:reports:read', 'automation-analytics:charts:read', 'automation-analytics:queries:read'] },
+    { name: 'Automation Analytics Viewer', description: 'View automation analytics dashboards, reports, and usage trends', permissions: 7, permissionNames: ['automation-analytics:dashboards:read', 'automation-analytics:reports:read', 'automation-analytics:trends:read', 'automation-analytics:usage:read', 'automation-analytics:charts:read', 'automation-analytics:queries:read', 'automation-analytics:exports:read'] },
+    { name: 'Automation Services Catalog administrator', description: 'Manage catalog items, approval workflows, and order fulfillment settings', permissions: 3, permissionNames: ['catalog:items:write', 'catalog:approvals:write', 'catalog:orders:write'] }
   ];
   const [roleFilter, setRoleFilter] = React.useState('');
   const [selectedRoles, setSelectedRoles] = React.useState<Set<string>>(new Set());
@@ -587,7 +596,20 @@ const Workspaces: React.FunctionComponent = () => {
                             </Td>
                             <Td>{role.name}</Td>
                             <Td style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{role.description}</Td>
-                            <Td>{role.permissions}</Td>
+                            <Td>
+                              <Popover
+                                headerContent={`Permissions for ${role.name}`}
+                                bodyContent={
+                                  <div>
+                                    {role.permissionNames.map((p, i) => (
+                                      <div key={i} style={{ padding: '4px 0' }}>{p}</div>
+                                    ))}
+                                  </div>
+                                }
+                              >
+                                <Button variant="link" isInline>{role.permissions}</Button>
+                              </Popover>
+                            </Td>
                           </Tr>
                         );
                       })}
@@ -621,23 +643,36 @@ const Workspaces: React.FunctionComponent = () => {
       {/* Details side panel removed by request */}
 
       <PageSection hasBodyWrapper={false}>
-        <Title headingLevel="h1" size="2xl">{wsMeta.name}</Title>
-        <Content>
-          <p style={{ margin: 0, color: '#6a6e73' }}>Manage workspace details and settings.</p>
-          <p style={{ marginTop: '4px', color: '#6a6e73' }}>
-            <strong>Workspace Hierarchy:</strong>{' '}
-            {wsMeta.hierarchy.map((item, idx) => (
-              <React.Fragment key={idx}>
-                {idx > 0 && <span>{' '}&gt;&nbsp;</span>}
-                {item.path ? (
-                  <Button variant="link" isInline style={{ fontWeight: 700, padding: 0 }} onClick={() => wsNavigate(item.path!)}>{item.name}</Button>
-                ) : (
-                  <span>{item.name}</span>
-                )}
-              </React.Fragment>
-            ))}
-          </p>
-        </Content>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <Title headingLevel="h1" size="2xl">{wsMeta.name}</Title>
+            <Content>
+              <p style={{ margin: 0, color: '#6a6e73' }}>Manage workspace details and settings.</p>
+              <p style={{ marginTop: '4px', color: '#6a6e73' }}>
+                <strong>Workspace Hierarchy:</strong>{' '}
+                {wsMeta.hierarchy.map((item, idx) => (
+                  <React.Fragment key={idx}>
+                    {idx > 0 && <span>{' '}&gt;&nbsp;</span>}
+                    {item.path ? (
+                      <Button variant="link" isInline style={{ fontWeight: 700, padding: 0 }} onClick={() => wsNavigate(item.path!)}>{item.name}</Button>
+                    ) : (
+                      <span>{item.name}</span>
+                    )}
+                  </React.Fragment>
+                ))}
+              </p>
+            </Content>
+          </div>
+          <Button variant="primary" style={{ marginRight: 16 }} onClick={() => {
+            setGrantWhere(null);
+            setSelectedTrustedOrg(null);
+            setSelectedWizardGroups(new Set());
+            setSelectedRoles(new Set());
+            setRoleFilter('');
+            setRolesPage(1);
+            setIsGrantWizardOpen(true);
+          }}>Grant access</Button>
+        </div>
       </PageSection>
       
       <PageSection hasBodyWrapper={false} isFilled style={{ paddingTop: 0 }}>
@@ -757,17 +792,6 @@ const Workspaces: React.FunctionComponent = () => {
                             </DropdownList>
                           </Dropdown>
                           <SearchInput aria-label={'Search'} placeholder={'Search'} value={''} onChange={() => {}} onClear={() => {}} />
-                        </ToolbarItem>
-                        <ToolbarItem>
-                          <Button variant="primary" onClick={() => {
-                            setGrantWhere(null);
-                            setSelectedTrustedOrg(null);
-                            setSelectedWizardGroups(new Set());
-                            setSelectedRoles(new Set());
-                            setRoleFilter('');
-                            setRolesPage(1);
-                            setIsGrantWizardOpen(true);
-                          }}>Grant access</Button>
                         </ToolbarItem>
                       </ToolbarContent>
                     </Toolbar>

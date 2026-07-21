@@ -135,6 +135,9 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
   const [composerWorkspace, setComposerWorkspace] = React.useState<WorkspaceNode | null>(null);
   const [composerSla, setComposerSla] = React.useState<string>('Premium');
   const [composerUsage, setComposerUsage] = React.useState<string>('Development');
+  const [selectedBillingAccount, setSelectedBillingAccount] = React.useState('Pinnacle Corp (1234567890)');
+  const [isBillingDropdownOpen, setIsBillingDropdownOpen] = React.useState(false);
+  const billingAccounts = ['Pinnacle Corp (1234567890)', 'Globell Inc (9876543210)', 'Initech LLC (5551234567)'];
   const [selectedFeatures, setSelectedFeatures] = React.useState<Set<string>>(new Set());
   const featuresAllSelected = selectedFeatures.size === allFeatures.length;
   type EarmarkConfig = { sockets: number; noEarmark: boolean };
@@ -197,13 +200,6 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
   };
   const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
 
-  // Change billing account modal
-  const [isBillingModalOpen, setIsBillingModalOpen] = React.useState(false);
-  const [billingModalWorkspace, setBillingModalWorkspace] = React.useState<WorkspaceNode | null>(null);
-  const [selectedBillingAccount, setSelectedBillingAccount] = React.useState('Pinnacle Corp (1234567890)');
-  const [isBillingDropdownOpen, setIsBillingDropdownOpen] = React.useState(false);
-  const billingAccounts = ['Pinnacle Corp (1234567890)', 'Globell Inc (9876543210)', 'Initech LLC (5551234567)'];
-
   const [isFeaturesModalOpen, setIsFeaturesModalOpen] = React.useState(false);
   const [featuresModalWorkspace, setFeaturesModalWorkspace] = React.useState<WorkspaceNode | null>(null);
   const openFeaturesModal = (ws: WorkspaceNode) => {
@@ -211,11 +207,6 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
     setIsFeaturesModalOpen(true);
   };
 
-  const openBillingModal = (ws: WorkspaceNode) => {
-    setBillingModalWorkspace(ws);
-    setSelectedBillingAccount(workspaceBilling[ws.id] || 'Pinnacle Corp (1234567890)');
-    setIsBillingModalOpen(true);
-  };
 
   const openComposer = (ws: WorkspaceNode, resetAll = false) => {
     setComposerWorkspace(ws);
@@ -223,6 +214,7 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
     setComposerUsage(resetAll ? '' : ws.usage);
     setSelectedFeatures(resetAll ? new Set<string>() : new Set(getWorkspaceFeatures(ws.id)));
     setEarmarks(resetAll ? {} : (workspaceEarmarks[ws.id] || {}));
+    setSelectedBillingAccount(workspaceBilling[ws.id] || 'Pinnacle Corp (1234567890)');
     setIsComposerOpen(true);
   };
 
@@ -277,6 +269,7 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
             onClose={() => setIsComposerOpen(false)}
             onSave={() => {
               if (composerWorkspace) {
+                setWorkspaceBilling(prev => ({ ...prev, [composerWorkspace.id]: selectedBillingAccount }));
                 setWorkspaceFeatures(prev => ({ ...prev, [composerWorkspace.id]: Array.from(selectedFeatures) }));
                 setWorkspaceEarmarks(prev => ({ ...prev, [composerWorkspace.id]: { ...earmarks } }));
                 addToast(`Subscription composer updated for ${composerWorkspace.name}`);
@@ -292,7 +285,48 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
             }
             startIndex={1}
           >
-            <WizardStep id="composer-step-1" name="Support" footer={{ isBackHidden: true }}>
+            <WizardStep id="composer-step-billing" name="Billing account" footer={{ isBackHidden: true }}>
+              <div style={{ padding: 16 }}>
+                <Title headingLevel="h3" size="lg">Change billing account</Title>
+                <p style={{ marginTop: 8 }}>
+                  The change of billing account will incur following changes in the access for current subscriptions. The changes will apply to the sub-workspace(s), if there&apos;s any.
+                </p>
+                <div style={{ marginTop: 16 }}>
+                  <span style={{ fontWeight: 700 }}>Select a billing account</span>{' '}
+                  <OutlinedQuestionCircleIcon style={{ color: '#6a6e73', cursor: 'pointer' }} />
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  <Dropdown
+                    isOpen={isBillingDropdownOpen}
+                    onOpenChange={setIsBillingDropdownOpen}
+                    onSelect={(_e, itemId) => {
+                      setSelectedBillingAccount(String(itemId ?? ''));
+                      setIsBillingDropdownOpen(false);
+                    }}
+                    toggle={(toggleRef) => (
+                      <MenuToggle
+                        ref={toggleRef}
+                        isExpanded={isBillingDropdownOpen}
+                        onClick={() => setIsBillingDropdownOpen(prev => !prev)}
+                        style={{ width: '100%', maxWidth: 400, justifyContent: 'space-between' }}
+                      >
+                        {selectedBillingAccount}
+                      </MenuToggle>
+                    )}
+                    popperProps={{ appendTo: () => document.body }}
+                  >
+                    <DropdownList>
+                      {billingAccounts.map((acct) => (
+                        <DropdownItem key={acct} itemId={acct} isSelected={selectedBillingAccount === acct}>
+                          {acct}
+                        </DropdownItem>
+                      ))}
+                    </DropdownList>
+                  </Dropdown>
+                </div>
+              </div>
+            </WizardStep>
+            <WizardStep id="composer-step-1" name="Support">
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">Configure SLA level and usage</Title>
                 <div style={{ marginTop: 16 }}>
@@ -460,69 +494,6 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
         </Modal>
       )}
 
-      {isBillingModalOpen && billingModalWorkspace && (
-        <Modal
-          isOpen
-          onClose={() => setIsBillingModalOpen(false)}
-          variant="medium"
-          aria-label="Change billing account"
-        >
-          <ModalHeader
-            title="Change billing account"
-            titleIconVariant="warning"
-          />
-          <ModalBody>
-            <p>
-              The change of billing account will incur following changes in the access for current subscriptions. The changes will apply to the sub-workspace(s), if there&apos;s any.
-            </p>
-            <div style={{ marginTop: 16 }}>
-              <span style={{ fontWeight: 700 }}>Select a billing account</span>{' '}
-              <OutlinedQuestionCircleIcon style={{ color: '#6a6e73', cursor: 'pointer' }} />
-            </div>
-            <div style={{ marginTop: 8 }}>
-              <Dropdown
-                isOpen={isBillingDropdownOpen}
-                onOpenChange={setIsBillingDropdownOpen}
-                onSelect={(_e, itemId) => {
-                  setSelectedBillingAccount(String(itemId ?? ''));
-                  setIsBillingDropdownOpen(false);
-                }}
-                toggle={(toggleRef) => (
-                  <MenuToggle
-                    ref={toggleRef}
-                    isExpanded={isBillingDropdownOpen}
-                    onClick={() => setIsBillingDropdownOpen(prev => !prev)}
-                    style={{ width: '100%', justifyContent: 'space-between' }}
-                  >
-                    {selectedBillingAccount}
-                  </MenuToggle>
-                )}
-                popperProps={{ appendTo: () => document.body }}
-              >
-                <DropdownList>
-                  {billingAccounts.map((acct) => (
-                    <DropdownItem key={acct} itemId={acct} isSelected={selectedBillingAccount === acct}>
-                      {acct}
-                    </DropdownItem>
-                  ))}
-                </DropdownList>
-              </Dropdown>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="primary" onClick={() => {
-              setWorkspaceBilling(prev => ({ ...prev, [billingModalWorkspace.id]: selectedBillingAccount }));
-              addToast(`Billing account has changed for ${billingModalWorkspace.name}`, (
-                <span>Please re-configure the subscription composer for the workspace(s)</span>
-              ));
-              setIsBillingModalOpen(false);
-              openComposer(billingModalWorkspace, true);
-            }}>Save</Button>
-            <Button variant="link" onClick={() => setIsBillingModalOpen(false)}>Cancel</Button>
-          </ModalFooter>
-        </Modal>
-      )}
-
       {isFeaturesModalOpen && featuresModalWorkspace && (
         <Modal
           isOpen
@@ -606,10 +577,11 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
         <Table aria-label="Subscription workspaces table">
           <Thead>
             <Tr>
-              <Th width={30} sort={getSortParams(0)}>Workspace</Th>
-              <Th width={15} sort={getSortParams(1)}>SLA</Th>
-              <Th width={20} sort={getSortParams(2)}>Usage</Th>
-              <Th width={20} sort={getSortParams(3)}>Available features</Th>
+              <Th width={25} sort={getSortParams(0)}>Workspace</Th>
+              <Th width={10} sort={getSortParams(1)}>SLA</Th>
+              <Th width={15} sort={getSortParams(2)}>Usage</Th>
+              <Th width={20} sort={getSortParams(3)}>Billing account</Th>
+              <Th width={15} sort={getSortParams(4)}>Available features</Th>
               <Th aria-label="Row actions" />
             </Tr>
           </Thead>
@@ -640,6 +612,7 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
                   </Td>
                   <Td dataLabel="SLA">{ws.sla}</Td>
                   <Td dataLabel="Usage">{ws.usage}</Td>
+                  <Td dataLabel="Billing account">{getWorkspaceBillingAccount(ws.id).name}</Td>
                   <Td dataLabel="Available features">
                     <Button variant="link" isInline onClick={() => openFeaturesModal(ws)}>{getWorkspaceFeatures(ws.id).length}</Button>
                   </Td>
@@ -663,7 +636,6 @@ const SubscriptionWorkspaces: React.FunctionComponent = () => {
                     >
                       <DropdownList>
                         <DropdownItem onClick={() => openComposer(ws)}>Subscription composer</DropdownItem>
-                        <DropdownItem onClick={() => openBillingModal(ws)}>Change billing account</DropdownItem>
                       </DropdownList>
                     </Dropdown>
                   </Td>

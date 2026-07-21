@@ -32,7 +32,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { useLocation } from 'react-router-dom';
 import { TreeView, TreeViewDataItem } from '@patternfly/react-core';
 import { EllipsisVIcon, FilterIcon, CheckCircleIcon, ExclamationCircleIcon, SyncAltIcon, ExclamationTriangleIcon, BellIcon } from '@patternfly/react-icons';
-import { Wizard, WizardStep, WizardHeader, Modal, ModalHeader, ModalBody, ModalFooter, Radio, TextInput, TextArea, AlertGroup, Alert, AlertActionCloseButton, Form, FormGroup, Popover, HelperText, HelperTextItem } from '@patternfly/react-core';
+import { Wizard, WizardStep, WizardHeader, Modal, ModalHeader, ModalBody, ModalFooter, Radio, TextInput, TextArea, AlertGroup, Alert, AlertActionCloseButton, Form, FormGroup, Popover, HelperText, HelperTextItem, EmptyState, EmptyStateBody, EmptyStateFooter, EmptyStateActions } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 
 const TrustedOrganizations: React.FunctionComponent = () => {
@@ -62,6 +62,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
   const [selectedOrg, setSelectedOrg] = React.useState<TrustedOrg | null>(null);
   const [detailsTabKey, setDetailsTabKey] = React.useState<string | number>(1); // default to User groups
   const [isPendingWizardOpen, setIsPendingWizardOpen] = React.useState(false);
+  const [pendingWizardComplete, setPendingWizardComplete] = React.useState(false);
   const [pendingWizardOrg, setPendingWizardOrg] = React.useState<TrustedOrg | null>(null);
   const [pendingRequesterName, setPendingRequesterName] = React.useState<string>('');
   const [pendingRequesterEmail, setPendingRequesterEmail] = React.useState<string>('');
@@ -108,7 +109,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     { id: 'w4-2', name: 'Workspace 4-2', parentId: 'w4' },
   ]);
   const [expandedWorkspaces, setExpandedWorkspaces] = React.useState<Set<string>>(new Set());
-  const [selectedWorkspaces, setSelectedWorkspaces] = React.useState<Set<string>>(() => new Set(workspaceNodes.map((n) => n.id)));
+  const [selectedWorkspaces, setSelectedWorkspaces] = React.useState<Set<string>>(() => new Set());
   const [originalSelectedWorkspaces, setOriginalSelectedWorkspaces] = React.useState<Set<string>>(new Set());
 
   const toggleExpandWorkspace = (id: string) => {
@@ -167,7 +168,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     { id: 'golden-girls', name: 'Golden Girls', members: 2 },
     { id: 'bad-bunnies', name: 'Bad Bunnies', members: 4 },
   ]);
-  const [selectedGroups, setSelectedGroups] = React.useState<Set<string>>(new Set(groupRows.map((g) => g.id)));
+  const [selectedGroups, setSelectedGroups] = React.useState<Set<string>>(new Set());
   const [originalSelectedGroups, setOriginalSelectedGroups] = React.useState<Set<string>>(new Set(selectedGroups));
 
   // Utility to generate pseudo-random groups based on org id
@@ -423,14 +424,16 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     // Initialize User groups data for this org in the wizard
     const rows = generateGroupsForOrg(org);
     setGroupRows(rows);
-    const allSelected = new Set(rows.map((g) => g.id));
-    setSelectedGroups(allSelected);
-    setOriginalSelectedGroups(new Set(allSelected));
+    setSelectedGroups(new Set());
+    setOriginalSelectedGroups(new Set());
+    // Reset workspace selection for least privilege
+    setSelectedWorkspaces(new Set());
     // Reset wizard-specific state
     setAcceptChoice(null);
     setVerifyEmail('');
     setConfigureChoice(null);
     setRequestTrustedChoice(null);
+    setPendingWizardComplete(false);
     // Ensure any open menus are closed before opening modal to avoid aria-hidden focus trap
     setOpenKebabKey(null);
     window.setTimeout(() => setIsPendingWizardOpen(true), 100);
@@ -1269,6 +1272,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
 
       {isPendingWizardOpen && pendingWizardOrg && (
         <Modal isOpen onClose={closePendingWizard} variant="large" aria-label="Review trusted organization request wizard" className="trusted-wizard-modal">
+        {!pendingWizardComplete && (
           <Wizard
             onClose={closePendingWizard}
             header={
@@ -1286,66 +1290,23 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                     row.orgId === pendingWizardOrg.orgId ? { ...row, status: 'Rejected' } : row
                   )
                 );
-                addToast(
-                  `You have rejected the trusted organization request from ${pendingWizardOrg.organizationName}.`,
-                  undefined,
-                  'info'
-                );
-                closePendingWizard();
+                setPendingWizardComplete(true);
               }
             }}
             onSave={() => {
-              if (acceptChoice === 'reject') {
-                setIncomingData((prev) =>
-                  prev.map((row) =>
-                    row.orgId === pendingWizardOrg.orgId ? { ...row, status: 'Rejected' } : row
-                  )
-                );
-                addToast(
-                  `You have rejected the trusted organization request from ${pendingWizardOrg.organizationName}.`,
-                  undefined,
-                  'info'
-                );
-                closePendingWizard();
-                return;
-              }
-              addToast(
-                `You are successfully a trusted org with ${pendingWizardOrg.organizationName}.`,
-                <span>To learn more about what you can do as a trusted org, <a href="#">click here</a>.</span>
-              );
-              // update incoming status to Accepted
               setIncomingData((prev) =>
                 prev.map((row) =>
-                  row.orgId === pendingWizardOrg.orgId ? { ...row, status: 'Accepted' } : row
+                  row.orgId === pendingWizardOrg.orgId ? { ...row, status: acceptChoice === 'reject' ? 'Rejected' : 'Accepted' } : row
                 )
               );
-              // If user chose to request trusted org back, add an outgoing row and show a second toast
-              if (requestTrustedChoice === 'yes') {
-                const hasActiveOutgoing = outgoingData.some((o) => o.orgId === pendingWizardOrg.orgId && o.status !== 'Severed');
-                if (!hasActiveOutgoing) {
-                  setOutgoingData((prev) => [
-                    ...prev,
-                    {
-                      organizationName: pendingWizardOrg.organizationName,
-                      orgId: pendingWizardOrg.orgId,
-                      status: 'Acceptance pending' as const,
-                      lastModified: new Date().toISOString().slice(0, 10),
-                    },
-                  ]);
-                }
-                addToast(
-                  `You have successfully sent a trusted org request to Organization #${pendingWizardOrg.orgId}`,
-                  <span>You can view your outgoing requests in the Outgoing tab.</span>
-                );
-              }
-              closePendingWizard();
+              setPendingWizardComplete(true);
             }}
           >
             <WizardStep id="step-1" name="Review request" footer={{ isBackHidden: true, isNextDisabled: acceptChoice === null || !verifyEmail.trim(), nextButtonText: acceptChoice === 'reject' ? 'Submit' : 'Next' }}>
               <div style={{ padding: 16 }}>
                 <Title headingLevel="h3" size="lg">You have a request to become a trusted organization. Review the request info below:</Title>
                 <p style={{ marginTop: 8 }}>
-                  Accepting to become a trusted org to {pendingWizardOrg.organizationName} will allow them to see your organization. However, you will not be able to see their organization unless you choose to establish the trusted organization connection back with {pendingWizardOrg.organizationName} in the third step.
+                  Accepting to become a trusted org to {pendingWizardOrg.organizationName} will allow them to see your organization.
                   For more information about trusted organizations, <a href="#">click here</a>.
                 </p>
                 <div
@@ -1453,11 +1414,24 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                   </WizardStep>
                 ),
                 (
-                  <WizardStep id="config-workspaces" name="Workspaces" key="config-workspaces" isHidden={configureChoice !== 'yes'}>
+                  <WizardStep id="config-workspaces" name="Workspaces" key="config-workspaces" isHidden={configureChoice !== 'yes'} footer={{ isNextDisabled: selectedWorkspaces.size === 0 }}>
                     <div style={{ padding: 16 }}>
                       <Title headingLevel="h3" size="lg">Configure what you allow {pendingWizardOrg.organizationName} to see from your organization</Title>
                       <p style={{ marginTop: 8 }}>Select which workspace(s) {pendingWizardOrg.organizationName} will be able to see:</p>
                       <div style={{ marginTop: 12 }}>
+                        <Checkbox
+                          id="wizard-workspace-select-all"
+                          label="Select all"
+                          isChecked={selectedWorkspaces.size === workspaceNodes.length}
+                          onChange={(_event, checked) => {
+                            if (checked) {
+                              setSelectedWorkspaces(new Set(workspaceNodes.map((n) => n.id)));
+                            } else {
+                              setSelectedWorkspaces(new Set());
+                            }
+                          }}
+                          style={{ marginBottom: 8 }}
+                        />
                         <TreeView
                           aria-label="Workspace tree"
                           variant="compact"
@@ -1611,7 +1585,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                   </WizardStep>
                 ),
                 (
-                  <WizardStep id="config-groups" name="User groups" key="config-groups" isHidden={configureChoice !== 'yes'}>
+                  <WizardStep id="config-groups" name="User groups" key="config-groups" isHidden={configureChoice !== 'yes'} footer={{ isNextDisabled: selectedGroups.size === 0 }}>
                     <div style={{ padding: 16 }}>
                       <Title headingLevel="h3" size="lg">Configure what you allow {pendingWizardOrg.organizationName} to see from your organization</Title>
                       <p style={{ marginTop: 8 }}>Select which user group(s) {pendingWizardOrg.organizationName} will be able to see:</p>
@@ -1715,45 +1689,101 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                 )
               ]}
             />
-            <WizardStep id="step-3" name="Request to be a trusted organization" isDisabled={acceptChoice === null || !verifyEmail.trim() || configureChoice === null} isHidden={acceptChoice === 'reject'} footer={{ nextButtonText: 'Submit', isNextDisabled: requestTrustedChoice === null }}>
+            <WizardStep id="step-3" name="Review" isDisabled={acceptChoice === null || !verifyEmail.trim() || configureChoice === null} isHidden={acceptChoice === 'reject'} footer={{ nextButtonText: 'Submit' }}>
               <div style={{ padding: 16 }}>
-                <Title headingLevel="h3" size="lg">Would you like to request to become a trusted org of {pendingWizardOrg.organizationName}?</Title>
-                <p style={{ marginTop: 8 }}>This will allow them to see and grant access to your organization.</p>
-                <div style={{ marginTop: 12 }}>
-                  <Radio
-                    id="request-trusted-yes"
-                    name="request-trusted-choice"
-                    isChecked={requestTrustedChoice === 'yes'}
-                    onChange={() => setRequestTrustedChoice('yes')}
-                    label={`Yes, request to become a trusted org of ${pendingWizardOrg.organizationName}`}
-                  />
-                  {requestTrustedChoice === 'yes' && (
-                    <div style={{ marginTop: 16 }}>
-                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Request description</Title>
-                      <div style={{ marginTop: 8, maxWidth: 560 }}>
-                        <TextArea
-                          id="request-description"
-                          name="request-description"
-                          value={requestDescription}
-                          onChange={(_event, value) => setRequestDescription(value)}
-                          resizeOrientation="vertical"
-                          placeholder="Provide any details for your request"
-                        />
-                      </div>
-                    </div>
-                  )}
-                  <Radio
-                    id="request-trusted-no"
-                    name="request-trusted-choice"
-                    isChecked={requestTrustedChoice === 'no'}
-                    onChange={() => setRequestTrustedChoice('no')}
-                    label={`No, I DO NOT wish to request to be a trusted org of ${pendingWizardOrg.organizationName}`}
-                    style={{ marginTop: 0 }}
-                  />
+                <Title headingLevel="h3" size="lg">Review</Title>
+                <p style={{ marginTop: 8 }}>
+                  Accepting trusted organization request from {pendingWizardOrg.organizationName}
+                </p>
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', rowGap: 12 }}>
+                    <div style={{ fontWeight: 700 }}>Organization name</div>
+                    <div>{pendingWizardOrg.organizationName}</div>
+                    <div style={{ fontWeight: 700 }}>Organization ID</div>
+                    <div>{pendingWizardOrg.orgId}</div>
+                    <div style={{ fontWeight: 700 }}>Configuration</div>
+                    <div>{configureChoice === 'yes' ? 'Custom configuration' : 'Default (all visible)'}</div>
+                    {configureChoice === 'yes' && (
+                      <>
+                        <div style={{ fontWeight: 700 }}>Workspace(s)</div>
+                        <div>{workspaceNodes.filter((n) => selectedWorkspaces.has(n.id) && !n.parentId).map((n) => n.name).join(', ') || 'None selected'}</div>
+                        <div style={{ fontWeight: 700 }}>User group(s)</div>
+                        <div>{groupRows.filter((g) => selectedGroups.has(g.id)).map((g) => g.name).join(', ') || 'None selected'}</div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </WizardStep>
           </Wizard>
+        )}
+        {pendingWizardComplete && (
+          <Wizard
+            className="pf-m-finished"
+            onClose={closePendingWizard}
+            header={
+              <WizardHeader
+                title={`Review trusted organization request from ${pendingWizardOrg.organizationName}`}
+                description="Review and manage this pending trust request."
+                onClose={closePendingWizard}
+              />
+            }
+          >
+            <WizardStep id="step-complete" name="" footer={{ isBackHidden: true, isNextHidden: true, isCancelHidden: true }}>
+              {acceptChoice === 'accept' ? (
+                <EmptyState
+                  headingLevel="h2"
+                  titleText={`You are now a trusted organization of ${pendingWizardOrg.organizationName}`}
+                  status="success"
+                  isFullHeight
+                >
+                  <EmptyStateBody>
+                    You have accepted the request and {pendingWizardOrg.organizationName} can now see your organization. However, you are not yet a trusted org of {pendingWizardOrg.organizationName}. To see and grant access to their organization, send them a trusted organization request.
+                  </EmptyStateBody>
+                  <EmptyStateFooter>
+                    <EmptyStateActions>
+                      <Button
+                        variant="primary"
+                        onClick={() => {
+                          closePendingWizard();
+                          setActiveTabKey(0);
+                          setEstablishOrgId(String(pendingWizardOrg.orgId));
+                          setEstablishDescription('');
+                          setIsEstablishModalOpen(true);
+                        }}
+                      >
+                        Send a trusted organization request
+                      </Button>
+                    </EmptyStateActions>
+                    <EmptyStateActions>
+                      <Button variant="link" onClick={() => closePendingWizard()}>
+                        Close
+                      </Button>
+                    </EmptyStateActions>
+                  </EmptyStateFooter>
+                </EmptyState>
+              ) : (
+                <EmptyState
+                  headingLevel="h2"
+                  titleText={`You have rejected the request from ${pendingWizardOrg.organizationName}`}
+                  status="warning"
+                  isFullHeight
+                >
+                  <EmptyStateBody>
+                    You have declined to become a trusted organization of {pendingWizardOrg.organizationName}. They will not be able to see your organization.
+                  </EmptyStateBody>
+                  <EmptyStateFooter>
+                    <EmptyStateActions>
+                      <Button variant="primary" onClick={() => closePendingWizard()}>
+                        Close
+                      </Button>
+                    </EmptyStateActions>
+                  </EmptyStateFooter>
+                </EmptyState>
+              )}
+            </WizardStep>
+          </Wizard>
+        )}
         </Modal>
       )}
 
