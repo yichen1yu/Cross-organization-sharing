@@ -1729,7 +1729,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
               />
             }
           >
-            <WizardStep id="step-complete" name="" footer={{ isBackHidden: true, isNextHidden: true, isCancelHidden: true }}>
+            <WizardStep id="step-complete" name="" footer={<div style={{ display: 'none' }} />} isHidden={!pendingWizardComplete}>
               {acceptChoice === 'accept' ? (
                 <EmptyState
                   headingLevel="h2"
