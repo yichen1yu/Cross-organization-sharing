@@ -1745,6 +1745,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     '/organization/trusted-organizations',
     '/organization/authentication-factors',
     '/organization/identity-provider-integration',
+    '/organization/organizational-features',
   ];
 
   // Determine which navigation structure to show
@@ -1800,9 +1801,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         '/organization/trusted-organizations',
         '/organization/authentication-factors',
         '/organization/identity-provider-integration',
+        '/organization/organizational-features',
       ].includes(location.pathname),
       isExpandable: true,
       subItems: [
+        { label: 'Organizational Features', path: '/organization/organizational-features', isActive: location.pathname === '/organization/organizational-features' },
         { label: 'Organization-wide Access', path: '/organization/organization-wide-access', isActive: location.pathname === '/organization/organization-wide-access' },
         { label: 'Trusted Organizations', path: '/organization/trusted-organizations', isActive: location.pathname === '/organization/trusted-organizations' },
         { label: 'Authentication Factors', path: '/organization/authentication-factors', isActive: location.pathname === '/organization/authentication-factors' },
@@ -2518,37 +2521,20 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           height="calc(100vh - 350px)"
           isVisitRequired={!editingReportName}
         >
-          <WizardStep name="Name and type" id="step-1" footer={<ScheduleWizardFooter isNextDisabled={!wizardReportName.trim() || !wizardFileType} />}>
-            <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Name and type</Title>
+          <WizardStep name="Name" id="step-1" footer={<ScheduleWizardFooter isNextDisabled={!wizardReportName.trim()} />}>
+            <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Name</Title>
             <Form>
               <FormGroup label="Report name" fieldId="report-name">
                 <TextInput id="report-name" placeholder="Enter a report name" value={wizardReportName} onChange={(_e, val) => setWizardReportName(val)} />
               </FormGroup>
-              <FormGroup label="File type" fieldId="file-type">
-                <Dropdown
-                  isOpen={wizardFileTypeOpen}
-                  onSelect={() => setWizardFileTypeOpen(false)}
-                  onOpenChange={setWizardFileTypeOpen}
-                  toggle={(toggleRef) => (
-                    <MenuToggle ref={toggleRef} onClick={() => setWizardFileTypeOpen(!wizardFileTypeOpen)} isExpanded={wizardFileTypeOpen} isFullWidth isDisabled={!!lockedFileType}>
-                      {wizardFileType || 'Select a type'}
-                    </MenuToggle>
-                  )}
-                >
-                  <DropdownList>
-                    <DropdownItem onClick={() => setWizardFileType('JSON')}>JSON</DropdownItem>
-                    <DropdownItem onClick={() => setWizardFileType('CSV')}>CSV</DropdownItem>
-                  </DropdownList>
-                </Dropdown>
-              </FormGroup>
             </Form>
           </WizardStep>
           <WizardStep
-            name="Service and task"
+            name="Job(s)"
             id="step-service-task"
             footer={<ScheduleWizardFooter showBack isNextDisabled={wizardInstances.some(inst => !inst.service || !inst.task)} />}
           >
-            <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Service and task</Title>
+            <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Job(s)</Title>
             {wizardInstances.map((inst, idx) => (
               <div key={`instance-${idx}`} style={{ marginBottom: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -2619,6 +2605,29 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 )}
               </div>
             ))}
+          </WizardStep>
+          <WizardStep name="File type" id="step-file-type" footer={<ScheduleWizardBackNextFooter isNextDisabled={!wizardFileType} />}>
+            <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>File type</Title>
+            <Form>
+              <FormGroup label={<>File type{' '}<Tooltip content="Available file types are based on the job(s) you selected in the previous step."><OutlinedQuestionCircleIcon style={{ marginLeft: '4px', cursor: 'pointer', color: 'var(--pf-t--global--icon--color--subtle)' }} /></Tooltip></>} fieldId="file-type">
+                <Dropdown
+                  isOpen={wizardFileTypeOpen}
+                  onSelect={() => setWizardFileTypeOpen(false)}
+                  onOpenChange={setWizardFileTypeOpen}
+                  toggle={(toggleRef) => (
+                    <MenuToggle ref={toggleRef} onClick={() => setWizardFileTypeOpen(!wizardFileTypeOpen)} isExpanded={wizardFileTypeOpen} isFullWidth isDisabled={!!lockedFileType}>
+                      {wizardFileType || 'Select a type'}
+                    </MenuToggle>
+                  )}
+                >
+                  <DropdownList>
+                    <DropdownItem onClick={() => setWizardFileType('JSON')}>JSON</DropdownItem>
+                    <DropdownItem onClick={() => setWizardFileType('CSV')}>CSV</DropdownItem>
+                    <DropdownItem onClick={() => setWizardFileType('PDF')}>PDF</DropdownItem>
+                  </DropdownList>
+                </Dropdown>
+              </FormGroup>
+            </Form>
           </WizardStep>
           <WizardStep name="Frequency" id="step-frequency" footer={<ScheduleWizardBackNextFooter isNextDisabled={!allCronValid} />}>
             <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>Frequency</Title>

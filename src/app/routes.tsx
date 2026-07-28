@@ -25,6 +25,7 @@ import { OrganizationWideAccess } from '@app/OrganizationManagement/Organization
 import { TrustedOrganizations } from '@app/OrganizationManagement/TrustedOrganizations';
 import { AuthenticationFactors } from '@app/OrganizationManagement/AuthenticationFactors';
 import { IdentityProviderIntegration } from '@app/OrganizationManagement/IdentityProviderIntegration';
+import { OrganizationalFeatures } from '@app/OrganizationManagement/OrganizationalFeatures';
 import { Subscriptions } from '@app/Subscriptions/Subscriptions';
 import { Billing } from '@app/Subscriptions/Billing';
 import { SubscriptionInventory } from '@app/Subscriptions/SubscriptionInventory';
@@ -405,6 +406,12 @@ const routes: AppRouteConfig[] = [
     exact: true,
     path: '/organization/identity-provider-integration',
     title: 'Identity Provider Integration | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <OrganizationalFeatures />,
+    exact: true,
+    path: '/organization/organizational-features',
+    title: 'Organizational Features | Red Hat Hybrid Cloud Console',
   },
 ];
 
