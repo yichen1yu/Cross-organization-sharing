@@ -264,7 +264,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
             <PageSection>
               <Toolbar>
                 <ToolbarContent>
-                  <ToolbarItem variant="bulk-select">
+                  <ToolbarItem>
                     <MenuToggle
                       splitButtonItems={[
                         <MenuToggleCheckbox
@@ -272,7 +272,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                           key="users-bulk-select"
                           aria-label="Select all"
                           isChecked={areAllUsersSelected ? true : areSomeUsersSelected ? null : false}
-                          onChange={(_e, checked) => onSelectAll(checked)}
+                          onChange={(checked) => onSelectAll(checked)}
                         />
                       ]}
                       aria-label="Select"
@@ -445,7 +445,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
             <PageSection>
               <Toolbar>
                 <ToolbarContent>
-                  <ToolbarItem variant="bulk-select">
+                  <ToolbarItem>
                     <MenuToggle
                       splitButtonItems={[
                         <MenuToggleCheckbox
@@ -453,7 +453,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                           key="groups-bulk-select"
                           aria-label="Select all"
                           isChecked={areAllGroupsSelected ? true : areSomeGroupsSelected ? null : false}
-                          onChange={(_e, checked) => onSelectAllGroups(checked)}
+                          onChange={(checked) => onSelectAllGroups(checked)}
                         />
                       ]}
                       aria-label="Select"
