@@ -163,8 +163,8 @@ const ServiceAccounts: React.FunctionComponent = () => {
               <Th width={25} {...getSortParams(1)}>Description</Th>
               <Th width={20}>Client ID</Th>
               <Th width={15}>Owner</Th>
-              <Th width={12} {...getSortParams(4)}>Time created</Th>
-              <Th width={5}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
+              <Th width={10} {...getSortParams(4)}>Time created</Th>
+              <Th width={10}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
             </Tr>
           </Thead>
           <Tbody>

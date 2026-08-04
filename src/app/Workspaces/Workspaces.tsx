@@ -46,6 +46,7 @@ import { allRoles as sharedRoles } from '@app/utils/rolesData';
 
 type WorkspaceMeta = {
   name: string;
+  description?: string;
   hierarchy: { name: string; path?: string }[];
 };
 

@@ -151,7 +151,7 @@ const AIAgents: React.FunctionComponent = () => {
               <Th width={25} {...getSortParams(0)}>Name</Th>
               <Th width={45} {...getSortParams(1)}>Description</Th>
               <Th width={15} {...getSortParams(2)}>Last release</Th>
-              <Th width={5}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
+              <Th width={15}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
             </Tr>
           </Thead>
           <Tbody>
