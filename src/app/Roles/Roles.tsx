@@ -3,410 +3,331 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   Button,
-  Card,
-  CardBody,
-  Checkbox,
-  Content,
+  Drawer,
+  DrawerActions,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerContentBody,
+  DrawerHead,
+  DrawerPanelContent,
   Dropdown,
   DropdownItem,
   DropdownList,
-  Flex,
-  FlexItem,
   MenuToggle,
+  MenuToggleElement,
   PageSection,
   Pagination,
   SearchInput,
+  Tab,
+  TabTitleText,
+  Tabs,
   Title,
   Toolbar,
   ToolbarContent,
-  ToolbarItem
+  ToolbarGroup,
+  ToolbarItem,
 } from '@patternfly/react-core';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { BellIcon, EllipsisVIcon, ExternalLinkAltIcon, UserCheckIcon } from '@patternfly/react-icons';
-import { useNavigate } from 'react-router-dom';
-
-interface RoleData {
-  id: string;
-  name: string;
-  description: string;
-  groups: number;
-  permissions: number;
-  lastModified: string;
-}
+import { Table, Tbody, Td, Th, Thead, Tr, ThProps } from '@patternfly/react-table';
+import { EllipsisVIcon, FilterIcon } from '@patternfly/react-icons';
+import OutlinedQuestionCircleIcon from '@patternfly/react-icons/dist/esm/icons/outlined-question-circle-icon';
+import { allRoles, type RoleData } from '@app/utils/rolesData';
 
 const Roles: React.FunctionComponent = () => {
-  const navigate = useNavigate();
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(20);
-  const [selectedRows, setSelectedRows] = React.useState<string[]>([]);
   const [searchValue, setSearchValue] = React.useState('');
-  const [isEllipsisMenuOpen, setIsEllipsisMenuOpen] = React.useState(false);
+  const [isKebabOpen, setIsKebabOpen] = React.useState(false);
+  const [isFilterOpen, setIsFilterOpen] = React.useState(false);
+  const [filterField, setFilterField] = React.useState('Name');
+  const [sortIndex, setSortIndex] = React.useState<number>(0);
+  const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>('asc');
 
-  // Real roles data
-  const allRoles: RoleData[] = React.useMemo(() => {
-    const roles: RoleData[] = [
-      {
-        id: 'ansible-lightspeed-admin',
-        name: 'Ansible Lightspeed administrator',
-        description: 'Perform read operations for Organization Administrators on all Lightspeed charts.',
-        groups: 1,
-        permissions: 4,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'automation-analytics-admin',
-        name: 'Automation Analytics administrator',
-        description: 'Perform any available operation on Automation Analytics resources.',
-        groups: 0,
-        permissions: 1,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'automation-analytics-editor',
-        name: 'Automation Analytics editor',
-        description: 'Perform read and update operations on Automation Analytics resources.',
-        groups: 1,
-        permissions: 2,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'automation-analytics-viewer',
-        name: 'Automation Analytics viewer',
-        description: 'Perform read operations on Automation Analytics resources.',
-        groups: 0,
-        permissions: 1,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'cloud-administrator',
-        name: 'Cloud administrator',
-        description: 'Perform any available operation on any source.',
-        groups: 1,
-        permissions: 1,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'compliance-administrator',
-        name: 'Compliance administrator',
-        description: 'Perform any available operation on Compliance resources.',
-        groups: 1,
-        permissions: 3,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'compliance-viewer',
-        name: 'Compliance viewer',
-        description: 'Perform read operations on Compliance resources.',
-        groups: 2,
-        permissions: 4,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'content-template-administrator',
-        name: 'Content Template administrator',
-        description: 'Perform any available operation on any Content Template resource.',
-        groups: 1,
-        permissions: 3,
-        lastModified: '02 Oct 2024'
-      },
-      {
-        id: 'content-template-viewer',
-        name: 'Content Template viewer',
-        description: 'Perform read-only operations on Content Template resources.',
-        groups: 1,
-        permissions: 2,
-        lastModified: '02 Oct 2024'
-      },
-      {
-        id: 'cost-administrator',
-        name: 'Cost administrator',
-        description: 'Perform any available operation on cost management resources.',
-        groups: 1,
-        permissions: 1,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'cost-cloud-viewer',
-        name: 'Cost cloud viewer',
-        description: 'Perform read operations on cost reports related to cloud sources.',
-        groups: 0,
-        permissions: 5,
-        lastModified: '19 Jun 2025'
-      },
-      {
-        id: 'cost-openshift-viewer',
-        name: 'Cost OpenShift viewer',
-        description: 'Perform read operations on cost reports related to OpenShift sources.',
-        groups: 0,
-        permissions: 1,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'cost-price-list-administrator',
-        name: 'Cost Price List administrator',
-        description: 'Perform read and write operations on cost models.',
-        groups: 0,
-        permissions: 2,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'cost-price-list-viewer',
-        name: 'Cost Price List viewer',
-        description: 'Perform read operations on cost models.',
-        groups: 0,
-        permissions: 2,
-        lastModified: '19 Sep 2024'
-      },
-      {
-        id: 'alert-overrider',
-        name: 'Alert overrider',
-        description: 'Override workspace default alert settings for themselves in their personal alert preferences.',
-        groups: 1,
-        permissions: 2,
-        lastModified: '4 Sep 2025'
-      }
-    ];
-    return roles.sort((a, b) => a.name.localeCompare(b.name));
-  }, []);
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const [selectedRole, setSelectedRole] = React.useState<RoleData | null>(null);
+  const [drawerTabKey, setDrawerTabKey] = React.useState<string | number>(0);
+  const [permPage, setPermPage] = React.useState(1);
+  const [permPerPage, setPermPerPage] = React.useState(4);
+
+  const sortableColumns = ['name', 'description', 'permissions', 'lastModified'] as const;
+
+  const getSortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: { index: sortIndex, direction: sortDirection },
+    onSort: (_event, index, direction) => {
+      setSortIndex(index);
+      setSortDirection(direction);
+    },
+    columnIndex,
+  });
 
   const filteredRoles = React.useMemo(() => {
     if (!searchValue) return allRoles;
-    return allRoles.filter(role => 
-      role.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-      role.description.toLowerCase().includes(searchValue.toLowerCase())
+    const lower = searchValue.toLowerCase();
+    return allRoles.filter((role) =>
+      role.name.toLowerCase().includes(lower) ||
+      role.description.toLowerCase().includes(lower)
     );
-  }, [allRoles, searchValue]);
+  }, [searchValue]);
+
+  const sortedRoles = React.useMemo(() => {
+    const sorted = [...filteredRoles];
+    const key = sortableColumns[sortIndex];
+    sorted.sort((a, b) => {
+      const aVal = a[key];
+      const bVal = b[key];
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+      const cmp = String(aVal).localeCompare(String(bVal));
+      return sortDirection === 'asc' ? cmp : -cmp;
+    });
+    return sorted;
+  }, [filteredRoles, sortIndex, sortDirection]);
 
   const paginatedRoles = React.useMemo(() => {
-    const startIndex = (page - 1) * perPage;
-    return filteredRoles.slice(startIndex, startIndex + perPage);
-  }, [filteredRoles, page, perPage]);
+    const start = (page - 1) * perPage;
+    return sortedRoles.slice(start, start + perPage);
+  }, [sortedRoles, page, perPage]);
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedRows(paginatedRoles.map(role => role.id));
-    } else {
-      setSelectedRows([]);
-    }
+  const paginatedPermissions = React.useMemo(() => {
+    if (!selectedRole) return [];
+    const start = (permPage - 1) * permPerPage;
+    return selectedRole.permissionDetails.slice(start, start + permPerPage);
+  }, [selectedRole, permPage, permPerPage]);
+
+  const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => setPage(newPage);
+  const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number, newPage: number) => { setPerPage(newPerPage); setPage(newPage); };
+
+  const handleSearchChange = (value: string) => { setSearchValue(value); setPage(1); };
+
+  const onRowClick = (role: RoleData) => {
+    setSelectedRole(role);
+    setDrawerTabKey(0);
+    setPermPage(1);
+    setIsDrawerOpen(true);
   };
 
-  const handleRowSelect = (roleId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedRows(prev => [...prev, roleId]);
-    } else {
-      setSelectedRows(prev => prev.filter(id => id !== roleId));
-    }
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+    setSelectedRole(null);
   };
 
-  const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const onPerPageSelect = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPerPage: number, newPage: number) => {
-    setPerPage(newPerPage);
-    setPage(newPage);
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearchValue(value);
-    setPage(1); // Reset to first page when searching
-  };
-
-  const handleCreateRole = () => {
-    console.log('Create role clicked');
-    // Implement create role logic here
-  };
-
-  const handleRoleClick = (roleId: string, roleName: string) => {
-    if (roleId === 'alert-overrider') {
-      navigate('/user-access/roles/alert-overrider');
-    } else {
-      // For other roles, log for now (can be implemented later)
-      console.log(`Clicked on role: ${roleName}`);
-    }
-  };
-
-  const handleManageAlerts = () => {
-    navigate('/subscription-usage?filter=Roles | IAM');
-  };
+  const drawerPanel = (
+    <DrawerPanelContent
+      defaultSize="480px"
+      style={{ height: 'calc(100vh - 180px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+    >
+      <DrawerHead>
+        <Title headingLevel="h2" size="lg">{selectedRole?.name ?? 'Role'}</Title>
+        <DrawerActions>
+          <DrawerCloseButton onClick={closeDrawer} />
+        </DrawerActions>
+      </DrawerHead>
+      <DrawerContentBody style={{ flex: '1 1 auto', overflow: 'auto' }}>
+        <Tabs activeKey={drawerTabKey} onSelect={(_e, key) => setDrawerTabKey(key)}>
+          <Tab eventKey={0} title={<TabTitleText>Permissions</TabTitleText>}>
+            <div style={{ padding: '16px 0' }}>
+              {selectedRole && selectedRole.permissionDetails.length > 0 ? (
+                <>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, paddingRight: 4 }}>
+                    <Pagination
+                      itemCount={selectedRole.permissionDetails.length}
+                      perPage={permPerPage}
+                      page={permPage}
+                      onSetPage={(_e, p) => setPermPage(p)}
+                      onPerPageSelect={(_e, pp, p) => { setPermPerPage(pp); setPermPage(p); }}
+                      isCompact
+                    />
+                  </div>
+                  <Table aria-label="Permissions table" variant="compact">
+                    <Thead>
+                      <Tr>
+                        <Th>Application</Th>
+                        <Th>Resource type</Th>
+                        <Th>Operation</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {paginatedPermissions.map((perm, idx) => (
+                        <Tr key={idx}>
+                          <Td dataLabel="Application">{perm.application}</Td>
+                          <Td dataLabel="Resource type">{perm.resourceType}</Td>
+                          <Td dataLabel="Operation">{perm.operation}</Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </>
+              ) : (
+                <p style={{ color: '#6a6e73', padding: '0 16px' }}>No permissions defined for this role.</p>
+              )}
+            </div>
+          </Tab>
+          <Tab
+            eventKey={1}
+            title={
+              <TabTitleText>
+                Assigned user groups{' '}
+                <OutlinedQuestionCircleIcon style={{ color: 'var(--pf-t--global--icon--color--subtle)', fontSize: '0.85em' }} />
+              </TabTitleText>
+            }
+          >
+            <div style={{ padding: '16px' }}>
+              {selectedRole && selectedRole.assignedGroups.length > 0 ? (
+                <Table aria-label="Assigned user groups table" variant="compact">
+                  <Thead>
+                    <Tr>
+                      <Th>User group</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {selectedRole.assignedGroups.map((group, idx) => (
+                      <Tr key={idx}>
+                        <Td>{group}</Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              ) : (
+                <p style={{ color: '#6a6e73' }}>No user groups are assigned to this role.</p>
+              )}
+            </div>
+          </Tab>
+        </Tabs>
+      </DrawerContentBody>
+    </DrawerPanelContent>
+  );
 
   return (
     <>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem>IAM</BreadcrumbItem>
-          <BreadcrumbItem>User Access</BreadcrumbItem>
+          <BreadcrumbItem>Identity &amp; Access Management</BreadcrumbItem>
+          <BreadcrumbItem>Access Management</BreadcrumbItem>
           <BreadcrumbItem isActive>Roles</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
-      
+
       <PageSection hasBodyWrapper={false}>
-        <Flex alignItems={{ default: 'alignItemsCenter' }} spaceItems={{ default: 'spaceItemsSm' }}>
-          <FlexItem>
-            <div className="pf-m-align-self-center" style={{ minWidth: '40px' }}>
-              <UserCheckIcon style={{ fontSize: '32px', color: '#0066cc' }} aria-label="page-header-icon" />
-            </div>
-          </FlexItem>
-          <FlexItem alignSelf={{ default: 'alignSelfStretch' }}>
-            <div style={{ borderLeft: '1px solid #d2d2d2', height: '100%', marginRight: '16px' }}></div>
-          </FlexItem>
-          <FlexItem flex={{ default: 'flex_1' }}>
-            <div>
-              <Title headingLevel="h1" size="2xl">Roles</Title>
-              <Content>
-                <p style={{ margin: 0, color: '#6a6e73' }}>Define and manage user roles with specific permissions and access levels across your organization.</p>
-                <div style={{ marginTop: '12px' }}>
-                  <Button
-                    variant="link"
-                    isInline
-                    icon={<ExternalLinkAltIcon />}
-                    iconPosition="end"
-                    component="a"
-                    href="https://docs.redhat.com/en/documentation/red_hat_hybrid_cloud_console/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Learn more
-                  </Button>
-                  <span style={{ margin: '0 8px', color: '#6a6e73' }}>|</span>
-                  <Button
-                    variant="link"
-                    isInline
-                    icon={<BellIcon />}
-                    iconPosition="start"
-                    onClick={handleManageAlerts}
-                  >
-                    Manage alerts for Roles
-                  </Button>
-                </div>
-              </Content>
-            </div>
-          </FlexItem>
-        </Flex>
+        <Title headingLevel="h1" size="2xl">Roles</Title>
       </PageSection>
-      
+
       <PageSection hasBodyWrapper={false} style={{ paddingTop: 0 }}>
-        <Card>
-          <CardBody style={{ padding: 0 }}>
-            {/* Toolbar */}
-            <Toolbar>
-              <ToolbarContent>
-                <ToolbarItem>
-                  <SearchInput
-                    placeholder="Search roles..."
-                    value={searchValue}
-                    onChange={(event, value) => handleSearchChange(value)}
-                    onClear={() => handleSearchChange('')}
-                  />
-                </ToolbarItem>
-                <ToolbarItem>
-                  <Button variant="primary" onClick={handleCreateRole}>
-                    Create role
-                  </Button>
-                </ToolbarItem>
-                <ToolbarItem>
-                  <Dropdown
-                    isOpen={isEllipsisMenuOpen}
-                    onOpenChange={(isOpen) => setIsEllipsisMenuOpen(isOpen)}
-                    popperProps={{ position: 'right' }}
-                    toggle={(toggleRef) => (
-                      <MenuToggle
-                        ref={toggleRef}
-                        aria-label="Actions"
-                        variant="plain"
-                        onClick={() => setIsEllipsisMenuOpen(!isEllipsisMenuOpen)}
+        <Drawer isExpanded={isDrawerOpen} isInline={false} position="right">
+          <DrawerContent panelContent={drawerPanel}>
+            <DrawerContentBody>
+              <Toolbar>
+                <ToolbarContent>
+                  <ToolbarGroup variant="filter-group">
+                    <ToolbarItem>
+                      <Dropdown
+                        isOpen={isFilterOpen}
+                        onSelect={(_e, value) => { setFilterField(value as string); setIsFilterOpen(false); }}
+                        onOpenChange={setIsFilterOpen}
+                        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                          <MenuToggle
+                            ref={toggleRef}
+                            onClick={() => setIsFilterOpen(!isFilterOpen)}
+                            isExpanded={isFilterOpen}
+                            icon={<FilterIcon />}
+                          >
+                            {`Filter by ${filterField.toLowerCase()}`}
+                          </MenuToggle>
+                        )}
                       >
-                        <EllipsisVIcon />
-                      </MenuToggle>
-                    )}
-                    shouldFocusToggleOnSelect
-                  >
-                    <DropdownList>
-                      <DropdownItem>Export roles</DropdownItem>
-                      <DropdownItem>Import roles</DropdownItem>
-                      <DropdownItem>Bulk actions</DropdownItem>
-                    </DropdownList>
-                  </Dropdown>
-                </ToolbarItem>
-                <ToolbarItem>
-                  <Pagination
-                    itemCount={filteredRoles.length}
-                    widgetId="roles-pagination-top"
-                    perPage={perPage}
-                    page={page}
-                    onSetPage={onSetPage}
-                    onPerPageSelect={onPerPageSelect}
-                    isCompact
-                  />
-                </ToolbarItem>
-              </ToolbarContent>
-            </Toolbar>
-
-            {/* Table */}
-            <Table aria-label="Roles table">
-              <Thead>
-                <Tr>
-                  <Th width={10}>
-                    <Checkbox
-                      id="select-all"
-                      isChecked={
-                        paginatedRoles.length > 0 && 
-                        paginatedRoles.every(role => selectedRows.includes(role.id))
-                      }
-                      onChange={(event, checked) => handleSelectAll(checked)}
-                      aria-label="Select all roles"
-                    />
-                  </Th>
-                  <Th width={20}>Name</Th>
-                  <Th width={35}>Description</Th>
-                  <Th width={10}>Groups</Th>
-                  <Th width={10}>Permissions</Th>
-                  <Th width={25}>Last modified</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {paginatedRoles.map((role) => (
-                  <Tr key={role.id}>
-                    <Td>
-                      <Checkbox
-                        id={`select-${role.id}`}
-                        isChecked={selectedRows.includes(role.id)}
-                        onChange={(event, checked) => handleRowSelect(role.id, checked)}
-                        aria-label={`Select ${role.name}`}
+                        <DropdownList>
+                          <DropdownItem key="name" value="Name">Name</DropdownItem>
+                          <DropdownItem key="description" value="Description">Description</DropdownItem>
+                        </DropdownList>
+                      </Dropdown>
+                    </ToolbarItem>
+                    <ToolbarItem>
+                      <SearchInput
+                        placeholder={`Filter by ${filterField.toLowerCase()}`}
+                        value={searchValue}
+                        onChange={(_event, value) => handleSearchChange(value)}
+                        onClear={() => handleSearchChange('')}
                       />
-                    </Td>
-                    <Td>
-                      <Button
-                        variant="link"
-                        isInline
-                        onClick={() => handleRoleClick(role.id, role.name)}
-                        style={{ padding: 0, fontSize: 'inherit' }}
-                      >
-                        {role.name}
-                      </Button>
-                    </Td>
-                    <Td>{role.description}</Td>
-                    <Td>{role.groups}</Td>
-                    <Td>{role.permissions}</Td>
-                    <Td>{role.lastModified}</Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
+                    </ToolbarItem>
+                  </ToolbarGroup>
+                  <ToolbarItem>
+                    <Button variant="primary">Create role</Button>
+                  </ToolbarItem>
+                  <ToolbarItem>
+                    <Dropdown
+                      isOpen={isKebabOpen}
+                      onOpenChange={setIsKebabOpen}
+                      popperProps={{ position: 'right' }}
+                      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                        <MenuToggle
+                          ref={toggleRef}
+                          aria-label="Actions"
+                          variant="plain"
+                          onClick={() => setIsKebabOpen(!isKebabOpen)}
+                          isExpanded={isKebabOpen}
+                        >
+                          <EllipsisVIcon />
+                        </MenuToggle>
+                      )}
+                    >
+                      <DropdownList>
+                        <DropdownItem>Export roles</DropdownItem>
+                        <DropdownItem>Import roles</DropdownItem>
+                      </DropdownList>
+                    </Dropdown>
+                  </ToolbarItem>
+                  <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
+                    <Pagination
+                      itemCount={sortedRoles.length}
+                      widgetId="roles-pagination-top"
+                      perPage={perPage}
+                      page={page}
+                      onSetPage={onSetPage}
+                      onPerPageSelect={onPerPageSelect}
+                      isCompact
+                    />
+                  </ToolbarItem>
+                </ToolbarContent>
+              </Toolbar>
 
-            {/* Bottom Pagination */}
-            <div style={{ padding: '16px' }}>
-              <Pagination
-                itemCount={filteredRoles.length}
-                widgetId="roles-pagination-bottom"
-                perPage={perPage}
-                page={page}
-                onSetPage={onSetPage}
-                onPerPageSelect={onPerPageSelect}
-              />
-            </div>
-          </CardBody>
-        </Card>
+              <Table aria-label="Roles table">
+                <Thead>
+                  <Tr>
+                    <Th sort={getSortParams(0)} width={20}>Name</Th>
+                    <Th sort={getSortParams(1)} width={40}>Description</Th>
+                    <Th sort={getSortParams(2)} width={15}>Permissions</Th>
+                    <Th sort={getSortParams(3)} width={25}>Last modified</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {paginatedRoles.map((role) => (
+                    <Tr
+                      key={role.id}
+                      isClickable
+                      isRowSelected={selectedRole?.id === role.id}
+                      onRowClick={() => onRowClick(role)}
+                    >
+                      <Td dataLabel="Name">{role.name}</Td>
+                      <Td dataLabel="Description">{role.description}</Td>
+                      <Td dataLabel="Permissions">{role.permissions}</Td>
+                      <Td dataLabel="Last modified">{role.lastModified}</Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+
+              <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
+                <Pagination
+                  itemCount={sortedRoles.length}
+                  widgetId="roles-pagination-bottom"
+                  perPage={perPage}
+                  page={page}
+                  onSetPage={onSetPage}
+                  onPerPageSelect={onPerPageSelect}
+                />
+              </div>
+            </DrawerContentBody>
+          </DrawerContent>
+        </Drawer>
       </PageSection>
     </>
   );

@@ -44,9 +44,9 @@ const allWorkspaces: WorkspaceNode[] = [
   { id: 'uxd', name: 'Pinnacle Corp', sla: 'Premium', usage: 'Production', availableFeatures: 2, level: 0 },
   { id: 'ws-default', name: 'Workspace default', sla: 'Premium', usage: 'Production', availableFeatures: 2, parentId: 'uxd', level: 1 },
   { id: 'ws-ungrouped', name: 'Workspace Ungrouped Hosts', sla: 'Premium', usage: 'Development', availableFeatures: 1, parentId: 'ws-default', level: 2 },
-  { id: 'ws-a', name: 'Workspace A', sla: 'Premium', usage: 'Production', availableFeatures: 3, parentId: 'ws-default', level: 2 },
-  { id: 'ws-b', name: 'Workspace B', sla: 'Standard', usage: 'Development', availableFeatures: 2, parentId: 'ws-default', level: 2 },
-  { id: 'ws-c', name: 'Workspace C', sla: 'Standard', usage: 'Disaster Recovery', availableFeatures: 1, parentId: 'ws-default', level: 2 },
+  { id: 'ws-a', name: 'Production', sla: 'Premium', usage: 'Production', availableFeatures: 3, parentId: 'ws-default', level: 2 },
+  { id: 'ws-b', name: 'Sandbox', sla: 'Standard', usage: 'Development', availableFeatures: 2, parentId: 'ws-default', level: 2 },
+  { id: 'ws-c', name: 'Preview', sla: 'Standard', usage: 'Disaster Recovery', availableFeatures: 1, parentId: 'ws-default', level: 2 },
 ];
 
 type FeatureRow = { name: string };

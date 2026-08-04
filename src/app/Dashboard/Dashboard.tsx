@@ -29,11 +29,11 @@ const Dashboard: React.FunctionComponent = () => {
   ];
 
   const userGroups = [
-    { name: 'Spice girls', updated: 'Just now' },
-    { name: 'Golden girls', updated: '2 days ago' },
-    { name: 'Powerpuff girls', updated: '2 days ago' },
-    { name: 'Admin group', updated: '1 month ago' },
-    { name: 'Default group', updated: '1 month ago' }
+    { name: 'Default admin access', updated: 'Just now' },
+    { name: 'Engineering Leads', updated: '2 days ago' },
+    { name: 'Platform-SRE', updated: '2 days ago' },
+    { name: 'Compliance Admins', updated: '1 month ago' },
+    { name: 'Default access', updated: '1 month ago' }
   ];
 
   const roles = [

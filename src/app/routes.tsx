@@ -16,11 +16,13 @@ import { LearningResources } from '@app/LearningResources/LearningResources';
 import { LearningResourcesIAM } from '@app/LearningResourcesIAM/LearningResourcesIAM';
 import { MyUserAccess } from '@app/MyUserAccess/MyUserAccess'; 
 import { ServiceAccounts } from '@app/ServiceAccounts/ServiceAccounts';
+import { AIAgents } from '@app/AIAgents/AIAgents';
 import { UserAccess } from '@app/UserAccess/UserAccess';
 import { Support } from '@app/Support/Support';
 import { Users } from '@app/Users/Users';
 import { Groups } from '@app/Groups/Groups';
 import { UsersAndGroups } from '@app/UsersAndGroups/UsersAndGroups';
+import { CreateUserGroup } from '@app/UsersAndGroups/CreateUserGroup';
 import { OrganizationWideAccess } from '@app/OrganizationManagement/OrganizationWideAccess';
 import { TrustedOrganizations } from '@app/OrganizationManagement/TrustedOrganizations';
 import { AuthenticationFactors } from '@app/OrganizationManagement/AuthenticationFactors';
@@ -316,6 +318,12 @@ const routes: AppRouteConfig[] = [
     title: 'Service Accounts | Red Hat Hybrid Cloud Console',
   },
   {
+    element: <AIAgents />,
+    exact: true,
+    path: '/ai-agents',
+    title: 'AI Agents | Red Hat Hybrid Cloud Console',
+  },
+  {
     element: <GeneralSettings />,
     exact: true,
     path: '/settings/general',
@@ -344,6 +352,12 @@ const routes: AppRouteConfig[] = [
     exact: true,
     path: '/users-and-groups',
     title: 'Users and Groups | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <CreateUserGroup />,
+    exact: true,
+    path: '/users-and-groups/create',
+    title: 'Create User Group | Red Hat Hybrid Cloud Console',
   },
   {
     element: <Users />,

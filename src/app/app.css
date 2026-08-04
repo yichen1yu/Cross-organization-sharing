@@ -53,3 +53,9 @@ body { margin: 0; }
   --pf-v6-c-content--blockquote--BorderLeftColor: var(--pf-t--global--color--nonstatus--purple--default);
   --pf-v6-c-content--hr--BackgroundColor: var(--pf-t--global--color--nonstatus--yellow--default);
 }
+
+/* Fix PF6 animated-tabs indicator clipping: the ::after on .pf-v6-c-tabs__list
+   draws the blue active-tab underline but overflow:auto clips it. */
+.pf-v6-c-tabs.pf-m-animate-current .pf-v6-c-tabs__list {
+  overflow: visible;
+}

@@ -8,6 +8,17 @@ import {
   BreadcrumbItem,
   Button,
   Content,
+  Drawer,
+  DrawerActions,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerContentBody,
+  DrawerHead,
+  DrawerPanelContent,
+  EmptyState,
+  EmptyStateBody,
+  Flex,
+  FlexItem,
   MenuToggle,
   MenuToggleCheckbox,
   MenuToggleElement,
@@ -26,7 +37,9 @@ import {
 } from '@patternfly/react-core';
 import { Dropdown, DropdownItem, DropdownList } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import { EllipsisVIcon, FilterIcon } from '@patternfly/react-icons';
+import { EllipsisVIcon, FilterIcon, OutlinedQuestionCircleIcon, PencilAltIcon, UsersIcon } from '@patternfly/react-icons';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { addGroup as addGroupToStore, getGroupMembers, type GroupMemberUser as StoreMemberUser, type GroupMemberSA as StoreMemberSA, type GroupMemberAgent as StoreMemberAgent } from '@app/utils/groupsStore';
 
 type UserRow = {
   id: string;
@@ -80,7 +93,90 @@ const initialGroups: GroupRow[] = [
   { id: 'g21', name: 'QA-Automation', description: 'Automated quality assurance runners', users: '6', aiAccess: false, lastModified: '25 May 2026' },
 ];
 
+type GroupMemberUser = { username: string; email: string; firstName: string; lastName: string };
+type GroupMemberSA = { name: string; clientId: string; owner: string };
+type GroupMemberAgent = { name: string; description: string };
+type GroupRole = { name: string; description: string };
+
+const _u = {
+  doejoe: { username: 'doejoe', email: 'lpichler@redhat.com', firstName: 'Joe', lastName: 'Doe' },
+  admin: { username: 'iqe_rbac_v2_admin', email: 'platform-accessmanagement+iqe_rbac_v2_admin+stage@redhat.com', firstName: 'RBAC Admin', lastName: 'For V2' },
+  normal: { username: 'iqe_rbac_v2_normal', email: 'platform-accessmanagement+iqe_rbac_v2_normal+stage@redhat.com', firstName: 'RBAC Normal', lastName: 'For V2' },
+  rbac: { username: 'iqe_rbac_v2_rbac', email: 'platform-accessmanagement+iqe_rbac_v2_rbac+stage@redhat.com', firstName: 'RBAC RBAC', lastName: 'For V2' },
+  viewer: { username: 'iqe_rbac_v2_viewer', email: 'platform-accessmanagement+iqe_rbac_v2_viewer+stage@redhat.com', firstName: 'RBAC Viewer', lastName: 'For V2' },
+  ws: { username: 'iqe_rbac_v2_workspaces', email: 'platform-accessmanagement+iqe_rbac_v2_workspaces+stage@redhat.com', firstName: 'RBAC Workspaces', lastName: 'For V2' },
+};
+
+const groupMemberUsers: Record<string, GroupMemberUser[]> = {
+  g1: [_u.rbac],
+  g2: [_u.viewer, _u.normal],
+  g3: [_u.doejoe, _u.admin],
+  g4: [_u.rbac],
+  g5: [_u.viewer],
+  g6: [_u.doejoe, _u.admin, _u.normal, _u.rbac, _u.viewer, _u.ws],
+  g7: [_u.admin],
+  g8: [_u.ws],
+  g9: [_u.normal],
+  g10: [_u.viewer, _u.rbac],
+  g11: [_u.doejoe],
+  g12: [_u.admin],
+  g13: [_u.viewer],
+  g14: [_u.doejoe, _u.admin, _u.normal],
+  g15: [_u.rbac, _u.viewer, _u.normal, _u.ws, _u.doejoe],
+  g16: [_u.admin, _u.ws],
+  g17: [_u.doejoe, _u.rbac, _u.viewer, _u.normal],
+  g18: [_u.doejoe, _u.admin, _u.normal, _u.rbac, _u.viewer, _u.ws],
+  g19: [_u.normal],
+  g20: [_u.admin, _u.doejoe, _u.rbac, _u.viewer, _u.normal, _u.ws],
+  g21: [_u.rbac, _u.viewer, _u.normal, _u.doejoe, _u.admin, _u.ws],
+};
+
+const groupMemberSAs: Record<string, GroupMemberSA[]> = {
+  g1: [{ name: 'test405', clientId: 'ab434b20-2276-4846-afdd-b0c4ecba2f0', owner: 'iqe_rbac_v2_admin' }],
+  g3: [{ name: 'iqe-rbac-v2-service-account', clientId: '7fb2272f-2844-4fd0-bab3-dbdb0d85a91f', owner: 'iqe_rbac_v2_admin' }],
+  g6: [{ name: 'SA for RBAC', clientId: 'd807b762-31c3-45d0-bffe-7f498b709c66', owner: 'iqe_rbac_v2_admin' }],
+  g8: [{ name: 'iqe-rbac-on-rbac-read', clientId: 'b43b9c00-0107-43be-afa7-4ce45006b51c', owner: 'iqe_rbac_v2_admin' }],
+  g12: [{ name: 'iqe-rbac-on-rbac', clientId: '9e6729e3-2c31-4b45-90af-2e88ed654c0f', owner: 'iqe_rbac_v2_admin' }],
+  g15: [{ name: 'iqe-rbac-v2-e2e-service-account', clientId: '6dfb7d72-cf19-40eb-9920-0e8de3d2bb40', owner: 'iqe_rbac_v2_admin' }],
+  g16: [{ name: 'SA for RBAC', clientId: 'd807b762-31c3-45d0-bffe-7f498b709c66', owner: 'iqe_rbac_v2_admin' }],
+  g18: [
+    { name: 'libord', clientId: 'f54cbb0-82e3-4f70-82be-a6f343746804', owner: 'iqe_rbac_v2_admin' },
+    { name: 'SA Permissions for RBAC', clientId: 'fe466d70-2aeb-4de7-6eb3-d48ff4729e62', owner: 'iqe_rbac_v2_admin' },
+  ],
+  g20: [{ name: 'testlibor', clientId: 'cc9a0d3f-07dd-43a5-990b-d5a21d6d90a8', owner: 'iqe_rbac_v2_admin' }],
+  g21: [{ name: 'iqe-rbac-v2-service-account', clientId: '7fb2272f-2844-4fd0-bab3-dbdb0d85a91f', owner: 'iqe_rbac_v2_admin' }],
+};
+
+const groupMemberAgents: Record<string, GroupMemberAgent[]> = {
+  g2: [{ name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console' }],
+  g3: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights' }],
+  g6: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights' }, { name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console' }],
+  g9: [{ name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed' }],
+  g10: [{ name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console' }],
+  g14: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights' }],
+  g17: [{ name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed' }],
+  g20: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights' }, { name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed' }],
+};
+
+const groupAssignedRoles: Record<string, GroupRole[]> = {
+  g1: [{ name: 'Cost Price List Viewer', description: 'View cost and price list data' }],
+  g3: [{ name: 'Automation Operator', description: 'Run and manage automation jobs' }],
+  g4: [{ name: 'Compliance Viewer', description: 'View compliance policies' }],
+  g5: [{ name: 'Compliance Auditor', description: 'Review audit logs and reports' }],
+  g6: [{ name: 'Default access', description: 'Standard platform access for all users' }],
+  g7: [{ name: 'Organization Administrator', description: 'Full admin privileges across the org' }],
+  g11: [{ name: 'Developer', description: 'Access to dev tooling and repos' }],
+  g14: [{ name: 'Engineering Lead', description: 'Technical leadership role' }, { name: 'Repository Admin', description: 'Admin access to source repositories' }],
+  g16: [{ name: 'Organization Administrator', description: 'Full admin privileges across the org' }],
+  g17: [{ name: 'IAM Reviewer', description: 'Review identity and access configurations' }],
+  g19: [{ name: 'OCM Cluster Owner', description: 'Own and manage OCM clusters' }],
+  g20: [{ name: 'SRE Operator', description: 'Operate SRE tooling and dashboards' }, { name: 'Cluster Admin', description: 'Manage OpenShift clusters' }],
+  g21: [{ name: 'QA Engineer', description: 'Run and review QA test suites' }],
+};
+
 const UsersAndGroups: React.FunctionComponent = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeKey, setActiveKey] = React.useState<string | number>(0);
 
   // --- Users tab state ---
@@ -163,6 +259,28 @@ const UsersAndGroups: React.FunctionComponent = () => {
   // --- Groups tab state ---
   const [groups, setGroups] = React.useState<GroupRow[]>(initialGroups);
 
+  const newGroupHandled = React.useRef(false);
+  React.useEffect(() => {
+    const state = location.state as {
+      newGroup?: {
+        name: string; description: string; users: string;
+        selectedUsers?: StoreMemberUser[];
+        selectedSAs?: StoreMemberSA[];
+        selectedAgents?: StoreMemberAgent[];
+      };
+    } | null;
+    if (state?.newGroup && !newGroupHandled.current) {
+      newGroupHandled.current = true;
+      const { name, description, users, selectedUsers: su, selectedSAs: ssa, selectedAgents: sa } = state.newGroup;
+      const storeId = addGroupToStore(name, description || '', Number(users) || 0, su, ssa, sa);
+      const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      setGroups(prev => [...prev, { id: storeId, name, description: description || '', users, aiAccess: true, lastModified: today }]);
+      setActiveKey(1);
+      addAlert(AlertVariant.success, `User group "${name}" created successfully.`);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const onToggleAiAccess = (groupId: string, checked: boolean) => {
     setGroups(prev => prev.map(g => g.id === groupId ? { ...g, aiAccess: checked } : g));
     const group = groups.find(g => g.id === groupId);
@@ -213,6 +331,43 @@ const UsersAndGroups: React.FunctionComponent = () => {
       return next;
     });
   };
+
+  // --- Group drawer state ---
+  const [isGroupDrawerOpen, setIsGroupDrawerOpen] = React.useState(false);
+  const [selectedGroup, setSelectedGroup] = React.useState<GroupRow | null>(null);
+  const [drawerTabKey, setDrawerTabKey] = React.useState<string | number>(0);
+  const [drawerUserPage, setDrawerUserPage] = React.useState(1);
+  const [drawerSaPage, setDrawerSaPage] = React.useState(1);
+  const [drawerAgentPage, setDrawerAgentPage] = React.useState(1);
+  const [drawerRolePage, setDrawerRolePage] = React.useState(1);
+  const drawerPerPage = 5;
+
+  const onGroupRowClick = (g: GroupRow) => {
+    setSelectedGroup(g);
+    setDrawerTabKey(0);
+    setDrawerUserPage(1);
+    setDrawerSaPage(1);
+    setDrawerAgentPage(1);
+    setDrawerRolePage(1);
+    setIsGroupDrawerOpen(true);
+  };
+
+  const _storeMembers = selectedGroup ? getGroupMembers(selectedGroup.id) : null;
+  const drawerUsers = selectedGroup
+    ? (groupMemberUsers[selectedGroup.id] || (_storeMembers?.users) || [])
+    : [];
+  const drawerSAs = selectedGroup
+    ? (groupMemberSAs[selectedGroup.id] || (_storeMembers?.serviceAccounts) || [])
+    : [];
+  const drawerAgents = selectedGroup
+    ? (groupMemberAgents[selectedGroup.id] || (_storeMembers?.agents) || [])
+    : [];
+  const drawerRoles = selectedGroup ? (groupAssignedRoles[selectedGroup.id] || []) : [];
+
+  const drawerUserPageRows = drawerUsers.slice((drawerUserPage - 1) * drawerPerPage, drawerUserPage * drawerPerPage);
+  const drawerSaPageRows = drawerSAs.slice((drawerSaPage - 1) * drawerPerPage, drawerSaPage * drawerPerPage);
+  const drawerAgentPageRows = drawerAgents.slice((drawerAgentPage - 1) * drawerPerPage, drawerAgentPage * drawerPerPage);
+  const drawerRolePageRows = drawerRoles.slice((drawerRolePage - 1) * drawerPerPage, drawerRolePage * drawerPerPage);
 
   const onSort = (_event: React.MouseEvent, index: number, direction: 'asc' | 'desc') => {
     setActiveSortIndex(index);
@@ -442,164 +597,333 @@ const UsersAndGroups: React.FunctionComponent = () => {
 
           {/* ======================== User groups tab ======================== */}
           <Tab eventKey={1} title={<TabTitleText>User groups</TabTitleText>}>
-            <PageSection>
-              <Toolbar>
-                <ToolbarContent>
-                  <ToolbarItem>
-                    <MenuToggle
-                      splitButtonItems={[
-                        <MenuToggleCheckbox
-                          id="groups-bulk-select"
-                          key="groups-bulk-select"
-                          aria-label="Select all"
-                          isChecked={areAllGroupsSelected ? true : areSomeGroupsSelected ? null : false}
-                          onChange={(checked) => onSelectAllGroups(checked)}
-                        />
-                      ]}
-                      aria-label="Select"
-                    />
-                  </ToolbarItem>
-                  <ToolbarGroup variant="filter-group">
-                    <ToolbarItem>
-                      <Dropdown
-                        isOpen={isGroupFilterOpen}
-                        onSelect={(_, v) => { setGroupFilterField(v as string); setIsGroupFilterOpen(false); }}
-                        onOpenChange={setIsGroupFilterOpen}
-                        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                          <MenuToggle
-                            ref={toggleRef}
-                            onClick={() => setIsGroupFilterOpen(prev => !prev)}
-                            icon={<FilterIcon />}
-                          >
-                            {groupFilterField}
-                          </MenuToggle>
-                        )}
-                      >
-                        <DropdownList>
-                          <DropdownItem key="Name" value="Name">Name</DropdownItem>
-                        </DropdownList>
-                      </Dropdown>
-                    </ToolbarItem>
-                    <ToolbarItem>
-                      <SearchInput
-                        placeholder="Filter by name"
-                        value={groupQuery}
-                        onChange={(_, v) => { setGroupQuery(v); setPageG(1); }}
-                        onClear={() => { setGroupQuery(''); setPageG(1); }}
-                      />
-                    </ToolbarItem>
-                  </ToolbarGroup>
-                  <ToolbarItem>
-                    <Button variant="primary">Create user group</Button>
-                  </ToolbarItem>
-                  <ToolbarItem>
-                    <Dropdown
-                      isOpen={isGroupKebabOpen}
-                      onOpenChange={setIsGroupKebabOpen}
-                      toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                        <MenuToggle
-                          ref={toggleRef}
-                          variant="plain"
-                          aria-label="Toolbar actions"
-                          onClick={() => setIsGroupKebabOpen(prev => !prev)}
-                        >
-                          <EllipsisVIcon />
-                        </MenuToggle>
-                      )}
-                    >
-                      <DropdownList>
-                        <DropdownItem>Delete</DropdownItem>
-                      </DropdownList>
-                    </Dropdown>
-                  </ToolbarItem>
-                  <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
-                    <Pagination
-                      isCompact
-                      itemCount={sortedGroups.length}
-                      perPage={perPageG}
-                      page={pageG}
-                      onSetPage={(_, p) => setPageG(p)}
-                      onPerPageSelect={(_, n) => { setPerPageG(n); setPageG(1); }}
-                    />
-                  </ToolbarItem>
-                </ToolbarContent>
-              </Toolbar>
-
-              <Table aria-label="User groups table">
-                <Thead>
-                  <Tr>
-                    <Th
-                      select={{
-                        onSelect: (_e, isSelected) => onSelectAllGroups(isSelected as boolean),
-                        isSelected: areAllGroupsSelected,
-                      }}
-                    />
-                    <Th
-                      width={25}
-                      sort={{
-                        sortBy: { index: activeSortIndex, direction: activeSortDirection },
-                        onSort,
-                        columnIndex: 0,
-                      }}
-                    >
-                      Name
-                    </Th>
-                    <Th width={25}>Description</Th>
-                    <Th width={15}>AI Agent access</Th>
-                    <Th width={10}>Users</Th>
-                    <Th width={15}>Last modified</Th>
-                    <Th width={10} screenReaderText="Actions" />
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {pageRowsG.map(g => (
-                    <Tr key={g.id}>
-                      <Td
-                        select={{
-                          rowIndex: 0,
-                          onSelect: (_e, isSelected) => onSelectGroupRow(g.id, isSelected as boolean),
-                          isSelected: selectedGroupIds.has(g.id),
-                        }}
-                      />
-                      <Td>{g.name}</Td>
-                      <Td>{g.description}</Td>
-                      <Td>
-                        <Switch
-                          id={`ai-access-${g.id}`}
-                          isChecked={g.aiAccess}
-                          onChange={(_e, checked) => onToggleAiAccess(g.id, checked)}
-                          aria-label="AI Agent access"
-                        />
-                      </Td>
-                      <Td>{g.users}</Td>
-                      <Td>{g.lastModified}</Td>
-                      <Td isActionCell>
-                        <Dropdown
-                          isOpen={openKebabFor === g.id}
-                          onOpenChange={(isOpen) => setOpenKebabFor(isOpen ? g.id : null)}
-                          toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-                            <MenuToggle
-                              ref={toggleRef}
-                              variant="plain"
-                              aria-label="Row actions"
-                              onClick={() => setOpenKebabFor(openKebabFor === g.id ? null : g.id)}
-                            >
-                              <EllipsisVIcon />
-                            </MenuToggle>
+            <Drawer isExpanded={isGroupDrawerOpen} isInline>
+              <DrawerContent panelContent={
+                selectedGroup ? (
+                  <DrawerPanelContent widths={{ default: 'width_33' }} style={{ borderLeft: '1px solid var(--pf-t--global--border--color--default)' }}>
+                    <DrawerHead>
+                      <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }} alignItems={{ default: 'alignItemsCenter' }}>
+                        <FlexItem>
+                          <Title headingLevel="h2" size="lg">{selectedGroup.name}</Title>
+                        </FlexItem>
+                        <FlexItem>
+                          <Button variant="link" icon={<PencilAltIcon />}>Edit user group</Button>
+                        </FlexItem>
+                      </Flex>
+                      <DrawerActions>
+                        <DrawerCloseButton onClick={() => { setIsGroupDrawerOpen(false); setSelectedGroup(null); }} />
+                      </DrawerActions>
+                    </DrawerHead>
+                    <div style={{ padding: '0 16px 16px' }}>
+                      <Tabs activeKey={drawerTabKey} onSelect={(_e, k) => { setDrawerTabKey(k); setDrawerUserPage(1); setDrawerSaPage(1); setDrawerAgentPage(1); setDrawerRolePage(1); }}>
+                        <Tab eventKey={0} title={<TabTitleText>Users</TabTitleText>}>
+                          {drawerUsers.length > 0 ? (
+                            <div style={{ marginTop: 8 }}>
+                              <Pagination
+                                isCompact
+                                itemCount={drawerUsers.length}
+                                perPage={drawerPerPage}
+                                page={drawerUserPage}
+                                onSetPage={(_, p) => setDrawerUserPage(p)}
+                                onPerPageSelect={() => {}}
+                                variant="top"
+                              />
+                              <Table aria-label="Group users" variant="compact" style={{ marginTop: 8 }}>
+                                <Thead>
+                                  <Tr>
+                                    <Th>Username</Th>
+                                    <Th>Email</Th>
+                                    <Th>First name</Th>
+                                    <Th>Last name</Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  {drawerUserPageRows.map((u, i) => (
+                                    <Tr key={i}>
+                                      <Td>{u.username}</Td>
+                                      <Td>{u.email}</Td>
+                                      <Td>{u.firstName}</Td>
+                                      <Td>{u.lastName}</Td>
+                                    </Tr>
+                                  ))}
+                                </Tbody>
+                              </Table>
+                              <Pagination
+                                itemCount={drawerUsers.length}
+                                perPage={drawerPerPage}
+                                page={drawerUserPage}
+                                onSetPage={(_, p) => setDrawerUserPage(p)}
+                                onPerPageSelect={() => {}}
+                                style={{ marginTop: 8 }}
+                              />
+                            </div>
+                          ) : (
+                            <EmptyState variant="lg" titleText="No users found" headingLevel="h3" icon={UsersIcon}>
+                              <EmptyStateBody>This group currently has no users assigned to it.</EmptyStateBody>
+                            </EmptyState>
                           )}
-                          popperProps={{ position: 'right' }}
-                        >
-                          <DropdownList>
-                            <DropdownItem>Edit user group</DropdownItem>
-                            <DropdownItem>Delete user group</DropdownItem>
-                          </DropdownList>
-                        </Dropdown>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </PageSection>
+                        </Tab>
+                        <Tab eventKey={1} title={<TabTitleText>Service accounts</TabTitleText>}>
+                          {drawerSAs.length > 0 ? (
+                            <div style={{ marginTop: 8 }}>
+                              <Pagination
+                                isCompact
+                                itemCount={drawerSAs.length}
+                                perPage={drawerPerPage}
+                                page={drawerSaPage}
+                                onSetPage={(_, p) => setDrawerSaPage(p)}
+                                onPerPageSelect={() => {}}
+                                variant="top"
+                              />
+                              <Table aria-label="Group service accounts" variant="compact" style={{ marginTop: 8 }}>
+                                <Thead>
+                                  <Tr>
+                                    <Th>Name</Th>
+                                    <Th>Client ID</Th>
+                                    <Th>Owner</Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  {drawerSaPageRows.map((sa, i) => (
+                                    <Tr key={i}>
+                                      <Td>{sa.name}</Td>
+                                      <Td>{sa.clientId}</Td>
+                                      <Td>{sa.owner}</Td>
+                                    </Tr>
+                                  ))}
+                                </Tbody>
+                              </Table>
+                              <Pagination
+                                itemCount={drawerSAs.length}
+                                perPage={drawerPerPage}
+                                page={drawerSaPage}
+                                onSetPage={(_, p) => setDrawerSaPage(p)}
+                                onPerPageSelect={() => {}}
+                                style={{ marginTop: 8 }}
+                              />
+                            </div>
+                          ) : (
+                            <EmptyState variant="lg" titleText="No service accounts found" headingLevel="h3" icon={UsersIcon}>
+                              <EmptyStateBody>This group currently has no service accounts assigned to it.</EmptyStateBody>
+                            </EmptyState>
+                          )}
+                        </Tab>
+                        <Tab eventKey={2} title={<TabTitleText>AI agents</TabTitleText>}>
+                          {drawerAgents.length > 0 ? (
+                            <div style={{ marginTop: 8 }}>
+                              <Pagination
+                                isCompact
+                                itemCount={drawerAgents.length}
+                                perPage={drawerPerPage}
+                                page={drawerAgentPage}
+                                onSetPage={(_, p) => setDrawerAgentPage(p)}
+                                onPerPageSelect={() => {}}
+                                variant="top"
+                              />
+                              <Table aria-label="Group AI agents" variant="compact" style={{ marginTop: 8 }}>
+                                <Thead>
+                                  <Tr>
+                                    <Th>Name</Th>
+                                    <Th>Description</Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  {drawerAgentPageRows.map((a, i) => (
+                                    <Tr key={i}>
+                                      <Td>{a.name}</Td>
+                                      <Td>{a.description}</Td>
+                                    </Tr>
+                                  ))}
+                                </Tbody>
+                              </Table>
+                              <Pagination
+                                itemCount={drawerAgents.length}
+                                perPage={drawerPerPage}
+                                page={drawerAgentPage}
+                                onSetPage={(_, p) => setDrawerAgentPage(p)}
+                                onPerPageSelect={() => {}}
+                                style={{ marginTop: 8 }}
+                              />
+                            </div>
+                          ) : (
+                            <EmptyState variant="lg" titleText="No AI agents found" headingLevel="h3" icon={UsersIcon}>
+                              <EmptyStateBody>This group currently has no AI agents assigned to it.</EmptyStateBody>
+                            </EmptyState>
+                          )}
+                        </Tab>
+                      </Tabs>
+                    </div>
+                  </DrawerPanelContent>
+                ) : undefined
+              }>
+                <DrawerContentBody>
+                  <PageSection>
+                    <Toolbar>
+                      <ToolbarContent>
+                        <ToolbarItem>
+                          <MenuToggle
+                            splitButtonItems={[
+                              <MenuToggleCheckbox
+                                id="groups-bulk-select"
+                                key="groups-bulk-select"
+                                aria-label="Select all"
+                                isChecked={areAllGroupsSelected ? true : areSomeGroupsSelected ? null : false}
+                                onChange={(checked) => onSelectAllGroups(checked)}
+                              />
+                            ]}
+                            aria-label="Select"
+                          />
+                        </ToolbarItem>
+                        <ToolbarGroup variant="filter-group">
+                          <ToolbarItem>
+                            <Dropdown
+                              isOpen={isGroupFilterOpen}
+                              onSelect={(_, v) => { setGroupFilterField(v as string); setIsGroupFilterOpen(false); }}
+                              onOpenChange={setIsGroupFilterOpen}
+                              toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                                <MenuToggle
+                                  ref={toggleRef}
+                                  onClick={() => setIsGroupFilterOpen(prev => !prev)}
+                                  icon={<FilterIcon />}
+                                >
+                                  {groupFilterField}
+                                </MenuToggle>
+                              )}
+                            >
+                              <DropdownList>
+                                <DropdownItem key="Name" value="Name">Name</DropdownItem>
+                              </DropdownList>
+                            </Dropdown>
+                          </ToolbarItem>
+                          <ToolbarItem>
+                            <SearchInput
+                              placeholder="Filter by name"
+                              value={groupQuery}
+                              onChange={(_, v) => { setGroupQuery(v); setPageG(1); }}
+                              onClear={() => { setGroupQuery(''); setPageG(1); }}
+                            />
+                          </ToolbarItem>
+                        </ToolbarGroup>
+                        <ToolbarItem>
+                          <Button variant="primary" onClick={() => navigate('/users-and-groups/create')}>Create user group</Button>
+                        </ToolbarItem>
+                        <ToolbarItem>
+                          <Dropdown
+                            isOpen={isGroupKebabOpen}
+                            onOpenChange={setIsGroupKebabOpen}
+                            toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                              <MenuToggle
+                                ref={toggleRef}
+                                variant="plain"
+                                aria-label="Toolbar actions"
+                                onClick={() => setIsGroupKebabOpen(prev => !prev)}
+                              >
+                                <EllipsisVIcon />
+                              </MenuToggle>
+                            )}
+                          >
+                            <DropdownList>
+                              <DropdownItem>Delete</DropdownItem>
+                            </DropdownList>
+                          </Dropdown>
+                        </ToolbarItem>
+                        <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
+                          <Pagination
+                            isCompact
+                            itemCount={sortedGroups.length}
+                            perPage={perPageG}
+                            page={pageG}
+                            onSetPage={(_, p) => setPageG(p)}
+                            onPerPageSelect={(_, n) => { setPerPageG(n); setPageG(1); }}
+                          />
+                        </ToolbarItem>
+                      </ToolbarContent>
+                    </Toolbar>
+
+                    <Table aria-label="User groups table">
+                      <Thead>
+                        <Tr>
+                          <Th
+                            select={{
+                              onSelect: (_e, isSelected) => onSelectAllGroups(isSelected as boolean),
+                              isSelected: areAllGroupsSelected,
+                            }}
+                          />
+                          <Th
+                            width={25}
+                            sort={{
+                              sortBy: { index: activeSortIndex, direction: activeSortDirection },
+                              onSort,
+                              columnIndex: 0,
+                            }}
+                          >
+                            Name
+                          </Th>
+                          <Th width={25}>Description</Th>
+                          <Th width={15}>AI Agent access</Th>
+                          <Th width={10}>Users</Th>
+                          <Th width={15}>Last modified</Th>
+                          <Th width={10} screenReaderText="Actions" />
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {pageRowsG.map(g => (
+                          <Tr
+                            key={g.id}
+                            isClickable
+                            isRowSelected={selectedGroup?.id === g.id}
+                            onRowClick={() => onGroupRowClick(g)}
+                          >
+                            <Td
+                              select={{
+                                rowIndex: 0,
+                                onSelect: (_e, isSelected) => onSelectGroupRow(g.id, isSelected as boolean),
+                                isSelected: selectedGroupIds.has(g.id),
+                              }}
+                            />
+                            <Td>{g.name}</Td>
+                            <Td>{g.description}</Td>
+                            <Td>
+                              <Switch
+                                id={`ai-access-${g.id}`}
+                                isChecked={g.aiAccess}
+                                onChange={(_e, checked) => { onToggleAiAccess(g.id, checked); }}
+                                onClick={(e) => e.stopPropagation()}
+                                aria-label="AI Agent access"
+                              />
+                            </Td>
+                            <Td>{g.users}</Td>
+                            <Td>{g.lastModified}</Td>
+                            <Td isActionCell onClick={(e) => e.stopPropagation()}>
+                              <Dropdown
+                                isOpen={openKebabFor === g.id}
+                                onOpenChange={(isOpen) => setOpenKebabFor(isOpen ? g.id : null)}
+                                toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                                  <MenuToggle
+                                    ref={toggleRef}
+                                    variant="plain"
+                                    aria-label="Row actions"
+                                    onClick={() => setOpenKebabFor(openKebabFor === g.id ? null : g.id)}
+                                  >
+                                    <EllipsisVIcon />
+                                  </MenuToggle>
+                                )}
+                                popperProps={{ position: 'right' }}
+                              >
+                                <DropdownList>
+                                  <DropdownItem>Edit user group</DropdownItem>
+                                  <DropdownItem>Delete user group</DropdownItem>
+                                </DropdownList>
+                              </Dropdown>
+                            </Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                  </PageSection>
+                </DrawerContentBody>
+              </DrawerContent>
+            </Drawer>
           </Tab>
         </Tabs>
       </PageSection>

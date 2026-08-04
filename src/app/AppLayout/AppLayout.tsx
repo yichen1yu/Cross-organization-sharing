@@ -1736,10 +1736,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     '/my-user-access',
     '/user-access',
     '/users-and-groups',
+    '/users-and-groups/create',
     '/roles',
     '/workspaces',
     '/red-hat-access-requests',
     '/service-accounts',
+    '/ai-agents',
+    '/authentication-policy',
     '/learning-resources-iam',
     '/organization/organization-wide-access',
     '/organization/trusted-organizations',
@@ -1783,14 +1786,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     { 
       label: 'Access Management', 
       path: '/user-access', 
-      isActive: ['/user-access', '/users-and-groups', '/roles', '/service-accounts'].includes(location.pathname) || location.pathname.startsWith('/workspaces'),
+      isActive: ['/user-access', '/roles', '/ai-agents'].includes(location.pathname) || location.pathname.startsWith('/workspaces') || location.pathname.startsWith('/users-and-groups'),
       isExpandable: true,
       subItems: [
-        { label: 'Users and Groups', path: '/users-and-groups', isActive: location.pathname === '/users-and-groups' },
+        { label: 'Users and Groups', path: '/users-and-groups', isActive: location.pathname.startsWith('/users-and-groups') },
         { label: 'Roles', path: '/roles', isActive: location.pathname === '/roles' },
         { label: 'Workspaces', path: '/workspaces', isActive: location.pathname.startsWith('/workspaces') },
-        // New Service accounts under Access management
-        { label: 'Service Accounts', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
+        { label: 'AI Agents', path: '/ai-agents', isActive: location.pathname === '/ai-agents' },
       ]
     },
     {
@@ -1812,8 +1814,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         { label: 'Identity Provider Integration', path: '/organization/identity-provider-integration', isActive: location.pathname === '/organization/identity-provider-integration' },
       ]
     },
-    // Remove Authentication Policy
-    // Remove standalone Service Accounts (now nested under Access Management)
+    { label: 'Service Accounts', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
     { label: 'Learning Resources', path: '/learning-resources-iam', isActive: location.pathname === '/learning-resources-iam' },
   ];
 

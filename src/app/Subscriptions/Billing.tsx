@@ -39,7 +39,7 @@ const Billing: React.FunctionComponent = () => {
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
   const [isMasterOpen, setIsMasterOpen] = React.useState(false);
   // Selection state for table rows
-  const groupNames = ['Golden girls', 'Powerpuff girls', 'Spice girls'];
+  const groupNames = ['Default admin access', 'Engineering Leads', 'Platform-SRE'];
   const [selectedRowIds, setSelectedRowIds] = React.useState<Set<number>>(new Set());
   const areAllSelected = selectedRowIds.size === groupNames.length;
   const areSomeSelected = selectedRowIds.size > 0 && selectedRowIds.size < groupNames.length;
@@ -132,7 +132,7 @@ const Billing: React.FunctionComponent = () => {
     'Umbrella': { names: ['Research leads', 'Lab techs', 'Field agents', 'Compliance'], members: [4, 8, 5, 2] },
     'Soylent': { names: ['Operations', 'Supply chain', 'Marketing', 'Customer success', 'Finance'], members: [7, 3, 5, 4, 2] },
   };
-  const defaultGroups = { names: ['Administrators', 'Powerpuff Girls', 'Spice Girls', 'Golden Girls', 'Bad Bunnies'], members: [3, 5, 7, 2, 4] };
+  const defaultGroups = { names: ['Default admin access', 'Engineering Leads', 'Platform-SRE', 'Compliance Admins', 'QA-Automation'], members: [2, 3, 7, 1, 6] };
   const currentOrgGroups = wizardGroupsByOrg[selectedTrustedOrg || ''] || defaultGroups;
   const wizardUserGroups = currentOrgGroups.names;
   const wizardMembers = currentOrgGroups.members;

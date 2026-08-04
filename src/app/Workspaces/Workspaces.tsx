@@ -15,6 +15,7 @@ import {
   Title,
   Toolbar,
   ToolbarContent,
+  ToolbarGroup,
   ToolbarItem,
   SearchInput,
   Dropdown,
@@ -40,6 +41,8 @@ import { Wizard, WizardStep, WizardHeader } from '@patternfly/react-core';
 import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon, SyncAltIcon } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
 import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { getGroups, getGroupsVersion, getGroupMembers } from '@app/utils/groupsStore';
+import { allRoles as sharedRoles } from '@app/utils/rolesData';
 
 type WorkspaceMeta = {
   name: string;
@@ -60,51 +63,62 @@ const workspaceData: Record<string, WorkspaceMeta> = {
     hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace Ungrouped Hosts' }],
   },
   'workspace-a': {
-    name: 'Workspace A',
-    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace A' }],
+    name: 'Production',
+    description: 'Workspace consisted of systems in the production environment.',
+    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Production' }],
   },
   'workspace-b': {
-    name: 'Workspace B',
-    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace B' }],
+    name: 'Sandbox',
+    description: 'Workspace consisted of systems in the sandbox environment.',
+    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Sandbox' }],
   },
   'workspace-c': {
-    name: 'Workspace C',
-    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Workspace C' }],
+    name: 'Preview',
+    description: 'Workspace consisted of systems in the preview environment.',
+    hierarchy: [{ name: 'Pinnacle Corp', path: '/workspaces/uxd' }, { name: 'Workspace default', path: '/workspaces/workspace-default' }, { name: 'Preview' }],
   },
 };
 
-type UserEntry = { name: string; org: string };
+type UserEntry = { name: string; org: string; username?: string; firstName?: string; lastName?: string };
 type GrantedRow = { groupName: string; description: string; users: number; roles: number; lastModified: string; rolesList: string[]; usersList: UserEntry[]; orgName?: string };
+
+const _u = {
+  doejoe: { name: 'Joe Doe', org: 'Pinnacle Corp', username: 'doejoe', firstName: 'Joe', lastName: 'Doe' },
+  admin: { name: 'RBAC Admin For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_admin', firstName: 'RBAC Admin', lastName: 'For V2' },
+  normal: { name: 'RBAC Normal For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_normal', firstName: 'RBAC Normal', lastName: 'For V2' },
+  rbac: { name: 'RBAC RBAC For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_rbac', firstName: 'RBAC RBAC', lastName: 'For V2' },
+  viewer: { name: 'RBAC Viewer For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_viewer', firstName: 'RBAC Viewer', lastName: 'For V2' },
+  workspaces: { name: 'RBAC Workspaces For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_workspaces', firstName: 'RBAC Workspaces', lastName: 'For V2' },
+};
 
 const initialGrantedByWorkspace: Record<string, GrantedRow[]> = {
   'workspace-a': [
-    { groupName: 'Golden girls', description: 'Workspace administrators handling access approvals and settings', users: 4, roles: 2, lastModified: '2 days ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-    { groupName: 'Seattle Grace admins', description: 'Clinical admins overseeing user lifecycle, roles, and audits', users: 3, roles: 2, lastModified: '2 days ago', rolesList: ['User manager', 'Audit viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
-    { groupName: 'Spice girls', description: 'Project members with standard access to dashboards and reports', users: 5, roles: 2, lastModified: '2 days ago', rolesList: ['Dashboard viewer', 'Report reader'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
+    { groupName: 'Default admin access', description: 'This group contains all org admin use...', users: 2, roles: 2, lastModified: '28 Mar 2022', rolesList: ['User Access administrator', 'Cost administrator'], usersList: [_u.admin, _u.rbac] },
+    { groupName: 'Compliance Admins', description: 'Manages compliance policies and audit...', users: 1, roles: 1, lastModified: '2 months ago', rolesList: ['Compliance administrator'], usersList: [_u.doejoe] },
+    { groupName: 'Engineering Leads', description: 'Technical leads across all squads', users: 3, roles: 2, lastModified: '15 Jan 2026', rolesList: ['Inventory administrator', 'Remediations administrator'], usersList: [_u.admin, _u.normal, _u.viewer] },
   ],
   'uxd': [
-    { groupName: 'Golden girls', description: 'Org-wide administrators with full access', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-    { groupName: 'Powerpuff girls', description: 'Security and compliance oversight across all workspaces', users: 3, roles: 2, lastModified: '3 days ago', rolesList: ['Security auditor', 'Compliance reviewer'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
-    { groupName: 'Bad Bunnies', description: 'Platform engineering team with infrastructure access', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
+    { groupName: 'Global Admins', description: 'Admin group for global operations', users: 2, roles: 3, lastModified: '01 Jun 2025', rolesList: ['User Access administrator', 'Cost administrator', 'Notifications administrator'], usersList: [_u.admin, _u.doejoe] },
+    { groupName: 'Platform-SRE', description: 'Site reliability engineering team', users: 3, roles: 2, lastModified: '18 Mar 2026', rolesList: ['Inventory administrator', 'Remediations administrator'], usersList: [_u.workspaces, _u.rbac, _u.viewer] },
+    { groupName: 'IAM-Reviewers', description: 'Identity and access management reviewers', users: 2, roles: 1, lastModified: '10 Dec 2025', rolesList: ['User Access viewer'], usersList: [_u.normal, _u.viewer] },
   ],
   'workspace-default': [
-    { groupName: 'Golden girls', description: 'Default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-    { groupName: 'Spice girls', description: 'General access for standard workspace operations', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
+    { groupName: 'Default access', description: 'This group contains all users in your...', users: 6, roles: 2, lastModified: '06 May 2021', rolesList: ['Compliance viewer', 'Notifications viewer'], usersList: [_u.doejoe, _u.admin, _u.normal, _u.rbac, _u.viewer, _u.workspaces] },
+    { groupName: 'Default admin access', description: 'This group contains all org admin use...', users: 2, roles: 1, lastModified: '28 Mar 2022', rolesList: ['User Access administrator'], usersList: [_u.admin, _u.rbac] },
   ],
   'workspace-ungrouped-hosts': [
-    { groupName: 'Powerpuff girls', description: 'Monitoring ungrouped hosts and triaging assignments', users: 3, roles: 1, lastModified: '12 hours ago', rolesList: ['Host manager'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
-    { groupName: 'Seattle Grace admins', description: 'Clinical systems ungrouped host oversight', users: 3, roles: 1, lastModified: '1 day ago', rolesList: ['Host viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
+    { groupName: 'Platform-SRE', description: 'Site reliability engineering team', users: 3, roles: 1, lastModified: '18 Mar 2026', rolesList: ['Inventory Hosts administrator'], usersList: [_u.workspaces, _u.rbac, _u.viewer] },
+    { groupName: 'QA-Automation', description: 'Automated quality assurance runners', users: 2, roles: 1, lastModified: '25 May 2026', rolesList: ['Inventory Hosts viewer'], usersList: [_u.normal, _u.doejoe] },
   ],
   'workspace-b': [
-    { groupName: 'Bad Bunnies', description: 'Infrastructure provisioning and deployment pipelines', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Deploy manager', 'Pipeline operator'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
-    { groupName: 'Golden girls', description: 'Workspace administrators handling approvals', users: 4, roles: 1, lastModified: '4 days ago', rolesList: ['Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-    { groupName: 'Spice girls', description: 'QA and testing team with report access', users: 5, roles: 1, lastModified: '2 days ago', rolesList: ['Report reader'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
-    { groupName: 'Cardiology admins', description: 'Cross-workspace access for cardiac monitoring systems', users: 2, roles: 1, lastModified: '6 hours ago', rolesList: ['System viewer'], usersList: [{ name: 'Cristina Yang', org: 'Cardiology' }, { name: 'Preston Burke', org: 'Cardiology' }] },
+    { groupName: 'Development Team Alpha', description: 'Front-end and back-end developers', users: 1, roles: 2, lastModified: '26 Mar 2026', rolesList: ['Content Template administrator', 'Remediations viewer'], usersList: [_u.doejoe] },
+    { groupName: 'Compliance Auditors', description: 'Reviews audit logs and compliance rep...', users: 1, roles: 1, lastModified: '3 months ago', rolesList: ['Compliance viewer'], usersList: [_u.viewer] },
+    { groupName: 'EnvironmentTesters', description: 'Staging and pre-prod environment testers', users: 3, roles: 1, lastModified: '22 Feb 2026', rolesList: ['Inventory Hosts viewer'], usersList: [_u.normal, _u.viewer, _u.workspaces] },
   ],
   'workspace-c': [
-    { groupName: 'Powerpuff girls', description: 'Dev environment access and sandbox management', users: 3, roles: 2, lastModified: '8 hours ago', rolesList: ['Sandbox admin', 'Developer'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
-    { groupName: 'Operating room ops', description: 'Operational monitoring and incident response', users: 6, roles: 2, lastModified: '3 days ago', rolesList: ['Incident responder', 'Monitor viewer'], usersList: [{ name: 'Mark Sloan', org: 'Surgery' }, { name: 'Callie Torres', org: 'Surgery' }, { name: 'Arizona Robbins', org: 'Surgery' }, { name: 'Owen Hunt', org: 'Surgery' }, { name: 'April Kepner', org: 'Surgery' }, { name: 'Jackson Avery', org: 'Surgery' }] },
-    { groupName: 'Seattle Grace admins', description: 'Clinical admin access for integration testing', users: 3, roles: 1, lastModified: '5 days ago', rolesList: ['Integration tester'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
+    { groupName: 'demo-local-v2__Child Group', description: 'Group for child workspace testing', users: 0, roles: 1, lastModified: '08 Apr 2026', rolesList: ['Content Template viewer'], usersList: [] },
+    { groupName: 'demo-local-v2__Seeded Group', description: 'Controlled test group for search and ...', users: 0, roles: 1, lastModified: '08 Apr 2026', rolesList: ['Inventory Hosts viewer'], usersList: [] },
+    { groupName: 'Automation Something', description: 'Automated pipeline runners', users: 2, roles: 2, lastModified: '10 days ago', rolesList: ['Notifications administrator', 'Malware detection viewer'], usersList: [_u.admin, _u.workspaces] },
   ],
 };
 
@@ -149,61 +163,24 @@ const Workspaces: React.FunctionComponent = () => {
   const [grantWhere, setGrantWhere] = React.useState<'within' | 'outside' | null>(null);
   const [isTrustedOpen, setIsTrustedOpen] = React.useState(false);
   const [selectedTrustedOrg, setSelectedTrustedOrg] = React.useState<string | null>(null);
-  // Main page: granted access rows — data moved to module scope for persistence
-
-  const initialGrantedByWorkspace: Record<string, GrantedRow[]> = {
-    'workspace-a': [
-      { groupName: 'Golden girls', description: 'Workspace administrators handling access approvals and settings', users: 4, roles: 2, lastModified: '2 days ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-      { groupName: 'Seattle Grace admins', description: 'Clinical admins overseeing user lifecycle, roles, and audits', users: 3, roles: 2, lastModified: '2 days ago', rolesList: ['User manager', 'Audit viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
-      { groupName: 'Spice girls', description: 'Project members with standard access to dashboards and reports', users: 5, roles: 2, lastModified: '2 days ago', rolesList: ['Dashboard viewer', 'Report reader'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
-    ],
-    'uxd': [
-      { groupName: 'Golden girls', description: 'Org-wide administrators with full access', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-      { groupName: 'Powerpuff girls', description: 'Security and compliance oversight across all workspaces', users: 3, roles: 2, lastModified: '3 days ago', rolesList: ['Security auditor', 'Compliance reviewer'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
-      { groupName: 'Bad Bunnies', description: 'Platform engineering team with infrastructure access', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
-    ],
-    'workspace-default': [
-      { groupName: 'Golden girls', description: 'Default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-      { groupName: 'Spice girls', description: 'General access for standard workspace operations', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
-    ],
-    'workspace-ungrouped-hosts': [
-      { groupName: 'Powerpuff girls', description: 'Monitoring ungrouped hosts and triaging assignments', users: 3, roles: 1, lastModified: '12 hours ago', rolesList: ['Host manager'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
-      { groupName: 'Seattle Grace admins', description: 'Clinical systems ungrouped host oversight', users: 3, roles: 1, lastModified: '1 day ago', rolesList: ['Host viewer'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
-    ],
-    'workspace-b': [
-      { groupName: 'Bad Bunnies', description: 'Infrastructure provisioning and deployment pipelines', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Deploy manager', 'Pipeline operator'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
-      { groupName: 'Golden girls', description: 'Workspace administrators handling approvals', users: 4, roles: 1, lastModified: '4 days ago', rolesList: ['Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-      { groupName: 'Spice girls', description: 'QA and testing team with report access', users: 5, roles: 1, lastModified: '2 days ago', rolesList: ['Report reader'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
-      { groupName: 'Cardiology admins', description: 'Cross-workspace access for cardiac monitoring systems', users: 2, roles: 1, lastModified: '6 hours ago', rolesList: ['System viewer'], usersList: [{ name: 'Cristina Yang', org: 'Cardiology' }, { name: 'Preston Burke', org: 'Cardiology' }] },
-    ],
-    'workspace-c': [
-      { groupName: 'Powerpuff girls', description: 'Dev environment access and sandbox management', users: 3, roles: 2, lastModified: '8 hours ago', rolesList: ['Sandbox admin', 'Developer'], usersList: [{ name: 'Blossom Utonium', org: 'Pinnacle Corp' }, { name: 'Bubbles Utonium', org: 'Pinnacle Corp' }, { name: 'Buttercup Utonium', org: 'Pinnacle Corp' }] },
-      { groupName: 'Operating room ops', description: 'Operational monitoring and incident response', users: 6, roles: 2, lastModified: '3 days ago', rolesList: ['Incident responder', 'Monitor viewer'], usersList: [{ name: 'Mark Sloan', org: 'Surgery' }, { name: 'Callie Torres', org: 'Surgery' }, { name: 'Arizona Robbins', org: 'Surgery' }, { name: 'Owen Hunt', org: 'Surgery' }, { name: 'April Kepner', org: 'Surgery' }, { name: 'Jackson Avery', org: 'Surgery' }] },
-      { groupName: 'Seattle Grace admins', description: 'Clinical admin access for integration testing', users: 3, roles: 1, lastModified: '5 days ago', rolesList: ['Integration tester'], usersList: [{ name: 'Harry Potter', org: 'Seattle Grace' }, { name: 'Ron Weasley', org: 'Seattle Grace' }, { name: 'Hermine Granger', org: 'Seattle Grace' }] },
-    ],
-  };
-
   const parentGrantedByWorkspace: Record<string, GrantedRow[]> = {
     'workspace-a': [
-      { groupName: 'Cardiology admins', description: 'Manage cardiac imaging access, approvals, and workspace settings', users: 2, roles: 1, lastModified: '6 hours ago', rolesList: ['Workspace administrator'], usersList: [{ name: 'Cristina Yang', org: 'Cardiology' }, { name: 'Preston Burke', org: 'Cardiology' }] },
-      { groupName: 'Radiology viewers', description: 'Read‑only access to imaging dashboards and reports', users: 8, roles: 1, lastModified: '1 day ago', rolesList: ['Report reader'], usersList: [{ name: 'Meredith Grey', org: 'Radiology' }, { name: 'Derek Shepherd', org: 'Radiology' }, { name: 'Alex Karev', org: 'Radiology' }, { name: 'Izzie Stevens', org: 'Radiology' }, { name: 'George O\'Malley', org: 'Radiology' }, { name: 'Miranda Bailey', org: 'Radiology' }, { name: 'Richard Webber', org: 'Radiology' }, { name: 'Addison Montgomery', org: 'Radiology' }] },
-      { groupName: 'Operating room ops', description: 'Operational runbooks, device integrations, and audit oversight', users: 6, roles: 2, lastModified: '4 days ago', rolesList: ['Operations manager', 'Audit viewer'], usersList: [{ name: 'Mark Sloan', org: 'Surgery' }, { name: 'Callie Torres', org: 'Surgery' }, { name: 'Arizona Robbins', org: 'Surgery' }, { name: 'Owen Hunt', org: 'Surgery' }, { name: 'April Kepner', org: 'Surgery' }, { name: 'Jackson Avery', org: 'Surgery' }] },
+      { groupName: 'Global Admins', description: 'Admin group for global operations', users: 2, roles: 1, lastModified: '01 Jun 2025', rolesList: ['User Access administrator'], usersList: [_u.admin, _u.doejoe] },
+      { groupName: 'Insights-PNQ', description: 'Insights product team members in PNQ', users: 3, roles: 1, lastModified: '07 Apr 2022', rolesList: ['Compliance viewer'], usersList: [_u.normal, _u.viewer, _u.workspaces] },
     ],
     'uxd': [],
     'workspace-default': [
-      { groupName: 'Golden girls', description: 'Org-wide administrators inherited from Pinnacle Corp root', users: 4, roles: 3, lastModified: '1 day ago', rolesList: ['Organization administrator', 'Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-      { groupName: 'Bad Bunnies', description: 'Platform engineering inherited from Pinnacle Corp root', users: 4, roles: 2, lastModified: '5 days ago', rolesList: ['Infrastructure admin', 'Cost manager'], usersList: [{ name: 'Benito Martinez', org: 'Pinnacle Corp' }, { name: 'DJ Luian', org: 'Pinnacle Corp' }, { name: 'Tainy Ocasio', org: 'Pinnacle Corp' }, { name: 'Mora Vega', org: 'Pinnacle Corp' }] },
+      { groupName: 'Global Admins', description: 'Inherited admin group for global operations', users: 2, roles: 3, lastModified: '01 Jun 2025', rolesList: ['User Access administrator', 'Notifications administrator', 'Cost administrator'], usersList: [_u.admin, _u.doejoe] },
+      { groupName: 'Platform-SRE', description: 'Inherited SRE team access', users: 3, roles: 1, lastModified: '18 Mar 2026', rolesList: ['Inventory administrator'], usersList: [_u.workspaces, _u.rbac, _u.viewer] },
     ],
     'workspace-ungrouped-hosts': [
-      { groupName: 'Golden girls', description: 'Inherited default workspace administrators', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-      { groupName: 'Spice girls', description: 'Inherited general access from parent workspace', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
+      { groupName: 'Default access', description: 'Inherited default access from parent', users: 6, roles: 1, lastModified: '06 May 2021', rolesList: ['Compliance viewer'], usersList: [_u.doejoe, _u.admin, _u.normal, _u.rbac, _u.viewer, _u.workspaces] },
     ],
     'workspace-b': [
-      { groupName: 'Golden girls', description: 'Default workspace administrators inherited from parent', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
-      { groupName: 'Spice girls', description: 'Inherited general access from Workspace default', users: 5, roles: 1, lastModified: '3 days ago', rolesList: ['Dashboard viewer'], usersList: [{ name: 'Scary Spice', org: 'Pinnacle Corp' }, { name: 'Sporty Spice', org: 'Pinnacle Corp' }, { name: 'Baby Spice', org: 'Pinnacle Corp' }, { name: 'Ginger Spice', org: 'Pinnacle Corp' }, { name: 'Posh Spice', org: 'Pinnacle Corp' }] },
+      { groupName: 'Default admin access', description: 'Inherited org admin access from parent', users: 2, roles: 1, lastModified: '28 Mar 2022', rolesList: ['User Access administrator'], usersList: [_u.admin, _u.rbac] },
     ],
     'workspace-c': [
-      { groupName: 'Golden girls', description: 'Default workspace administrators inherited from parent', users: 4, roles: 2, lastModified: '1 day ago', rolesList: ['Workspace administrator', 'Approver'], usersList: [{ name: 'Sophia Petrillo', org: 'Pinnacle Corp' }, { name: 'Dorothy Zbornak', org: 'Pinnacle Corp' }, { name: 'Rose Nylund', org: 'Pinnacle Corp' }, { name: 'Blanche Devereaux', org: 'Pinnacle Corp' }] },
+      { groupName: 'OCM-Test-Group', description: 'Test group for OCM integration', users: 1, roles: 1, lastModified: '30 Nov 2025', rolesList: ['Compliance viewer'], usersList: [_u.doejoe] },
     ],
   };
 
@@ -272,38 +249,15 @@ const Workspaces: React.FunctionComponent = () => {
     'Umbrella': { names: ['Research leads', 'Lab techs', 'Field agents', 'Compliance'], members: [4, 8, 5, 2] },
     'Soylent': { names: ['Operations', 'Supply chain', 'Marketing', 'Customer success', 'Finance'], members: [7, 3, 5, 4, 2] },
   };
-  const defaultGroups = { names: ['Administrators', 'Powerpuff Girls', 'Spice Girls', 'Golden Girls', 'Bad Bunnies'], members: [3, 5, 7, 2, 4] };
-  const groupDescriptions: Record<string, string> = {
-    'Engineering leads': 'Technical leadership overseeing engineering projects and architecture decisions',
-    'Product managers': 'Product strategy, roadmap planning, and feature prioritization',
-    'Design ops': 'Design system management and UX process coordination',
-    'QA engineers': 'Quality assurance testing, automation, and release validation',
-    'DevOps': 'CI/CD pipelines, infrastructure automation, and deployment management',
-    'Sales ops': 'Sales process optimization and CRM administration',
-    'Account managers': 'Client relationship management and account growth',
-    'Support team': 'Customer support, ticket resolution, and escalation handling',
-    'Logistics': 'Supply chain coordination and delivery management',
-    'Billing admins': 'Invoice processing, payment management, and billing inquiries',
-    'Platform team': 'Core platform infrastructure and shared services',
-    'Security ops': 'Security monitoring, incident response, and compliance',
-    'Data analysts': 'Data reporting, business intelligence, and analytics',
-    'SRE team': 'Site reliability, uptime monitoring, and incident management',
-    'Administrator': 'Full administrative access and organization settings',
-    'Research leads': 'Research project oversight and experimental planning',
-    'Lab techs': 'Laboratory operations and technical equipment management',
-    'Field agents': 'On-site operations and field data collection',
-    'Compliance': 'Regulatory compliance monitoring and audit preparation',
-    'Operations': 'Day-to-day operational management and process oversight',
-    'Supply chain': 'Vendor coordination and supply chain logistics',
-    'Marketing': 'Marketing campaigns, content strategy, and brand management',
-    'Customer success': 'Customer onboarding, retention, and satisfaction',
-    'Finance': 'Financial planning, budgeting, and expense management',
-    'Administrators': 'Organization-wide administrative access and settings',
-    'Powerpuff Girls': 'Cross-functional team for special projects and initiatives',
-    'Spice Girls': 'Collaboration group for inter-department coordination',
-    'Golden Girls': 'Workspace administrators handling access approvals and settings',
-    'Bad Bunnies': 'Experimental projects and innovation sandbox team',
+  const _storeVersion = getGroupsVersion();
+  const _storeGroups = getGroups();
+  const defaultGroups = {
+    names: _storeGroups.map(g => g.name),
+    members: _storeGroups.map(g => g.members),
   };
+  const groupDescriptions: Record<string, string> = Object.fromEntries(
+    _storeGroups.map(g => [g.name, g.description])
+  );
   const currentOrgGroups = wizardGroupsByOrg[selectedTrustedOrg || ''] || defaultGroups;
   const wizardUserGroups = currentOrgGroups.names;
   const wizardMembers = currentOrgGroups.members;
@@ -315,17 +269,8 @@ const Workspaces: React.FunctionComponent = () => {
     else setSelectedWizardGroups(new Set());
   };
 
-  // Wizard step 3: roles table state
-  type RoleRow = { name: string; description: string; permissions: number; permissionNames: string[] };
-  const allRoles: RoleRow[] = [
-    { name: 'RHEL Admin', description: 'Manage RHEL subscriptions, repositories, and system configurations', permissions: 3, permissionNames: ['rhel:subscriptions:write', 'rhel:repositories:write', 'rhel:configurations:write'] },
-    { name: 'OpenShift Reviewer', description: 'View OpenShift cluster details, deployments, and usage reports', permissions: 4, permissionNames: ['openshift:clusters:read', 'openshift:deployments:read', 'openshift:usage:read', 'openshift:reports:read'] },
-    { name: 'Ansible Reviewer', description: 'View Ansible automation jobs, inventories, and execution history', permissions: 3, permissionNames: ['ansible:jobs:read', 'ansible:inventories:read', 'ansible:history:read'] },
-    { name: 'Automation Analytics Administrator', description: 'Full control over automation analytics settings, dashboards, and data exports', permissions: 1, permissionNames: ['automation-analytics:*:*'] },
-    { name: 'Automation Analytics Editor', description: 'Create and modify automation analytics reports, charts, and saved queries', permissions: 6, permissionNames: ['automation-analytics:reports:write', 'automation-analytics:charts:write', 'automation-analytics:queries:write', 'automation-analytics:reports:read', 'automation-analytics:charts:read', 'automation-analytics:queries:read'] },
-    { name: 'Automation Analytics Viewer', description: 'View automation analytics dashboards, reports, and usage trends', permissions: 7, permissionNames: ['automation-analytics:dashboards:read', 'automation-analytics:reports:read', 'automation-analytics:trends:read', 'automation-analytics:usage:read', 'automation-analytics:charts:read', 'automation-analytics:queries:read', 'automation-analytics:exports:read'] },
-    { name: 'Automation Services Catalog administrator', description: 'Manage catalog items, approval workflows, and order fulfillment settings', permissions: 3, permissionNames: ['catalog:items:write', 'catalog:approvals:write', 'catalog:orders:write'] }
-  ];
+  // Wizard step 3: roles table state — uses shared roles from the Roles page
+  const allRoles = sharedRoles;
   const [roleFilter, setRoleFilter] = React.useState('');
   const [selectedRoles, setSelectedRoles] = React.useState<Set<string>>(new Set());
   const [rolesPage, setRolesPage] = React.useState(1);
@@ -392,20 +337,31 @@ const Workspaces: React.FunctionComponent = () => {
           <Wizard
             onClose={() => setIsGrantWizardOpen(false)}
             onSave={() => {
-              // Create one row per selected group, using a simple mapping to Users/Roles counts
-              const mockFirstNames = ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Jamie', 'Quinn', 'Sage', 'Dakota', 'Skyler'];
-              const mockLastNames = ['Chen', 'Patel', 'Kim', 'Lopez', 'Singh', 'Nguyen', 'Müller', 'Tanaka', 'Costa', 'Johansson', 'Ali', 'Novak'];
               const orgName = grantWhere === 'outside' && selectedTrustedOrg ? selectedTrustedOrg : myOrgName;
+              const storeGroupsList = getGroups();
               const newRows: GrantedRow[] = Array.from(selectedWizardGroups).map(idx => {
-                const memberCount = wizardMembers[idx] ?? 1;
-                const users: UserEntry[] = Array.from({ length: memberCount }).map((_, i) => ({
-                  name: `${mockFirstNames[(idx * 3 + i) % mockFirstNames.length]} ${mockLastNames[(idx * 5 + i) % mockLastNames.length]}`,
-                  org: orgName,
-                }));
+                const groupName = wizardUserGroups[idx];
+                const storeGroup = storeGroupsList.find(g => g.name === groupName);
+                let users: UserEntry[] = [];
+                if (storeGroup) {
+                  const members = getGroupMembers(storeGroup.id);
+                  members.users.forEach(u => users.push({ name: `${u.firstName} ${u.lastName}`, org: orgName, username: u.username, firstName: u.firstName, lastName: u.lastName }));
+                  members.serviceAccounts.forEach(sa => users.push({ name: sa.name, org: orgName, username: sa.name, firstName: sa.name, lastName: '' }));
+                  members.agents.forEach(a => users.push({ name: a.name, org: orgName, username: a.name, firstName: a.name, lastName: '' }));
+                }
+                if (users.length === 0) {
+                  const memberCount = wizardMembers[idx] ?? 1;
+                  const mockFirstNames = ['Alex', 'Jordan', 'Taylor', 'Morgan', 'Casey', 'Riley', 'Avery', 'Jamie', 'Quinn', 'Sage', 'Dakota', 'Skyler'];
+                  const mockLastNames = ['Chen', 'Patel', 'Kim', 'Lopez', 'Singh', 'Nguyen', 'Müller', 'Tanaka', 'Costa', 'Johansson', 'Ali', 'Novak'];
+                  users = Array.from({ length: memberCount }).map((_, i) => ({
+                    name: `${mockFirstNames[(idx * 3 + i) % mockFirstNames.length]} ${mockLastNames[(idx * 5 + i) % mockLastNames.length]}`,
+                    org: orgName,
+                  }));
+                }
                 return {
-                  groupName: wizardUserGroups[idx],
-                  description: groupDescriptions[wizardUserGroups[idx]] || 'User group for workspace access',
-                  users: memberCount,
+                  groupName,
+                  description: groupDescriptions[groupName] || 'User group for workspace access',
+                  users: users.length,
                   roles: selectedRoles.size || 1,
                   lastModified: 'Just now',
                   rolesList: Array.from(selectedRoles),
@@ -421,7 +377,7 @@ const Workspaces: React.FunctionComponent = () => {
             }}
             header={
               <WizardHeader
-                title={`Grant access to Workspace A`}
+                title={`Grant access to Production`}
                 description="Review and configure access."
                 onClose={() => setIsGrantWizardOpen(false)}
               />
@@ -601,8 +557,8 @@ const Workspaces: React.FunctionComponent = () => {
                                 headerContent={`Permissions for ${role.name}`}
                                 bodyContent={
                                   <div>
-                                    {role.permissionNames.map((p, i) => (
-                                      <div key={i} style={{ padding: '4px 0' }}>{p}</div>
+                                    {role.permissionDetails.map((p, i) => (
+                                      <div key={i} style={{ padding: '4px 0' }}>{p.application}:{p.resourceType}:{p.operation}</div>
                                     ))}
                                   </div>
                                 }
@@ -647,7 +603,7 @@ const Workspaces: React.FunctionComponent = () => {
           <div>
             <Title headingLevel="h1" size="2xl">{wsMeta.name}</Title>
             <Content>
-              <p style={{ margin: 0, color: '#6a6e73' }}>Manage workspace details and settings.</p>
+              <p style={{ margin: 0, color: '#6a6e73' }}>{(wsMeta as any).description || 'Manage workspace details and settings.'}</p>
               <p style={{ marginTop: '4px', color: '#6a6e73' }}>
                 <strong>Workspace Hierarchy:</strong>{' '}
                 {wsMeta.hierarchy.map((item, idx) => (
@@ -681,13 +637,12 @@ const Workspaces: React.FunctionComponent = () => {
             <PageSection style={{ paddingTop: 8, paddingBottom: 0 }}>
               <Tabs activeKey={roleTabKey} onSelect={handleRoleTabClick}>
                 <Tab eventKey={0} title={<TabTitleText>Roles assigned in this workspace</TabTitleText>}>
-                 <Drawer isExpanded={isDetailsPanelOpen} isInline position="right" style={{ minHeight: 'calc(100vh - 220px)' }}>
+                 <Drawer isExpanded={isDetailsPanelOpen} isInline={false} position="right" style={{ minHeight: 'calc(100vh - 220px)' }}>
                   <DrawerContent
                     panelContent={
                       <DrawerPanelContent defaultSize="400px" style={{ display: 'flex', flexDirection: 'column' }}>
                         <DrawerHead>
                           <Title headingLevel="h2" size="lg">{detailsPanelRow?.groupName}</Title>
-                          <Content component="p" style={{ marginTop: 8 }}>This is a panel description. It is helpful.</Content>
                           <DrawerActions>
                             <Dropdown
                               isOpen={false}
@@ -710,38 +665,90 @@ const Workspaces: React.FunctionComponent = () => {
                         <DrawerContentBody>
                           <Tabs activeKey={detailsPanelTab} onSelect={(_e, key) => setDetailsPanelTab(key)}>
                             <Tab eventKey={0} title={<TabTitleText>Roles</TabTitleText>}>
-                              <Table aria-label="Roles for group" variant="compact">
-                                <Thead>
-                                  <Tr>
-                                    <Th>Roles</Th>
-                                  </Tr>
-                                </Thead>
-                                <Tbody>
-                                  {(detailsPanelRow?.rolesList || []).map((role, i) => (
-                                    <Tr key={i}>
-                                      <Td>{role}</Td>
+                              <div style={{ padding: '16px 0' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, paddingRight: 4 }}>
+                                  <Pagination
+                                    itemCount={detailsPanelRow?.rolesList?.length || 0}
+                                    perPage={5}
+                                    page={1}
+                                    onSetPage={() => {}}
+                                    onPerPageSelect={() => {}}
+                                    isCompact
+                                  />
+                                </div>
+                                <Table aria-label="Roles for group" variant="compact">
+                                  <Thead>
+                                    <Tr>
+                                      <Th>Roles</Th>
                                     </Tr>
-                                  ))}
-                                </Tbody>
-                              </Table>
+                                  </Thead>
+                                  <Tbody>
+                                    {(detailsPanelRow?.rolesList || []).map((role, i) => (
+                                      <Tr key={i}>
+                                        <Td>
+                                          <Button variant="link" isInline>{role}</Button>
+                                        </Td>
+                                      </Tr>
+                                    ))}
+                                  </Tbody>
+                                </Table>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8, paddingRight: 4 }}>
+                                  <Pagination
+                                    itemCount={detailsPanelRow?.rolesList?.length || 0}
+                                    perPage={5}
+                                    page={1}
+                                    onSetPage={() => {}}
+                                    onPerPageSelect={() => {}}
+                                  />
+                                </div>
+                              </div>
                             </Tab>
                             <Tab eventKey={1} title={<TabTitleText>Users</TabTitleText>}>
-                              <Table aria-label="Users in group" variant="compact">
-                                <Thead>
-                                  <Tr>
-                                    <Th>Users</Th>
-                                    <Th>Organization</Th>
-                                  </Tr>
-                                </Thead>
-                                <Tbody>
-                                  {(detailsPanelRow?.usersList || []).map((user, i) => (
-                                    <Tr key={i}>
-                                      <Td>{user.name}</Td>
-                                      <Td>{user.org}</Td>
+                              <div style={{ padding: '16px 0' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, paddingRight: 4 }}>
+                                  <Pagination
+                                    itemCount={detailsPanelRow?.usersList?.length || 0}
+                                    perPage={5}
+                                    page={1}
+                                    onSetPage={() => {}}
+                                    onPerPageSelect={() => {}}
+                                    isCompact
+                                  />
+                                </div>
+                                <Table aria-label="Users in group" variant="compact">
+                                  <Thead>
+                                    <Tr>
+                                      <Th>Username</Th>
+                                      <Th>First name</Th>
+                                      <Th>Last name</Th>
                                     </Tr>
-                                  ))}
-                                </Tbody>
-                              </Table>
+                                  </Thead>
+                                  <Tbody>
+                                    {(detailsPanelRow?.usersList || []).map((user, i) => {
+                                      const nameParts = user.name.split(' ');
+                                      const firstName = user.firstName || nameParts[0] || '';
+                                      const lastName = user.lastName || nameParts.slice(1).join(' ') || '';
+                                      const username = user.username || firstName.toLowerCase() + lastName.toLowerCase().replace(/\s/g, '');
+                                      return (
+                                        <Tr key={i}>
+                                          <Td dataLabel="Username">{username}</Td>
+                                          <Td dataLabel="First name">{firstName}</Td>
+                                          <Td dataLabel="Last name">{lastName}</Td>
+                                        </Tr>
+                                      );
+                                    })}
+                                  </Tbody>
+                                </Table>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8, paddingRight: 4 }}>
+                                  <Pagination
+                                    itemCount={detailsPanelRow?.usersList?.length || 0}
+                                    perPage={5}
+                                    page={1}
+                                    onSetPage={() => {}}
+                                    onPerPageSelect={() => {}}
+                                  />
+                                </div>
+                              </div>
                             </Tab>
                           </Tabs>
                           <div style={{ padding: '16px' }}>
@@ -755,43 +762,42 @@ const Workspaces: React.FunctionComponent = () => {
                   <PageSection style={{ paddingTop: 8, paddingBottom: 0 }}>
                     <Toolbar style={{ marginTop: 16 }}>
                       <ToolbarContent>
+                        <ToolbarGroup variant="filter-group">
+                          <ToolbarItem>
+                            <Dropdown
+                              isOpen={isMasterOpen}
+                              onOpenChange={setIsMasterOpen}
+                              toggle={(toggleRef) => (
+                                <MenuToggle ref={toggleRef} isExpanded={isMasterOpen} icon={<FilterIcon />}>
+                                  Filter by user group
+                                </MenuToggle>
+                              )}
+                            >
+                              <DropdownList>
+                                <DropdownItem onClick={() => setIsMasterOpen(false)}>User group</DropdownItem>
+                                <DropdownItem onClick={() => setIsMasterOpen(false)}>Organization name</DropdownItem>
+                              </DropdownList>
+                            </Dropdown>
+                          </ToolbarItem>
+                          <ToolbarItem>
+                            <SearchInput aria-label="Filter by user group" placeholder="Filter by user group" value="" onChange={() => {}} onClear={() => {}} />
+                          </ToolbarItem>
+                        </ToolbarGroup>
                         <ToolbarItem>
-                          <Dropdown
-                            isOpen={isMasterOpen}
-                            onOpenChange={setIsMasterOpen}
-                            toggle={(toggleRef) => (
-                              <MenuToggle ref={toggleRef} isExpanded={isMasterOpen}>
-                                <Checkbox
-                                  id="toolbar-master-checkbox"
-                                  aria-label="Select"
-                                  isChecked={areAllSelected}
-                                  onChange={(_e, checked) => onToggleAll(!!checked)}
-                                />
-                              </MenuToggle>
-                            )}
-                          >
-                            <DropdownList>
-                              <DropdownItem onClick={() => { onToggleAll(true); setIsMasterOpen(false); }}>Select all</DropdownItem>
-                              <DropdownItem onClick={() => { onToggleAll(false); setIsMasterOpen(false); }}>Deselect all</DropdownItem>
-                            </DropdownList>
-                          </Dropdown>
+                          <Button variant="primary" onClick={() => {
+                            setRolesPage(1);
+                            setIsGrantWizardOpen(true);
+                          }}>Grant access</Button>
                         </ToolbarItem>
-                        <ToolbarItem style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <Dropdown
-                            isOpen={false}
-                            onOpenChange={() => {}}
-                            toggle={(toggleRef) => (
-                              <MenuToggle ref={toggleRef} isExpanded={false} icon={null} style={{ minWidth: '220px' }}>
-                                User name group
-                              </MenuToggle>
-                            )}
-                          >
-                            <DropdownList>
-                              <DropdownItem>User name group</DropdownItem>
-                              <DropdownItem>Organization name</DropdownItem>
-                            </DropdownList>
-                          </Dropdown>
-                          <SearchInput aria-label={'Search'} placeholder={'Search'} value={''} onChange={() => {}} onClear={() => {}} />
+                        <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
+                          <Pagination
+                            itemCount={grantedRows.length}
+                            perPage={20}
+                            page={1}
+                            onSetPage={() => {}}
+                            onPerPageSelect={() => {}}
+                            isCompact
+                          />
                         </ToolbarItem>
                       </ToolbarContent>
                     </Toolbar>
@@ -800,51 +806,28 @@ const Workspaces: React.FunctionComponent = () => {
                     <Table aria-label="Role assignment groups table">
                       <Thead>
                         <Tr>
-                          <Th aria-label="Row select" />
-                          <Th width={35}>User group name</Th>
-                          <Th width={25}>Description</Th>
-                          <Th width={10}>Users</Th>
-                          <Th width={10}>Roles</Th>
-                          <Th width={20}>Last modified</Th>
-                          <Th aria-label="Row actions"></Th>
+                          <Th width={25} sort={{ sortBy: { index: 0, direction: 'asc' }, onSort: () => {}, columnIndex: 0 }}>User group name</Th>
+                          <Th width={30}>Description</Th>
+                          <Th width={10} sort={{ sortBy: { index: 0, direction: 'asc' }, onSort: () => {}, columnIndex: 2 }}>Users</Th>
+                          <Th width={10} sort={{ sortBy: { index: 0, direction: 'asc' }, onSort: () => {}, columnIndex: 3 }}>Roles</Th>
+                          <Th width={25} sort={{ sortBy: { index: 0, direction: 'asc' }, onSort: () => {}, columnIndex: 4 }}>Last modified</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
                         {grantedRows.map((row, idx) => (
-                          <Tr key={`${row.groupName}-${idx}`}>
-                            <Td>
-                              <Checkbox
-                                id={`select-group-${idx}`}
-                                aria-label={`Select ${row.groupName}`}
-                                isChecked={selectedRowIds.has(idx)}
-                                onChange={(_e, checked) => onToggleRow(idx, !!checked)}
-                              />
-                            </Td>
-                            <Td dataLabel="User group name" style={{ paddingRight: '32px' }}>
-                              <Button variant="link" isInline onClick={() => openDetails(row)}>{row.groupName}</Button>
-                            </Td>
+                          <Tr
+                            key={`${row.groupName}-${idx}`}
+                            isClickable
+                            isRowSelected={detailsPanelRow?.groupName === row.groupName && isDetailsPanelOpen}
+                            onRowClick={() => openDetails(row)}
+                          >
+                            <Td dataLabel="User group name">{row.groupName}</Td>
                             <Td dataLabel="Description" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '520px' }}>
                               {row.description}
                             </Td>
                             <Td dataLabel="Users">{row.users}</Td>
                             <Td dataLabel="Roles">{row.roles}</Td>
                             <Td dataLabel="Last modified">{row.lastModified}</Td>
-                            <Td isActionCell>
-                              <Dropdown isOpen={false} onOpenChange={() => {}}
-                                toggle={(toggleRef) => (
-                                  <MenuToggle ref={toggleRef} aria-label={`Row actions for ${row.groupName}`} variant="plain">
-                                    <EllipsisVIcon />
-                                  </MenuToggle>
-                                )}
-                                popperProps={{ position: 'right' }}
-                              >
-                                <DropdownList>
-                                  <DropdownItem>View</DropdownItem>
-                                  <DropdownItem>Edit</DropdownItem>
-                                  <DropdownItem>Remove</DropdownItem>
-                                </DropdownList>
-                              </Dropdown>
-                            </Td>
                           </Tr>
                         ))}
                       </Tbody>
