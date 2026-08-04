@@ -35,8 +35,8 @@ import {
   UserPlusIcon,
   LockIcon,
   AutomationIcon,
+  OutlinedQuestionCircleIcon,
 } from '@patternfly/react-icons';
-import OutlinedQuestionCircleIcon from '@patternfly/react-icons/dist/esm/icons/outlined-question-circle-icon';
 
 type FeatureCard = {
   id: string;
