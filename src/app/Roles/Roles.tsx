@@ -28,8 +28,7 @@ import {
   ToolbarItem,
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr, ThProps } from '@patternfly/react-table';
-import { EllipsisVIcon, FilterIcon } from '@patternfly/react-icons';
-import OutlinedQuestionCircleIcon from '@patternfly/react-icons/dist/esm/icons/outlined-question-circle-icon';
+import { EllipsisVIcon, FilterIcon, OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { allRoles, type RoleData } from '@app/utils/rolesData';
 
 const Roles: React.FunctionComponent = () => {
