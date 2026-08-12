@@ -12,11 +12,12 @@ import {
   PageSection,
   Pagination,
   SearchInput,
+  Switch,
   Title,
   Toolbar,
   ToolbarContent,
-  ToolbarItem,
   ToolbarGroup,
+  ToolbarItem,
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon } from '@patternfly/react-icons';
@@ -26,16 +27,21 @@ const AIAgents: React.FunctionComponent = () => {
     id: string;
     name: string;
     description: string;
+    inheritAccess: boolean;
     lastRelease: string;
   };
 
   const initialRows: AIAgentRow[] = [
-    { id: 'ai1', name: 'Red Hat Insights Assistant', description: 'AI agent for Insights', lastRelease: '3 months ago' },
-    { id: 'ai2', name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console', lastRelease: '3 months ago' },
-    { id: 'ai3', name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed', lastRelease: '4 months ago' },
+    { id: 'ai1', name: 'Red Hat Insights Assistant', description: 'AI agent for Insights', inheritAccess: true, lastRelease: '3 months ago' },
+    { id: 'ai2', name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console', inheritAccess: false, lastRelease: '3 months ago' },
+    { id: 'ai3', name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed', inheritAccess: true, lastRelease: '4 months ago' },
   ];
 
-  const [rows] = React.useState<AIAgentRow[]>(initialRows);
+  const [rows, setRows] = React.useState<AIAgentRow[]>(initialRows);
+
+  const handleToggleInheritAccess = (id: string) => {
+    setRows(prev => prev.map(r => r.id === id ? { ...r, inheritAccess: !r.inheritAccess } : r));
+  };
   const [query, setQuery] = React.useState('');
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(50);
@@ -149,9 +155,10 @@ const AIAgents: React.FunctionComponent = () => {
           <Thead>
             <Tr>
               <Th width={25} {...getSortParams(0)}>Name</Th>
-              <Th width={45} {...getSortParams(1)}>Description</Th>
+              <Th width={35} {...getSortParams(1)}>Description</Th>
+              <Th width={15}>Inherit user's access</Th>
               <Th width={15} {...getSortParams(2)}>Last release</Th>
-              <Th width={15}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
+              <Th width={10}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -159,6 +166,14 @@ const AIAgents: React.FunctionComponent = () => {
               <Tr key={r.id}>
                 <Td>{r.name}</Td>
                 <Td>{r.description || <span style={{ color: '#6a6e73' }}>&mdash;</span>}</Td>
+                <Td>
+                  <Switch
+                    id={`inherit-access-${r.id}`}
+                    aria-label={`Inherit user's access for ${r.name}`}
+                    isChecked={r.inheritAccess}
+                    onChange={() => handleToggleInheritAccess(r.id)}
+                  />
+                </Td>
                 <Td>{r.lastRelease}</Td>
                 <Td isActionCell>
                   <Dropdown

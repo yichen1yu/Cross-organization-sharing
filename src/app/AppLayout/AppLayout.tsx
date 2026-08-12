@@ -228,13 +228,59 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [lockedFileType, setLockedFileType] = React.useState<string | null>(null);
   const [isScheduleWizardOpen, setIsScheduleWizardOpen] = React.useState(false);
 
+  type WizardInstance = { service: string; task: string; variant: string; serviceOpen: boolean; taskOpen: boolean; variantOpen: boolean };
+  const emptyWizardInstance = (): WizardInstance => ({ service: '', task: '', variant: '', serviceOpen: false, taskOpen: false, variantOpen: false });
+  const RHEL_USAGE_VARIANTS = [
+    'RHEL Advanced Update Support Add-On, Annual',
+    'RHEL ARM',
+    'RHEL for IBM Power',
+    'RHEL for IBM z',
+    'RHEL for SAP x86',
+    'RHEL for x86',
+    'RHEL for x86 ELS Annual',
+    'RHEL for x86 ELS On-Demand',
+    'RHEL for x86 ELS On-Demand for Third Party Linux Migration',
+    'RHEL for x86 EUS',
+    'RHEL for x86 HA',
+    'RHEL for x86 Resilient Storage',
+    'Satellite Capsule',
+    'Satellite Server',
+  ];
+  const OPENSHIFT_USAGE_VARIANTS = [
+    'Advanced Cluster Security',
+    'Container Platform (Annual)',
+    'Container Platform (On-Demand)',
+    'Dedicated (On-Demand)',
+    'Red Hat Advanced Cluster Management',
+    'Red Hat OpenShift AI',
+    'ROSA with Hosted Control Planes',
+  ];
+  const ANSIBLE_USAGE_VARIANTS = ['AWS'];
+  const SERVICE_TASKS: Record<string, string[]> = {
+    'Subscription Services': [
+      'Subscription Inventory',
+      'Subscription Usage - RHEL',
+      'Subscription Usage - OpenShift',
+      'Subscription Usage - Ansible',
+    ],
+    'Cost Management': ['Cost management report'],
+    'RHEL Inventory': ['System inventory'],
+  };
+  const WIZARD_SERVICES = ['RHEL Inventory', 'Subscription Services'];
+  const getUsageVariants = (task: string): string[] | null => {
+    if (task === 'Subscription Usage - RHEL') return RHEL_USAGE_VARIANTS;
+    if (task === 'Subscription Usage - OpenShift') return OPENSHIFT_USAGE_VARIANTS;
+    if (task === 'Subscription Usage - Ansible') return ANSIBLE_USAGE_VARIANTS;
+    return null;
+  };
+
   const openSchedulerWizard = React.useCallback((options?: SchedulerWizardOptions) => {
     setEditingReportName(null);
     setWizardReportName('');
     setWizardFileType(options?.preselectedFileType || '');
     const service = options?.preselectedService || '';
     const task = options?.preselectedTask || '';
-    setWizardInstances([{ service, task, serviceOpen: false, taskOpen: false }]);
+    setWizardInstances([{ ...emptyWizardInstance(), service, task }]);
     setCronMinute(''); setCronHour(''); setCronDayOfMonth(''); setCronMonth(''); setCronDayOfWeek('');
     setCronTimezone('Eastern Time (ET)');
     setLockedService(options?.lockService ? (options.preselectedService || null) : null);
@@ -253,9 +299,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [wizardReportName, setWizardReportName] = React.useState('');
   const [wizardFileType, setWizardFileType] = React.useState('');
   const [wizardFileTypeOpen, setWizardFileTypeOpen] = React.useState(false);
-  const [wizardInstances, setWizardInstances] = React.useState<Array<{ service: string; task: string; serviceOpen: boolean; taskOpen: boolean }>>([
-    { service: '', task: '', serviceOpen: false, taskOpen: false },
-  ]);
+  const [wizardInstances, setWizardInstances] = React.useState<WizardInstance[]>([emptyWizardInstance()]);
   const [cronMinute, setCronMinute] = React.useState('');
   const [cronHour, setCronHour] = React.useState('');
   const [cronDayOfMonth, setCronDayOfMonth] = React.useState('');
@@ -466,7 +510,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     return `${dd}/${mm}/${yyyy} ${hh12}:${mins} ${ampm} ${tz}`;
   };
 
-  type ReportInstance = { service: string; task: string };
+  type ReportInstance = { service: string; task: string; variant?: string };
   type ReportEntry = {
     name: string;
     date: string;
@@ -502,11 +546,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       name: 'RHEL vulnerability scan summary',
       date: '25/07/2025 12:00 am ET',
       status: 'Failed',
-      service: 'Red Hat Lightspeed',
+      service: 'RHEL Inventory',
       creator: 'Carlos Mendez',
       frequency: 'Weekly on Monday at 8:00am ET',
       fileType: 'JSON',
-      task: 'Vulnerability report',
+      task: 'System inventory',
       cronMinute: '0', cronHour: '8', cronDayOfMonth: '*', cronMonth: '*', cronDayOfWeek: '1',
       cronTimezone: 'Eastern Time (ET)',
     },
@@ -518,7 +562,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       creator: 'Priya Sharma',
       frequency: 'Daily at 12:00am ET',
       fileType: 'CSV',
-      task: 'OpenShift usage report',
+      task: 'Subscription Usage - OpenShift',
       cronMinute: '0', cronHour: '0', cronDayOfMonth: '*', cronMonth: '*', cronDayOfWeek: '*',
       cronTimezone: 'Eastern Time (ET)',
     },
@@ -2026,12 +2070,68 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     </DrawerPanelContent>
   );
 
-  const updateWizardInstance = (index: number, updates: Partial<{ service: string; task: string; serviceOpen: boolean; taskOpen: boolean }>) => {
+  const updateWizardInstance = (index: number, updates: Partial<WizardInstance>) => {
     setWizardInstances(prev => prev.map((inst, i) => i === index ? { ...inst, ...updates } : inst));
   };
 
+  const isJobComboTaken = (
+    service: string,
+    task: string,
+    variant: string,
+    excludeJobIndex?: number
+  ) =>
+    wizardInstances.some(
+      (other, i) =>
+        i !== excludeJobIndex &&
+        other.service === service &&
+        other.task === task &&
+        (getUsageVariants(task) ? other.variant === variant : true)
+    );
+
+  const getAvailableTasksForJob = (service: string, jobIndex: number) =>
+    (SERVICE_TASKS[service] || []).filter((task) => {
+      if (wizardInstances[jobIndex]?.service === service && wizardInstances[jobIndex]?.task === task) {
+        return true;
+      }
+      const variants = getUsageVariants(task);
+      if (!variants) {
+        return !isJobComboTaken(service, task, '', jobIndex);
+      }
+      return variants.some((variant) => !isJobComboTaken(service, task, variant, jobIndex));
+    });
+
+  const getAvailableVariantsForJob = (service: string, task: string, jobIndex: number) => {
+    const variants = getUsageVariants(task) || [];
+    return variants.filter((variant) => {
+      if (
+        wizardInstances[jobIndex]?.service === service &&
+        wizardInstances[jobIndex]?.task === task &&
+        wizardInstances[jobIndex]?.variant === variant
+      ) {
+        return true;
+      }
+      return !isJobComboTaken(service, task, variant, jobIndex);
+    });
+  };
+
+  const getAvailableServicesForJob = (jobIndex: number) =>
+    WIZARD_SERVICES.filter(
+      (service) =>
+        wizardInstances[jobIndex]?.service === service || getAvailableTasksForJob(service, jobIndex).length > 0
+    );
+
+  const hasRemainingJobCombos = WIZARD_SERVICES.some((service) =>
+    (SERVICE_TASKS[service] || []).some((task) => {
+      const variants = getUsageVariants(task);
+      if (!variants) {
+        return !isJobComboTaken(service, task, '');
+      }
+      return variants.some((variant) => !isJobComboTaken(service, task, variant));
+    })
+  );
+
   const addWizardInstance = () => {
-    setWizardInstances(prev => [...prev, { service: '', task: '', serviceOpen: false, taskOpen: false }]);
+    setWizardInstances(prev => [...prev, emptyWizardInstance()]);
   };
 
   const removeWizardInstance = (index: number) => {
@@ -2074,7 +2174,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           <Button variant="primary" onClick={() => {
             const nextDate = getNextCronDate(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek, cronTimezone);
             const naturalLang = allCronValid ? cronToNaturalLanguage(cronMinute, cronHour, cronDayOfMonth, cronMonth, cronDayOfWeek) : '';
-            const savedInstances = wizardInstances.map(inst => ({ service: inst.service, task: inst.task }));
+            const savedInstances = wizardInstances.map(inst => ({ service: inst.service, task: inst.task, variant: inst.variant || undefined }));
             if (editingReportName) {
               setSchedulerReports(prev => prev.map(r => r.name === editingReportName ? {
                 ...r,
@@ -2181,7 +2281,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                       setLockedFileType(null);
                       setWizardReportName('');
                       setWizardFileType('');
-                      setWizardInstances([{ service: '', task: '', serviceOpen: false, taskOpen: false }]);
+                      setWizardInstances([emptyWizardInstance()]);
                       setCronMinute(''); setCronHour(''); setCronDayOfMonth(''); setCronMonth(''); setCronDayOfWeek('');
                       setCronTimezone('Eastern Time (ET)');
                       setIsScheduleWizardOpen(true);
@@ -2277,8 +2377,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                               setWizardReportName(report.name);
                               setWizardFileType(report.fileType || '');
                               const instances = report.instances && report.instances.length > 0
-                                ? report.instances.map(inst => ({ service: inst.service, task: inst.task, serviceOpen: false, taskOpen: false }))
-                                : [{ service: report.service, task: report.task || '', serviceOpen: false, taskOpen: false }];
+                                ? report.instances.map(inst => ({ ...emptyWizardInstance(), service: inst.service, task: inst.task, variant: inst.variant || '' }))
+                                : [{ ...emptyWizardInstance(), service: report.service, task: report.task || '' }];
                               setWizardInstances(instances);
                               setCronMinute(report.cronMinute || '');
                               setCronHour(report.cronHour || '');
@@ -2533,7 +2633,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           <WizardStep
             name="Job(s)"
             id="step-service-task"
-            footer={<ScheduleWizardFooter showBack isNextDisabled={wizardInstances.some(inst => !inst.service || !inst.task)} />}
+            footer={<ScheduleWizardFooter showBack isNextDisabled={wizardInstances.some(inst => !inst.service || !inst.task || (!!getUsageVariants(inst.task) && !inst.variant))} />}
           >
             <Title headingLevel="h2" size="lg" style={{ marginBottom: '24px' }}>Job(s)</Title>
             {wizardInstances.map((inst, idx) => (
@@ -2559,9 +2659,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                       )}
                     >
                       <DropdownList>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Cost Management', task: '' })}>Cost Management</DropdownItem>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Subscription Services', task: '' })}>Subscription Services</DropdownItem>
-                        <DropdownItem onClick={() => updateWizardInstance(idx, { service: 'Red Hat Lightspeed', task: '' })}>Red Hat Lightspeed</DropdownItem>
+                        {getAvailableServicesForJob(idx).map((service) => (
+                          <DropdownItem key={service} onClick={() => updateWizardInstance(idx, { service, task: '', variant: '' })}>
+                            {service}
+                          </DropdownItem>
+                        ))}
                       </DropdownList>
                     </Dropdown>
                   </FormGroup>
@@ -2577,29 +2679,42 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                       )}
                     >
                       <DropdownList>
-                        {inst.service === 'Subscription Services' && <>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'RHEL usage report' })}>RHEL usage report</DropdownItem>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'OpenShift usage report' })}>OpenShift usage report</DropdownItem>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Ansible usage report' })}>Ansible usage report</DropdownItem>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Subscription inventory report' })}>Subscription inventory report</DropdownItem>
-                        </>}
-                        {inst.service === 'Cost Management' && <>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Cost management report' })}>Cost management report</DropdownItem>
-                        </>}
-                        {inst.service === 'Red Hat Lightspeed' && <>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Inventory report' })}>Inventory report</DropdownItem>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Vulnerability report' })}>Vulnerability report</DropdownItem>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Compliance report' })}>Compliance report</DropdownItem>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Advisories' })}>Advisories</DropdownItem>
-                          <DropdownItem onClick={() => updateWizardInstance(idx, { task: 'Malware report' })}>Malware report</DropdownItem>
-                        </>}
+                        {getAvailableTasksForJob(inst.service, idx).map((task) => (
+                          <DropdownItem key={task} onClick={() => updateWizardInstance(idx, { task, variant: '' })}>
+                            {task}
+                          </DropdownItem>
+                        ))}
                       </DropdownList>
                     </Dropdown>
                   </FormGroup>
+                  {getUsageVariants(inst.task) && (
+                    <FormGroup label="Variant" fieldId={`wizard-variant-${idx}`}>
+                      <Dropdown
+                        isOpen={inst.variantOpen}
+                        onSelect={() => updateWizardInstance(idx, { variantOpen: false })}
+                        onOpenChange={(open) => updateWizardInstance(idx, { variantOpen: open })}
+                        isScrollable
+                        maxMenuHeight="200px"
+                        toggle={(toggleRef) => (
+                          <MenuToggle ref={toggleRef} onClick={() => updateWizardInstance(idx, { variantOpen: !inst.variantOpen })} isExpanded={inst.variantOpen} isFullWidth>
+                            {inst.variant || 'Select a variant'}
+                          </MenuToggle>
+                        )}
+                      >
+                        <DropdownList>
+                          {getAvailableVariantsForJob(inst.service, inst.task, idx).map((variant) => (
+                            <DropdownItem key={variant} onClick={() => updateWizardInstance(idx, { variant })}>
+                              {variant}
+                            </DropdownItem>
+                          ))}
+                        </DropdownList>
+                      </Dropdown>
+                    </FormGroup>
+                  )}
                 </Form>
                 {idx === wizardInstances.length - 1 && (
                   <div style={{ marginTop: '16px' }}>
-                    <Button variant="link" icon={<PlusCircleIcon />} style={{ paddingLeft: 0 }} onClick={() => { addWizardInstance(); }}>
+                    <Button variant="link" icon={<PlusCircleIcon />} style={{ paddingLeft: 0 }} isDisabled={!hasRemainingJobCombos} onClick={() => { addWizardInstance(); }}>
                       Add an instance
                     </Button>
                   </div>
@@ -2972,6 +3087,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', rowGap: '4px' }}>
                     <span style={{ fontWeight: 600 }}>Service</span><span>{inst.service || '—'}</span>
                     <span style={{ fontWeight: 600 }}>Task name</span><span>{inst.task || '—'}</span>
+                    {getUsageVariants(inst.task) && (
+                      <><span style={{ fontWeight: 600 }}>Variant</span><span>{inst.variant || '—'}</span></>
+                    )}
                   </div>
                 </div>
               ))}
