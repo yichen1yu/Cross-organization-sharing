@@ -873,7 +873,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                 <Label color="red" icon={<ExclamationCircleIcon />}>Revoked</Label>
                               )}
                               {row.status === 'Rejected' && (
-                                <Label color="gold" icon={<ExclamationTriangleIcon />}>Rejected</Label>
+                                <Label color="yellow" icon={<ExclamationTriangleIcon />}>Rejected</Label>
                               )}
                             </Td>
                             <Td dataLabel="Connected date">{row.connectedDate}</Td>
