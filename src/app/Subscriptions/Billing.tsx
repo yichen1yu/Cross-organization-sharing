@@ -295,7 +295,7 @@ const Billing: React.FunctionComponent = () => {
                     </Dropdown>
                   </div>
                   <p style={{ marginTop: 8, color: 'var(--pf-v6-global--palette--black-700)' }}>
-                    Don’t see the trusted org you need? <a href="/organization/trusted-organizations?tab=incoming">Check the incoming trusted organization connection requests.</a>
+                    Don’t see the trusted org you need? <a href="/organization/trusted-organizations">Check the pending trusted organization connection requests.</a>
                   </p>
                 </div>
               </div>

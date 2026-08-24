@@ -442,7 +442,7 @@ const Workspaces: React.FunctionComponent = () => {
                   </div>
                   <p style={{ marginTop: 8, color: 'var(--pf-v6-global--palette--black-700)' }}>
                     Don’t see the trusted org you need? 
-                    <a href="/organization/trusted-organizations?tab=incoming">Check the incoming trusted organization connection requests.</a>
+                    <a href="/organization/trusted-organizations">Check the pending trusted organization connection requests.</a>
                   </p>
                 </div>
             </div>
@@ -784,12 +784,6 @@ const Workspaces: React.FunctionComponent = () => {
                             <SearchInput aria-label="Filter by user group" placeholder="Filter by user group" value="" onChange={() => {}} onClear={() => {}} />
                           </ToolbarItem>
                         </ToolbarGroup>
-                        <ToolbarItem>
-                          <Button variant="primary" onClick={() => {
-                            setRolesPage(1);
-                            setIsGrantWizardOpen(true);
-                          }}>Grant access</Button>
-                        </ToolbarItem>
                         <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
                           <Pagination
                             itemCount={grantedRows.length}
