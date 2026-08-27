@@ -29,6 +29,8 @@ import {
   TabTitleText,
   TextInput,
   Title,
+  ToggleGroup,
+  ToggleGroupItem,
   Toolbar,
   ToolbarContent,
   ToolbarItem,
@@ -42,7 +44,7 @@ import {
   WizardStep,
   WizardHeader,
 } from '@patternfly/react-core';
-import { Table, Thead, Tbody, Tr, Th, Td, TreeRowWrapper } from '@patternfly/react-table';
+import { Table, Thead, Tbody, Tr, Th, Td, ThProps, TreeRowWrapper, ExpandableRowContent } from '@patternfly/react-table';
 import { EllipsisVIcon, AngleRightIcon, AngleDownIcon } from '@patternfly/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { allRoles as sharedRoles } from '@app/utils/rolesData';
@@ -88,6 +90,41 @@ const WorkspacesList: React.FunctionComponent = () => {
   const myOrgName = 'Pinnacle Corp';
   const trustedOrgNames = ['Initech', 'Soylent', 'Acme Corp', 'Stark Industries', 'Massive Dynamic', 'Dunder Mifflin'];
 
+  const [sharedSearch, setSharedSearch] = React.useState('');
+  const [sharedView, setSharedView] = React.useState<'list' | 'byOrg'>('list');
+  const [expandedOrgs, setExpandedOrgs] = React.useState<Set<string>>(new Set());
+  const [sharedSortIndex, setSharedSortIndex] = React.useState<number>(3);
+  const [sharedSortDirection, setSharedSortDirection] = React.useState<'asc' | 'desc'>('desc');
+
+  const sharedSortableColumns = ['name', 'organization', 'roles', 'sharedDate'] as const;
+  const getSharedSortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: { index: sharedSortIndex, direction: sharedSortDirection },
+    onSort: (_event, index, direction) => {
+      setSharedSortIndex(index);
+      setSharedSortDirection(direction);
+    },
+    columnIndex,
+  });
+
+  const [orgSortIndex, setOrgSortIndex] = React.useState<number>(2);
+  const [orgSortDirection, setOrgSortDirection] = React.useState<'asc' | 'desc'>('desc');
+  const getOrgSortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: { index: orgSortIndex, direction: orgSortDirection },
+    onSort: (_event, index, direction) => {
+      setOrgSortIndex(index);
+      setOrgSortDirection(direction);
+    },
+    columnIndex,
+  });
+
+  const toggleOrgExpand = (org: string) => {
+    setExpandedOrgs(prev => {
+      const next = new Set(prev);
+      if (next.has(org)) next.delete(org); else next.add(org);
+      return next;
+    });
+  };
+
   // Shared workspaces data
   type SharedWorkspace = {
     name: string;
@@ -104,9 +141,28 @@ const WorkspacesList: React.FunctionComponent = () => {
       ],
     },
     {
+      name: 'QA Environment', organization: 'Initech', sharedDate: '2025-08-20',
+      roles: [
+        { name: 'Editor', description: 'Create, edit, and delete resources in the workspace', permissions: 10 },
+      ],
+    },
+    {
       name: 'Staging', organization: 'Acme Corp', sharedDate: '2025-09-01',
       roles: [
         { name: 'Viewer', description: 'Read-only access to workspace resources', permissions: 3 },
+      ],
+    },
+    {
+      name: 'CI/CD Pipeline', organization: 'Acme Corp', sharedDate: '2025-07-15',
+      roles: [
+        { name: 'Operator', description: 'Manage day-to-day operations within the workspace', permissions: 8 },
+        { name: 'Viewer', description: 'Read-only access to workspace resources', permissions: 3 },
+      ],
+    },
+    {
+      name: 'Sandbox', organization: 'Acme Corp', sharedDate: '2025-06-28',
+      roles: [
+        { name: 'Administrator', description: 'Full administrative access to the workspace', permissions: 15 },
       ],
     },
     {
@@ -114,6 +170,12 @@ const WorkspacesList: React.FunctionComponent = () => {
       roles: [
         { name: 'Administrator', description: 'Full administrative access to the workspace', permissions: 15 },
         { name: 'Editor', description: 'Create, edit, and delete resources in the workspace', permissions: 10 },
+        { name: 'Viewer', description: 'Read-only access to workspace resources', permissions: 3 },
+      ],
+    },
+    {
+      name: 'Demo', organization: 'Dunder Mifflin', sharedDate: '2025-05-22',
+      roles: [
         { name: 'Viewer', description: 'Read-only access to workspace resources', permissions: 3 },
       ],
     },
@@ -370,30 +432,164 @@ const WorkspacesList: React.FunctionComponent = () => {
               >
                 <DrawerContentBody>
                   <PageSection hasBodyWrapper={false} isFilled>
-                    <Table aria-label="Shared workspaces table">
-                      <Thead>
-                        <Tr>
-                          <Th width={30}>Workspace name</Th>
-                          <Th width={30}>Organization</Th>
-                          <Th width={20}>Roles</Th>
-                          <Th width={20}>Shared date</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {sharedWorkspaces.map((ws) => (
-                          <Tr key={`${ws.name}-${ws.organization}`}>
-                            <Td dataLabel="Workspace name">{ws.name}</Td>
-                            <Td dataLabel="Organization">{ws.organization}</Td>
-                            <Td dataLabel="Roles">
-                              <Button variant="link" isInline onClick={() => openRolesDrawer(ws)}>
-                                {ws.roles.length}
-                              </Button>
-                            </Td>
-                            <Td dataLabel="Shared date">{ws.sharedDate}</Td>
+                    <Toolbar>
+                      <ToolbarContent>
+                        <ToolbarItem>
+                          <SearchInput
+                            aria-label="Filter by name"
+                            placeholder="Filter by name"
+                            value={sharedSearch}
+                            onChange={(_e, value) => setSharedSearch(value)}
+                            onClear={() => setSharedSearch('')}
+                          />
+                        </ToolbarItem>
+                        <ToolbarItem>
+                          <ToggleGroup>
+                            <ToggleGroupItem
+                              key="list"
+                              text="List"
+                              isSelected={sharedView === 'list'}
+                              onChange={() => setSharedView('list')}
+                            />
+                            <ToggleGroupItem
+                              key="byOrg"
+                              text="By organization"
+                              isSelected={sharedView === 'byOrg'}
+                              onChange={() => setSharedView('byOrg')}
+                            />
+                          </ToggleGroup>
+                        </ToolbarItem>
+                        <ToolbarItem variant="pagination" align={{ default: 'alignEnd' }}>
+                          <Pagination
+                            itemCount={sharedWorkspaces.filter(ws => !sharedSearch.trim() || ws.name.toLowerCase().includes(sharedSearch.trim().toLowerCase()) || ws.organization.toLowerCase().includes(sharedSearch.trim().toLowerCase())).length}
+                            perPage={10}
+                            page={1}
+                            onSetPage={() => {}}
+                            onPerPageSelect={() => {}}
+                            isCompact
+                          />
+                        </ToolbarItem>
+                      </ToolbarContent>
+                    </Toolbar>
+
+                    {sharedView === 'list' ? (
+                      <Table aria-label="Shared workspaces table">
+                        <Thead>
+                          <Tr>
+                            <Th sort={getSharedSortParams(0)} width={30}>Workspace name</Th>
+                            <Th sort={getSharedSortParams(1)} width={30}>Organization</Th>
+                            <Th width={20}>Roles</Th>
+                            <Th sort={getSharedSortParams(3)} width={20}>Shared date</Th>
                           </Tr>
-                        ))}
-                      </Tbody>
-                    </Table>
+                        </Thead>
+                        <Tbody>
+                          {sharedWorkspaces.filter(ws => !sharedSearch.trim() || ws.name.toLowerCase().includes(sharedSearch.trim().toLowerCase()) || ws.organization.toLowerCase().includes(sharedSearch.trim().toLowerCase())).sort((a, b) => {
+                            const key = sharedSortableColumns[sharedSortIndex];
+                            const aVal = key === 'roles' ? a.roles.length : a[key];
+                            const bVal = key === 'roles' ? b.roles.length : b[key];
+                            const cmp = typeof aVal === 'number' && typeof bVal === 'number' ? aVal - bVal : String(aVal).localeCompare(String(bVal));
+                            return sharedSortDirection === 'asc' ? cmp : -cmp;
+                          }).map((ws) => (
+                            <Tr key={`${ws.name}-${ws.organization}`}>
+                              <Td dataLabel="Workspace name">{ws.name}</Td>
+                              <Td dataLabel="Organization">{ws.organization}</Td>
+                              <Td dataLabel="Roles">
+                                <Button variant="link" isInline onClick={() => openRolesDrawer(ws)}>
+                                  {ws.roles.length}
+                                </Button>
+                              </Td>
+                              <Td dataLabel="Shared date">{ws.sharedDate}</Td>
+                            </Tr>
+                          ))}
+                        </Tbody>
+                      </Table>
+                    ) : (
+                      (() => {
+                        const filtered = sharedWorkspaces.filter(ws => !sharedSearch.trim() || ws.name.toLowerCase().includes(sharedSearch.trim().toLowerCase()) || ws.organization.toLowerCase().includes(sharedSearch.trim().toLowerCase()));
+                        const orgMap = new Map<string, SharedWorkspace[]>();
+                        filtered.forEach(ws => {
+                          if (!orgMap.has(ws.organization)) orgMap.set(ws.organization, []);
+                          orgMap.get(ws.organization)!.push(ws);
+                        });
+                        const orgEntries = Array.from(orgMap.entries());
+                        orgEntries.sort((a, b) => {
+                          let cmp = 0;
+                          if (orgSortIndex === 0) {
+                            cmp = a[0].localeCompare(b[0]);
+                          } else if (orgSortIndex === 1) {
+                            cmp = a[1].length - b[1].length;
+                          } else {
+                            const dateA = a[1].reduce((latest, ws) => ws.sharedDate > latest ? ws.sharedDate : latest, '');
+                            const dateB = b[1].reduce((latest, ws) => ws.sharedDate > latest ? ws.sharedDate : latest, '');
+                            cmp = dateA.localeCompare(dateB);
+                          }
+                          return orgSortDirection === 'asc' ? cmp : -cmp;
+                        });
+                        return (
+                          <Table aria-label="Shared workspaces by organization">
+                            <Thead>
+                              <Tr>
+                                <Th />
+                                <Th sort={getOrgSortParams(0)} width={40}>Organization</Th>
+                                <Th sort={getOrgSortParams(1)} width={25}>Workspaces</Th>
+                                <Th sort={getOrgSortParams(2)} width={25}>Last shared date</Th>
+                              </Tr>
+                            </Thead>
+                            <Tbody>
+                              {orgEntries.map(([org, workspaces], idx) => {
+                                const isExpanded = expandedOrgs.has(org);
+                                const latestDate = workspaces.reduce((latest, ws) => ws.sharedDate > latest ? ws.sharedDate : latest, '');
+                                return (
+                                  <React.Fragment key={org}>
+                                    <Tr>
+                                      <Td
+                                        expand={{
+                                          rowIndex: idx,
+                                          isExpanded,
+                                          onToggle: () => toggleOrgExpand(org),
+                                        }}
+                                      />
+                                      <Td dataLabel="Organization">{org}</Td>
+                                      <Td dataLabel="Workspaces">{workspaces.length}</Td>
+                                      <Td dataLabel="Last shared date">{latestDate}</Td>
+                                    </Tr>
+                                    <Tr isExpanded={isExpanded}>
+                                      <Td />
+                                      <Td colSpan={3} noPadding>
+                                        <ExpandableRowContent>
+                                          <Table aria-label={`Workspaces from ${org}`} variant="compact" borders={false}>
+                                            <Thead>
+                                              <Tr>
+                                                <Th style={{ width: '44.44%' }}>Workspace name</Th>
+                                                <Th style={{ width: '27.78%' }}>Roles</Th>
+                                                <Th style={{ width: '27.78%' }}>Shared date</Th>
+                                              </Tr>
+                                            </Thead>
+                                            <Tbody>
+                                              {workspaces.map(ws => (
+                                                <Tr key={ws.name}>
+                                                  <Td dataLabel="Workspace name">{ws.name}</Td>
+                                                  <Td dataLabel="Roles">
+                                                    <Button variant="link" isInline onClick={() => openRolesDrawer(ws)}>
+                                                      {ws.roles.length}
+                                                    </Button>
+                                                  </Td>
+                                                  <Td dataLabel="Shared date">{ws.sharedDate}</Td>
+                                                </Tr>
+                                              ))}
+                                            </Tbody>
+                                          </Table>
+                                        </ExpandableRowContent>
+                                      </Td>
+                                    </Tr>
+                                  </React.Fragment>
+                                );
+                              })}
+                            </Tbody>
+                          </Table>
+                        );
+                      })()
+                    )}
                   </PageSection>
                 </DrawerContentBody>
               </DrawerContent>

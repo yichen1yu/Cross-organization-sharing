@@ -1742,6 +1742,57 @@ const TrustedOrganizations: React.FunctionComponent = () => {
           <p>
             This ends the trust connection. All access between the two organizations is removed, in both directions. This cannot be undone — trust would need to be re-established from scratch.
           </p>
+          {revokeTargetOrg && (() => {
+            const yourSharedGroups = allOrgGroups.filter((g) => generateSelectedGroupsForOrg(revokeTargetOrg.orgId).has(g.id));
+            const theirSharedGroups = generateForeignGroupsForOrg(revokeTargetOrg.orgId);
+            const affectedWorkspaces = [
+              { name: 'Production', roles: 2 },
+              { name: 'Staging', roles: 1 },
+              ...(parseInt(revokeTargetOrg.orgId) % 2 === 0 ? [{ name: 'Development', roles: 3 }] : []),
+            ];
+            return (
+              <div style={{ marginTop: 16 }}>
+                <ExpandableSection toggleText={`User groups you shared with ${revokeTargetOrg.organizationName} (${yourSharedGroups.length})`} isIndented>
+                  {yourSharedGroups.length > 0 ? (
+                    <Table aria-label="Your shared groups" variant="compact" borders={false}>
+                      <Thead><Tr><Th>Group name</Th><Th>Members</Th></Tr></Thead>
+                      <Tbody>
+                        {yourSharedGroups.map((g) => (
+                          <Tr key={g.id}><Td>{g.name}</Td><Td>{g.members}</Td></Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                  ) : (
+                    <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>No groups shared.</p>
+                  )}
+                </ExpandableSection>
+                <ExpandableSection toggleText={`User groups ${revokeTargetOrg.organizationName} shared with you (${theirSharedGroups.length})`} isIndented>
+                  {theirSharedGroups.length > 0 ? (
+                    <Table aria-label="Their shared groups" variant="compact" borders={false}>
+                      <Thead><Tr><Th>Group name</Th><Th>Members</Th></Tr></Thead>
+                      <Tbody>
+                        {theirSharedGroups.map((g) => (
+                          <Tr key={g.id}><Td>{g.name}</Td><Td>{g.members}</Td></Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                  ) : (
+                    <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>No groups shared.</p>
+                  )}
+                </ExpandableSection>
+                <ExpandableSection toggleText={`Affected workspaces (${affectedWorkspaces.length})`} isIndented>
+                  <Table aria-label="Affected workspaces" variant="compact" borders={false}>
+                    <Thead><Tr><Th>Workspace</Th><Th>Role bindings removed</Th></Tr></Thead>
+                    <Tbody>
+                      {affectedWorkspaces.map((ws) => (
+                        <Tr key={ws.name}><Td>{ws.name}</Td><Td>{ws.roles}</Td></Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </ExpandableSection>
+              </div>
+            );
+          })()}
           <FormGroup
             label={`Type ${revokeTargetOrg?.organizationName || 'the organization name'} to confirm`}
             fieldId="revoke-confirm-input"
