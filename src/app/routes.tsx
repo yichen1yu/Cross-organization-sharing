@@ -49,6 +49,10 @@ import { WorkspacesList } from '@app/Workspaces/WorkspacesList';
 import { SubscriptionWorkspaces } from '@app/Subscriptions/SubscriptionWorkspaces';
 import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
 import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
+import { Integrations } from '@app/Settings/Integrations/Integrations';
+import { Notifications } from '@app/Settings/Notifications/Notifications';
+import { Language } from '@app/Settings/Language/Language';
+import { UserPreferences } from '@app/UserPreferences/UserPreferences';
 import { NotFound } from '@app/NotFound/NotFound';
 export interface IAppRoute {
   label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
@@ -334,6 +338,31 @@ const routes: AppRouteConfig[] = [
     exact: true,
     path: '/settings/profile',
     title: 'Profile Settings | Red Hat Hybrid Cloud Console',
+  },
+  // Settings bundle pages
+  {
+    element: <Integrations />,
+    exact: true,
+    path: '/settings/integrations',
+    title: 'Integrations | Settings | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <Notifications />,
+    exact: true,
+    path: '/settings/notifications',
+    title: 'Notifications | Settings | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <Language />,
+    exact: true,
+    path: '/settings/language',
+    title: 'Language | Settings | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <UserPreferences />,
+    exact: true,
+    path: '/user-preferences',
+    title: 'User Preferences | Red Hat Hybrid Cloud Console',
   },
   {
     element: <Support />,

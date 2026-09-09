@@ -43,6 +43,7 @@ import {
   Wizard,
   WizardStep,
   WizardHeader,
+  Switch,
 } from '@patternfly/react-core';
 import { Table, Thead, Tbody, Tr, Th, Td, ThProps, TreeRowWrapper, ExpandableRowContent } from '@patternfly/react-table';
 import { EllipsisVIcon, AngleRightIcon, AngleDownIcon } from '@patternfly/react-icons';
@@ -73,6 +74,11 @@ const WorkspacesList: React.FunctionComponent = () => {
   const [searchValue, setSearchValue] = React.useState('');
   const [expanded, setExpanded] = React.useState<Set<string>>(new Set(['uxd', 'ws-default']));
   const [openKebab, setOpenKebab] = React.useState<string | null>(null);
+  const [aiAgentAccess, setAiAgentAccess] = React.useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    allWorkspaces.forEach(ws => { initial[ws.id] = true; });
+    return initial;
+  });
 
   // Request access wizard state
   const [isRequestWizardOpen, setIsRequestWizardOpen] = React.useState(false);
@@ -191,11 +197,11 @@ const WorkspacesList: React.FunctionComponent = () => {
   };
 
   // Toast state
-  const [toasts, setToasts] = React.useState<{ key: number; title: string }[]>([]);
-  const addToast = (title: string) => {
+  const [toasts, setToasts] = React.useState<{ key: number; title: string; variant?: 'success' | 'warning' | 'info' }[]>([]);
+  const addToast = (title: string, variant: 'success' | 'warning' | 'info' = 'success') => {
     const key = Date.now();
-    setToasts(prev => [...prev, { key, title }]);
-    setTimeout(() => setToasts(prev => prev.filter(t => t.key !== key)), 5000);
+    setToasts(prev => [...prev, { key, title, variant }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.key !== key)), 6000);
   };
   const removeToast = (key: number) => setToasts(prev => prev.filter(t => t.key !== key));
 
@@ -266,7 +272,7 @@ const WorkspacesList: React.FunctionComponent = () => {
     <>
       <AlertGroup isToast isLiveRegion>
         {toasts.map(t => (
-          <Alert key={t.key} variant="success" title={t.title} actionClose={<AlertActionCloseButton onClose={() => removeToast(t.key)} />} />
+          <Alert key={t.key} variant={t.variant || 'success'} title={t.title} actionClose={<AlertActionCloseButton onClose={() => removeToast(t.key)} />} />
         ))}
       </AlertGroup>
 
@@ -289,7 +295,7 @@ const WorkspacesList: React.FunctionComponent = () => {
               <p><a href="#">Learn more about workspaces <span style={{ fontSize: '0.75em' }}>↗</span></a></p>
             </Content>
           </div>
-          <Button variant="secondary" style={{ marginRight: 16 }} onClick={openRequestWizard}>Request access</Button>
+          <Button variant="secondary" onClick={openRequestWizard}>Request access</Button>
         </div>
       </PageSection>
 
@@ -327,8 +333,9 @@ const WorkspacesList: React.FunctionComponent = () => {
               <Table aria-label="Workspaces table" isTreeTable>
                 <Thead>
                   <Tr>
-                    <Th width={40}>Name</Th>
-                    <Th>Description</Th>
+                    <Th width={35}>Name</Th>
+                    <Th width={30}>Description</Th>
+                    <Th width={15}>AI Agent access</Th>
                     <Th aria-label="Row actions" />
                   </Tr>
                 </Thead>
@@ -360,6 +367,21 @@ const WorkspacesList: React.FunctionComponent = () => {
                           </span>
                         </Td>
                         <Td dataLabel="Description">{ws.description}</Td>
+                        <Td dataLabel="AI Agent access">
+                          <Switch
+                            id={`ai-agent-${ws.id}`}
+                            aria-label={`AI Agent access for ${ws.name}`}
+                            isChecked={aiAgentAccess[ws.id] ?? true}
+                            onChange={(_e, checked) => {
+                              setAiAgentAccess(prev => ({ ...prev, [ws.id]: checked }));
+                              if (checked) {
+                                addToast(`AI Agent access has been enabled for "${ws.name}".`, 'success');
+                              } else {
+                                addToast(`AI Agent access has been disabled for "${ws.name}". AI agents will no longer be able to read, write, or manage any resources in this workspace.`, 'warning');
+                              }
+                            }}
+                          />
+                        </Td>
                         <Td isActionCell>
                           <Dropdown
                             isOpen={openKebab === ws.id}

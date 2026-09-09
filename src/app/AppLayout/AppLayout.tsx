@@ -135,6 +135,7 @@ import {
   UsersIcon,
   MinusCircleIcon,
   PlusCircleIcon,
+  GlobeIcon,
   WrenchIcon
 } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td, ExpandableRowContent } from '@patternfly/react-table';
@@ -1584,7 +1585,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     <MenuItem 
                       icon={<BellIcon />}
                       onClick={() => {
-                        navigate('/subscription-usage');
+                        navigate('/settings/notifications');
                         setIsUtilitiesDropdownOpen(false);
                       }}
                     >
@@ -1593,7 +1594,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     <MenuItem 
                       icon={<DatabaseIcon />}
                       onClick={() => {
-                        navigate('/data-integration');
+                        navigate('/settings/integrations');
                         setIsUtilitiesDropdownOpen(false);
                       }}
                     >
@@ -1607,6 +1608,15 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                       }}
                     >
                       Scheduler
+                    </MenuItem>
+                    <MenuItem
+                      icon={<GlobeIcon />}
+                      onClick={() => {
+                        navigate('/settings/language');
+                        setIsUtilitiesDropdownOpen(false);
+                      }}
+                    >
+                      Language
                     </MenuItem>
                   </MenuGroup>
                   <MenuGroup label="Identity & Access Management">
@@ -1733,17 +1743,33 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => {
-                    navigate('/subscription-usage');
+                    navigate('/user-preferences');
                     setIsUserDropdownOpen(false);
                   }}
                 >
-                  My Alert Preferences
+                  User Preferences
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => {
+                    navigate('/settings/language');
+                    setIsUserDropdownOpen(false);
+                  }}
+                >
+                  Language
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => {
+                    navigate('/internal');
+                    setIsUserDropdownOpen(false);
+                  }}
+                >
+                  Internal
                 </DropdownItem>
                 <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
                   <Divider />
                 </div>
                 <DropdownItem>
-                  Logout
+                  Log out
                 </DropdownItem>
               </DropdownList>
             </Dropdown>
@@ -1795,11 +1821,20 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     '/organization/organizational-features',
   ];
 
+  const settingsNavPages = [
+    '/settings/integrations',
+    '/settings/notifications',
+    '/settings/language',
+    '/settings/learning-resources',
+  ];
+
   // Determine which navigation structure to show
   const getNavigationType = () => {
     const currentPath = location.pathname;
     
-    if (primaryNavPages.includes(currentPath)) {
+    if (settingsNavPages.includes(currentPath) || currentPath.startsWith('/settings/')) {
+      return 'settings';
+    } else if (primaryNavPages.includes(currentPath)) {
       return 'primary';
     } else if (secondaryNavPages.includes(currentPath) || currentPath.startsWith('/workspaces/')) {
       return 'secondary';
@@ -1862,10 +1897,48 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     { label: 'Learning Resources', path: '/learning-resources-iam', isActive: location.pathname === '/learning-resources-iam' },
   ];
 
+  // Settings bundle navigation
+  const settingsNavItems = [
+    { label: 'Integrations', path: '/settings/integrations', isActive: location.pathname === '/settings/integrations' },
+    { label: 'Notifications', path: '/settings/notifications', isActive: location.pathname === '/settings/notifications' },
+    { label: 'Language', path: '/settings/language', isActive: location.pathname === '/settings/language' },
+    { label: 'Learning Resources', path: '/learning-resources', isActive: location.pathname === '/learning-resources' },
+  ];
+
+  const renderBundleNav = (items: typeof settingsNavItems, prefix: string) =>
+    items.map((item, idx) =>
+      item.isExpandable ? (
+        <NavExpandable
+          key={`${prefix}-expandable-${idx}`}
+          id={`${prefix}-expandable-${idx}`}
+          title={item.label}
+          isActive={item.isActive}
+          isExpanded={item.isActive}
+        >
+          {item.subItems?.map((subItem, subIdx) => (
+            <NavItem key={`${prefix}-sub-${idx}-${subIdx}`} id={`${prefix}-sub-${idx}-${subIdx}`} isActive={subItem.isActive}>
+              <NavLink to={subItem.path}>
+                {subItem.label}
+              </NavLink>
+            </NavItem>
+          ))}
+        </NavExpandable>
+      ) : (
+        <NavItem key={`${prefix}-${idx}`} id={`${prefix}-${idx}`} isActive={item.isActive}>
+          <NavLink to={item.path}>
+            {item.label}
+          </NavLink>
+        </NavItem>
+      )
+    );
+
   const Navigation = (
     <Nav id="nav-primary-simple">
       <NavList id="nav-list-simple">
-        {navigationType === 'primary' ? (
+        {navigationType === 'settings' ? (
+          // Show Settings bundle navigation
+          renderBundleNav(settingsNavItems, 'settings')
+        ) : navigationType === 'primary' ? (
           // Show primary navigation
           <>
             {overviewRoute && renderNavItem(overviewRoute, 0)}
@@ -1878,31 +1951,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </>
         ) : (
           // Show secondary navigation (IAM bundle)
-          secondaryNavItems.map((item, idx) => (
-            item.isExpandable ? (
-              <NavExpandable
-                key={`secondary-expandable-${idx}`}
-                id={`secondary-expandable-${idx}`}
-                title={item.label}
-                isActive={item.isActive}
-                isExpanded={item.isActive}
-              >
-                {item.subItems?.map((subItem, subIdx) => (
-                  <NavItem key={`secondary-sub-${idx}-${subIdx}`} id={`secondary-sub-${idx}-${subIdx}`} isActive={subItem.isActive}>
-                    <NavLink to={subItem.path}>
-                      {subItem.label}
-                    </NavLink>
-                  </NavItem>
-                ))}
-              </NavExpandable>
-            ) : (
-              <NavItem key={`secondary-${idx}`} id={`secondary-${idx}`} isActive={item.isActive}>
-                <NavLink to={item.path}>
-                  {item.label}
-                </NavLink>
-              </NavItem>
-            )
-          ))
+          renderBundleNav(secondaryNavItems, 'secondary')
         )}
       </NavList>
     </Nav>
@@ -1910,7 +1959,14 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const Sidebar = (
     <PageSidebar>
-      <PageSidebarBody>{Navigation}</PageSidebarBody>
+      <PageSidebarBody>
+        {navigationType === 'settings' && (
+          <div style={{ padding: '16px 16px 8px 16px', fontWeight: 400, fontSize: '16px' }}>
+            Console Settings
+          </div>
+        )}
+        {Navigation}
+      </PageSidebarBody>
     </PageSidebar>
   );
 
