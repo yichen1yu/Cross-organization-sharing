@@ -612,6 +612,14 @@ const WorkspacesList: React.FunctionComponent = () => {
                         );
                       })()
                     )}
+                    <Pagination
+                      itemCount={sharedWorkspaces.filter(ws => !sharedSearch.trim() || ws.name.toLowerCase().includes(sharedSearch.trim().toLowerCase()) || ws.organization.toLowerCase().includes(sharedSearch.trim().toLowerCase())).length}
+                      perPage={10}
+                      page={1}
+                      onSetPage={() => {}}
+                      onPerPageSelect={() => {}}
+                      style={{ marginTop: 24 }}
+                    />
                   </PageSection>
                 </DrawerContentBody>
               </DrawerContent>

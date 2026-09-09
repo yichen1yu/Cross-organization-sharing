@@ -837,7 +837,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                             page={page}
                             onSetPage={onSetPage}
                             onPerPageSelect={onPerPageSelect}
-                            isCompact={false}
+                            isCompact
                           />
                         </ToolbarItem>
                       </ToolbarContent>
@@ -956,6 +956,14 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                         ))}
                       </Tbody>
                     </Table>
+                    <Pagination
+                      itemCount={connectionsFilteredAndSorted.length}
+                      perPage={perPage}
+                      page={page}
+                      onSetPage={onSetPage}
+                      onPerPageSelect={onPerPageSelect}
+                      style={{ marginTop: 24 }}
+                    />
                   </DrawerContentBody>
                 </DrawerContent>
               </Drawer>
@@ -1026,6 +1034,14 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                       )}
                     </Tbody>
                   </Table>
+                  <Pagination
+                    itemCount={receivedFilteredAndSorted.length}
+                    perPage={receivedPerPage}
+                    page={receivedPage}
+                    onSetPage={(_e, p) => setReceivedPage(p)}
+                    onPerPageSelect={(_e, pp) => { setReceivedPerPage(pp); setReceivedPage(1); }}
+                    style={{ marginTop: 24 }}
+                  />
                 </PageSection>
               </Tab>
 
@@ -1126,6 +1142,14 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                       )}
                     </Tbody>
                   </Table>
+                  <Pagination
+                    itemCount={sentFilteredAndSorted.length}
+                    perPage={sentPerPage}
+                    page={sentPage}
+                    onSetPage={(_e, p) => setSentPage(p)}
+                    onPerPageSelect={(_e, pp) => { setSentPerPage(pp); setSentPage(1); }}
+                    style={{ marginTop: 24 }}
+                  />
                 </PageSection>
               </Tab>
             </Tabs>
@@ -1193,6 +1217,14 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                   )}
                 </Tbody>
               </Table>
+              <Pagination
+                itemCount={logFilteredAndSorted.length}
+                perPage={logPerPage}
+                page={logPage}
+                onSetPage={(_e, p) => setLogPage(p)}
+                onPerPageSelect={(_e, pp) => { setLogPerPage(pp); setLogPage(1); }}
+                style={{ marginTop: 24 }}
+              />
             </PageSection>
           </Tab>
 

@@ -61,12 +61,12 @@ type GroupRow = {
 };
 
 const initialUsers: UserRow[] = [
-  { id: 'u1', isAdmin: false, username: 'doejoe', email: 'lpichler@redhat.com', firstName: 'Joe', lastName: 'Doe', active: true },
-  { id: 'u2', isAdmin: true, username: 'iqe_rbac_v2_admin', email: 'platform-accessmanagement+iqe_rbac_v2_admin+stage@redhat.com', firstName: 'RBAC Admin', lastName: 'For V2', active: true },
-  { id: 'u3', isAdmin: false, username: 'iqe_rbac_v2_normal', email: 'platform-accessmanagement+iqe_rbac_v2_normal+stage@redhat.com', firstName: 'RBAC Normal', lastName: 'For V2', active: true },
-  { id: 'u4', isAdmin: false, username: 'iqe_rbac_v2_rbac', email: 'platform-accessmanagement+iqe_rbac_v2_rbac+stage@redhat.com', firstName: 'RBAC RBAC', lastName: 'For V2', active: true },
-  { id: 'u5', isAdmin: false, username: 'iqe_rbac_v2_viewer', email: 'platform-accessmanagement+iqe_rbac_v2_viewer+stage@redhat.com', firstName: 'RBAC Viewer', lastName: 'For V2', active: true },
-  { id: 'u6', isAdmin: false, username: 'iqe_rbac_v2_workspaces', email: 'platform-accessmanagement+iqe_rbac_v2_workspaces+stage@redhat.com', firstName: 'RBAC Workspaces', lastName: 'For V2', active: true },
+  { id: 'u1', isAdmin: false, username: 'jsmith', email: 'jsmith@redhat.com', firstName: 'John', lastName: 'Smith', active: true },
+  { id: 'u2', isAdmin: true, username: 'mwilliams', email: 'mwilliams@redhat.com', firstName: 'Maria', lastName: 'Williams', active: true },
+  { id: 'u3', isAdmin: false, username: 'agarcia', email: 'agarcia@redhat.com', firstName: 'Alex', lastName: 'Garcia', active: true },
+  { id: 'u4', isAdmin: false, username: 'pchen', email: 'pchen@redhat.com', firstName: 'Priya', lastName: 'Chen', active: true },
+  { id: 'u5', isAdmin: false, username: 'djohnson', email: 'djohnson@redhat.com', firstName: 'David', lastName: 'Johnson', active: true },
+  { id: 'u6', isAdmin: false, username: 'skumar', email: 'skumar@redhat.com', firstName: 'Sarah', lastName: 'Kumar', active: true },
 ];
 
 const initialGroups: GroupRow[] = [
@@ -95,16 +95,16 @@ const initialGroups: GroupRow[] = [
 
 type GroupMemberUser = { username: string; email: string; firstName: string; lastName: string };
 type GroupMemberSA = { name: string; clientId: string; owner: string };
-type GroupMemberAgent = { name: string; description: string };
+type GroupMemberAgent = { name: string; description: string; workspaces?: string[] };
 type GroupRole = { name: string; description: string };
 
 const _u = {
-  doejoe: { username: 'doejoe', email: 'lpichler@redhat.com', firstName: 'Joe', lastName: 'Doe' },
-  admin: { username: 'iqe_rbac_v2_admin', email: 'platform-accessmanagement+iqe_rbac_v2_admin+stage@redhat.com', firstName: 'RBAC Admin', lastName: 'For V2' },
-  normal: { username: 'iqe_rbac_v2_normal', email: 'platform-accessmanagement+iqe_rbac_v2_normal+stage@redhat.com', firstName: 'RBAC Normal', lastName: 'For V2' },
-  rbac: { username: 'iqe_rbac_v2_rbac', email: 'platform-accessmanagement+iqe_rbac_v2_rbac+stage@redhat.com', firstName: 'RBAC RBAC', lastName: 'For V2' },
-  viewer: { username: 'iqe_rbac_v2_viewer', email: 'platform-accessmanagement+iqe_rbac_v2_viewer+stage@redhat.com', firstName: 'RBAC Viewer', lastName: 'For V2' },
-  ws: { username: 'iqe_rbac_v2_workspaces', email: 'platform-accessmanagement+iqe_rbac_v2_workspaces+stage@redhat.com', firstName: 'RBAC Workspaces', lastName: 'For V2' },
+  doejoe: { username: 'jsmith', email: 'jsmith@redhat.com', firstName: 'John', lastName: 'Smith' },
+  admin: { username: 'mwilliams', email: 'mwilliams@redhat.com', firstName: 'Maria', lastName: 'Williams' },
+  normal: { username: 'agarcia', email: 'agarcia@redhat.com', firstName: 'Alex', lastName: 'Garcia' },
+  rbac: { username: 'pchen', email: 'pchen@redhat.com', firstName: 'Priya', lastName: 'Chen' },
+  viewer: { username: 'djohnson', email: 'djohnson@redhat.com', firstName: 'David', lastName: 'Johnson' },
+  ws: { username: 'skumar', email: 'skumar@redhat.com', firstName: 'Sarah', lastName: 'Kumar' },
 };
 
 const groupMemberUsers: Record<string, GroupMemberUser[]> = {
@@ -132,30 +132,36 @@ const groupMemberUsers: Record<string, GroupMemberUser[]> = {
 };
 
 const groupMemberSAs: Record<string, GroupMemberSA[]> = {
-  g1: [{ name: 'test405', clientId: 'ab434b20-2276-4846-afdd-b0c4ecba2f0', owner: 'iqe_rbac_v2_admin' }],
-  g3: [{ name: 'iqe-rbac-v2-service-account', clientId: '7fb2272f-2844-4fd0-bab3-dbdb0d85a91f', owner: 'iqe_rbac_v2_admin' }],
-  g6: [{ name: 'SA for RBAC', clientId: 'd807b762-31c3-45d0-bffe-7f498b709c66', owner: 'iqe_rbac_v2_admin' }],
-  g8: [{ name: 'iqe-rbac-on-rbac-read', clientId: 'b43b9c00-0107-43be-afa7-4ce45006b51c', owner: 'iqe_rbac_v2_admin' }],
-  g12: [{ name: 'iqe-rbac-on-rbac', clientId: '9e6729e3-2c31-4b45-90af-2e88ed654c0f', owner: 'iqe_rbac_v2_admin' }],
-  g15: [{ name: 'iqe-rbac-v2-e2e-service-account', clientId: '6dfb7d72-cf19-40eb-9920-0e8de3d2bb40', owner: 'iqe_rbac_v2_admin' }],
-  g16: [{ name: 'SA for RBAC', clientId: 'd807b762-31c3-45d0-bffe-7f498b709c66', owner: 'iqe_rbac_v2_admin' }],
+  g1: [{ name: 'cluster-monitor-sa', clientId: 'ab434b20-2276-4846-afdd-b0c4ecba2f0', owner: 'mwilliams' }],
+  g3: [{ name: 'insights-collector-sa', clientId: '7fb2272f-2844-4fd0-bab3-dbdb0d85a91f', owner: 'mwilliams' }],
+  g6: [{ name: 'pipeline-deploy-sa', clientId: 'd807b762-31c3-45d0-bffe-7f498b709c66', owner: 'pchen' }],
+  g8: [{ name: 'audit-reader-sa', clientId: 'b43b9c00-0107-43be-afa7-4ce45006b51c', owner: 'mwilliams' }],
+  g12: [{ name: 'subscription-sync-sa', clientId: '9e6729e3-2c31-4b45-90af-2e88ed654c0f', owner: 'agarcia' }],
+  g15: [{ name: 'e2e-test-runner-sa', clientId: '6dfb7d72-cf19-40eb-9920-0e8de3d2bb40', owner: 'mwilliams' }],
+  g16: [{ name: 'pipeline-deploy-sa', clientId: 'd807b762-31c3-45d0-bffe-7f498b709c66', owner: 'pchen' }],
   g18: [
-    { name: 'libord', clientId: 'f54cbb0-82e3-4f70-82be-a6f343746804', owner: 'iqe_rbac_v2_admin' },
-    { name: 'SA Permissions for RBAC', clientId: 'fe466d70-2aeb-4de7-6eb3-d48ff4729e62', owner: 'iqe_rbac_v2_admin' },
+    { name: 'image-builder-sa', clientId: 'f54cbb0-82e3-4f70-82be-a6f343746804', owner: 'skumar' },
+    { name: 'cost-management-sa', clientId: 'fe466d70-2aeb-4de7-6eb3-d48ff4729e62', owner: 'mwilliams' },
   ],
-  g20: [{ name: 'testlibor', clientId: 'cc9a0d3f-07dd-43a5-990b-d5a21d6d90a8', owner: 'iqe_rbac_v2_admin' }],
-  g21: [{ name: 'iqe-rbac-v2-service-account', clientId: '7fb2272f-2844-4fd0-bab3-dbdb0d85a91f', owner: 'iqe_rbac_v2_admin' }],
+  g20: [{ name: 'compliance-scan-sa', clientId: 'cc9a0d3f-07dd-43a5-990b-d5a21d6d90a8', owner: 'djohnson' }],
+  g21: [{ name: 'insights-collector-sa', clientId: '7fb2272f-2844-4fd0-bab3-dbdb0d85a91f', owner: 'mwilliams' }],
 };
 
 const groupMemberAgents: Record<string, GroupMemberAgent[]> = {
-  g2: [{ name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console' }],
-  g3: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights' }],
-  g6: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights' }, { name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console' }],
-  g9: [{ name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed' }],
-  g10: [{ name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console' }],
-  g14: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights' }],
-  g17: [{ name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed' }],
-  g20: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights' }, { name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed' }],
+  g2: [{ name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console', workspaces: ['Default', 'Production US-East', 'Staging'] }],
+  g3: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights', workspaces: ['Default', 'Production EU-West'] }],
+  g6: [
+    { name: 'Red Hat Insights Assistant', description: 'AI agent for Insights', workspaces: ['Default', 'Production US-East', 'Production EU-West'] },
+    { name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console', workspaces: ['Default'] },
+  ],
+  g9: [{ name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed', workspaces: ['Default', 'Development', 'Staging'] }],
+  g10: [{ name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console', workspaces: ['Default', 'Production US-East'] }],
+  g14: [{ name: 'Red Hat Insights Assistant', description: 'AI agent for Insights', workspaces: ['Default', 'Production EU-West', 'Staging', 'Development'] }],
+  g17: [{ name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed', workspaces: ['Default', 'Production US-East'] }],
+  g20: [
+    { name: 'Red Hat Insights Assistant', description: 'AI agent for Insights', workspaces: ['Default', 'Production US-East', 'Production EU-West', 'Staging'] },
+    { name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed', workspaces: ['Default', 'Development'] },
+  ],
 };
 
 const groupAssignedRoles: Record<string, GroupRole[]> = {
@@ -339,6 +345,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
   const [drawerUserPage, setDrawerUserPage] = React.useState(1);
   const [drawerSaPage, setDrawerSaPage] = React.useState(1);
   const [drawerAgentPage, setDrawerAgentPage] = React.useState(1);
+  const [selectedAgent, setSelectedAgent] = React.useState<GroupMemberAgent | null>(null);
   const [drawerRolePage, setDrawerRolePage] = React.useState(1);
   const drawerPerPage = 5;
 
@@ -348,6 +355,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
     setDrawerUserPage(1);
     setDrawerSaPage(1);
     setDrawerAgentPage(1);
+    setSelectedAgent(null);
     setDrawerRolePage(1);
     setIsGroupDrawerOpen(true);
   };
@@ -611,7 +619,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                         </FlexItem>
                       </Flex>
                       <DrawerActions>
-                        <DrawerCloseButton onClick={() => { setIsGroupDrawerOpen(false); setSelectedGroup(null); }} />
+                        <DrawerCloseButton onClick={() => { setIsGroupDrawerOpen(false); setSelectedGroup(null); setSelectedAgent(null); }} />
                       </DrawerActions>
                     </DrawerHead>
                     <div style={{ padding: '0 16px 16px' }}>
@@ -709,7 +717,30 @@ const UsersAndGroups: React.FunctionComponent = () => {
                           )}
                         </Tab>
                         <Tab eventKey={2} title={<TabTitleText>AI agents</TabTitleText>}>
-                          {drawerAgents.length > 0 ? (
+                          {selectedAgent ? (
+                            <div style={{ marginTop: 8 }}>
+                              <Button variant="link" isInline onClick={() => setSelectedAgent(null)} style={{ marginBottom: '12px' }}>
+                                ← Back to AI agents
+                              </Button>
+                              <Title headingLevel="h4" size="lg" style={{ marginBottom: '4px' }}>{selectedAgent.name}</Title>
+                              <Content component="p" style={{ color: 'var(--pf-v6-global--Color--200)', marginBottom: '16px' }}>{selectedAgent.description}</Content>
+                              <Title headingLevel="h5" size="md" style={{ marginBottom: '8px' }}>Workspace access</Title>
+                              <Table aria-label="Agent workspace access" variant="compact">
+                                <Thead>
+                                  <Tr>
+                                    <Th>Workspace</Th>
+                                  </Tr>
+                                </Thead>
+                                <Tbody>
+                                  {(selectedAgent.workspaces || []).map((ws, i) => (
+                                    <Tr key={i}>
+                                      <Td>{ws}</Td>
+                                    </Tr>
+                                  ))}
+                                </Tbody>
+                              </Table>
+                            </div>
+                          ) : drawerAgents.length > 0 ? (
                             <div style={{ marginTop: 8 }}>
                               <Pagination
                                 isCompact
@@ -729,7 +760,12 @@ const UsersAndGroups: React.FunctionComponent = () => {
                                 </Thead>
                                 <Tbody>
                                   {drawerAgentPageRows.map((a, i) => (
-                                    <Tr key={i}>
+                                    <Tr
+                                      key={i}
+                                      isClickable
+                                      isRowSelected={false}
+                                      onRowClick={() => setSelectedAgent(a)}
+                                    >
                                       <Td>{a.name}</Td>
                                       <Td>{a.description}</Td>
                                     </Tr>
@@ -860,7 +896,6 @@ const UsersAndGroups: React.FunctionComponent = () => {
                             Name
                           </Th>
                           <Th width={25}>Description</Th>
-                          <Th width={15}>AI Agent access</Th>
                           <Th width={10}>Users</Th>
                           <Th width={15}>Last modified</Th>
                           <Th width={10} screenReaderText="Actions" />
@@ -883,15 +918,6 @@ const UsersAndGroups: React.FunctionComponent = () => {
                             />
                             <Td>{g.name}</Td>
                             <Td>{g.description}</Td>
-                            <Td>
-                              <Switch
-                                id={`ai-access-${g.id}`}
-                                isChecked={g.aiAccess}
-                                onChange={(_e, checked) => { onToggleAiAccess(g.id, checked); }}
-                                onClick={(e) => e.stopPropagation()}
-                                aria-label="AI Agent access"
-                              />
-                            </Td>
                             <Td>{g.users}</Td>
                             <Td>{g.lastModified}</Td>
                             <Td isActionCell onClick={(e) => e.stopPropagation()}>

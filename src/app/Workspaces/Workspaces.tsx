@@ -84,12 +84,12 @@ type UserEntry = { name: string; org: string; username?: string; firstName?: str
 type GrantedRow = { groupName: string; description: string; users: number; roles: number; lastModified: string; rolesList: string[]; usersList: UserEntry[]; orgName?: string };
 
 const _u = {
-  doejoe: { name: 'Joe Doe', org: 'Pinnacle Corp', username: 'doejoe', firstName: 'Joe', lastName: 'Doe' },
-  admin: { name: 'RBAC Admin For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_admin', firstName: 'RBAC Admin', lastName: 'For V2' },
-  normal: { name: 'RBAC Normal For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_normal', firstName: 'RBAC Normal', lastName: 'For V2' },
-  rbac: { name: 'RBAC RBAC For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_rbac', firstName: 'RBAC RBAC', lastName: 'For V2' },
-  viewer: { name: 'RBAC Viewer For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_viewer', firstName: 'RBAC Viewer', lastName: 'For V2' },
-  workspaces: { name: 'RBAC Workspaces For V2', org: 'Pinnacle Corp', username: 'iqe_rbac_v2_workspaces', firstName: 'RBAC Workspaces', lastName: 'For V2' },
+  doejoe: { name: 'John Smith', org: 'Pinnacle Corp', username: 'jsmith', firstName: 'John', lastName: 'Smith' },
+  admin: { name: 'Maria Williams', org: 'Pinnacle Corp', username: 'mwilliams', firstName: 'Maria', lastName: 'Williams' },
+  normal: { name: 'Alex Garcia', org: 'Pinnacle Corp', username: 'agarcia', firstName: 'Alex', lastName: 'Garcia' },
+  rbac: { name: 'Priya Chen', org: 'Pinnacle Corp', username: 'pchen', firstName: 'Priya', lastName: 'Chen' },
+  viewer: { name: 'David Johnson', org: 'Pinnacle Corp', username: 'djohnson', firstName: 'David', lastName: 'Johnson' },
+  workspaces: { name: 'Sarah Kumar', org: 'Pinnacle Corp', username: 'skumar', firstName: 'Sarah', lastName: 'Kumar' },
 };
 
 const initialGrantedByWorkspace: Record<string, GrantedRow[]> = {
@@ -119,7 +119,7 @@ const initialGrantedByWorkspace: Record<string, GrantedRow[]> = {
   'workspace-c': [
     { groupName: 'demo-local-v2__Child Group', description: 'Group for child workspace testing', users: 0, roles: 1, lastModified: '08 Apr 2026', rolesList: ['Content Template viewer'], usersList: [] },
     { groupName: 'demo-local-v2__Seeded Group', description: 'Controlled test group for search and ...', users: 0, roles: 1, lastModified: '08 Apr 2026', rolesList: ['Inventory Hosts viewer'], usersList: [] },
-    { groupName: 'Automation Something', description: 'Automated pipeline runners', users: 2, roles: 2, lastModified: '10 days ago', rolesList: ['Notifications administrator', 'Malware detection viewer'], usersList: [_u.admin, _u.workspaces] },
+    { groupName: 'Automation Something', description: 'Automated pipeline runners', users: 2, roles: 2, lastModified: '10 days ago', rolesList: ['Notifications administrator', 'Malware detection viewer'], usersList: [_u.admin, _u.workspaces, { name: 'Red Hat Lightspeed Agent', org: 'Pinnacle Corp', username: 'rh-lightspeed-agent' }] },
   ],
 };
 
