@@ -1905,7 +1905,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     { label: 'Learning Resources', path: '/learning-resources', isActive: location.pathname === '/learning-resources' },
   ];
 
-  const renderBundleNav = (items: typeof settingsNavItems, prefix: string) =>
+  const renderBundleNav = (items: Array<{ label: string; path: string; isActive: boolean; isExpandable?: boolean; subItems?: Array<{ label: string; path: string; isActive: boolean }> }>, prefix: string) =>
     items.map((item, idx) =>
       item.isExpandable ? (
         <NavExpandable
