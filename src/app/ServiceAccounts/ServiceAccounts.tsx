@@ -342,7 +342,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
               label="Service account name"
               isRequired
               fieldId="sa-name"
-              labelIcon={
+              labelHelp={
                 <Button variant="plain" aria-label="More info for service account name" style={{ padding: 0 }}>
                   <HelpIcon />
                 </Button>
@@ -399,7 +399,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
               label="Service Access Token name"
               isRequired
               fieldId="sat-name"
-              labelIcon={
+              labelHelp={
                 <Button variant="plain" aria-label="More info for service access token name" style={{ padding: 0 }}>
                   <HelpIcon />
                 </Button>
@@ -539,7 +539,8 @@ const ServiceAccounts: React.FunctionComponent = () => {
             />
           </div>
         </ModalBody>
-        <ModalFooter style={{ display: 'flex', justifyContent: 'center' }}>
+        <ModalFooter>
+          <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
           <Button
             variant="secondary"
             isDisabled={!hasCopiedCredentials}
@@ -561,6 +562,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
           >
             Close
           </Button>
+          </div>
         </ModalFooter>
       </Modal>
     </>
