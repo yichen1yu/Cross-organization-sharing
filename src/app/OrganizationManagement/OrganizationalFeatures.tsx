@@ -36,6 +36,7 @@ import {
   LockIcon,
   AutomationIcon,
   OutlinedQuestionCircleIcon,
+  AngleRightIcon,
 } from '@patternfly/react-icons';
 
 type FeatureCard = {
@@ -124,6 +125,37 @@ const initialAiAgents: AiAgent[] = [
   { id: 'compliance-ai', name: 'Compliance AI', description: 'Automated compliance posture analysis and policy recommendations.', enabled: false },
 ];
 
+const agentRbacAccess: Record<string, { role: string; access: string }[]> = {
+  lightspeed: [
+    { role: 'Lightspeed Admin', access: 'Full read/write access to Lightspeed configuration, model settings, and usage policies' },
+    { role: 'Lightspeed Viewer', access: 'Read-only access to Lightspeed conversation logs and analytics dashboards' },
+    { role: 'Lightspeed Operator', access: 'Manage prompt templates, response filters, and context sources' },
+  ],
+  'insights-advisor': [
+    { role: 'Advisor Admin', access: 'Full access to recommendation rules, risk profiles, and remediation playbooks' },
+    { role: 'Advisor Analyst', access: 'View and export risk assessments, system health reports, and trend data' },
+    { role: 'Advisor Remediator', access: 'Execute remediation actions and manage remediation plans across RHEL systems' },
+  ],
+  'ansible-ai': [
+    { role: 'Ansible AI Admin', access: 'Configure AI model preferences, training data sources, and content policies' },
+    { role: 'Ansible AI User', access: 'Generate Playbooks, roles, and task suggestions using AI-powered content creation' },
+  ],
+  'openshift-ai': [
+    { role: 'OpenShift AI Admin', access: 'Full access to cluster AI configuration, model deployments, and resource quotas' },
+    { role: 'OpenShift AI Operator', access: 'Manage AI-assisted troubleshooting workflows and workload optimization settings' },
+    { role: 'OpenShift AI Viewer', access: 'Read-only access to cluster health insights and AI-generated recommendations' },
+  ],
+  'image-builder-ai': [
+    { role: 'Image Builder AI Admin', access: 'Configure AI composition rules, base image policies, and optimization profiles' },
+    { role: 'Image Builder AI User', access: 'Use AI recommendations for image composition, package selection, and optimization' },
+  ],
+  'compliance-ai': [
+    { role: 'Compliance AI Admin', access: 'Full access to compliance policy definitions, AI rule sets, and audit configurations' },
+    { role: 'Compliance AI Analyst', access: 'View compliance posture reports, policy violations, and AI-generated remediation steps' },
+    { role: 'Compliance AI Auditor', access: 'Read-only access to compliance audit trails and historical posture data' },
+  ],
+};
+
 type ToastAlert = {
   key: number;
   variant: AlertVariant;
@@ -136,6 +168,7 @@ const OrganizationalFeatures: React.FunctionComponent = () => {
   const [aiAgents, setAiAgents] = React.useState<AiAgent[]>(initialAiAgents);
   const [savedAgents, setSavedAgents] = React.useState<AiAgent[]>(initialAiAgents);
   const [alerts, setAlerts] = React.useState<ToastAlert[]>([]);
+  const [expandedAgents, setExpandedAgents] = React.useState<Set<string>>(new Set());
   const alertIdRef = React.useRef(0);
 
   const addAlert = (variant: AlertVariant, title: string, description?: React.ReactNode) => {
@@ -318,36 +351,97 @@ const OrganizationalFeatures: React.FunctionComponent = () => {
           description="Enable or disable individual AI agents across your organization. Changes apply to all users."
         />
         <ModalBody>
-          {aiAgents.map((agent, idx) => (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '8px 0 16px',
+            }}
+          >
+            <Title headingLevel="h4" size="md">All</Title>
+            <Switch
+              id="ai-agent-toggle-all"
+              aria-label="Toggle all AI agents"
+              isChecked={aiAgents.every(a => a.enabled)}
+              onChange={() => {
+                const allOn = aiAgents.every(a => a.enabled);
+                setAiAgents(prev => prev.map(a => ({ ...a, enabled: !allOn })));
+              }}
+            />
+          </div>
+          {aiAgents.map((agent, idx) => {
+            const isExpanded = expandedAgents.has(agent.id);
+            return (
             <div
               key={agent.id}
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                padding: '16px 0',
+                padding: '12px 0',
                 borderBottom: idx < aiAgents.length - 1 ? '1px solid var(--pf-v6-global--BorderColor--100, #d2d2d2)' : 'none',
               }}
             >
-              <div style={{ paddingRight: 24 }}>
-                <Title headingLevel="h4" size="md">{agent.name}</Title>
-                <Content>
-                  <p style={{ margin: '4px 0 0', color: '#6a6e73', fontSize: '0.875rem' }}>
-                    {agent.description}
-                  </p>
-                </Content>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', flex: 1 }}>
+                  <Button
+                    variant="plain"
+                    aria-label={isExpanded ? 'Collapse' : 'Expand'}
+                    onClick={() => {
+                      setExpandedAgents(prev => {
+                        const next = new Set(prev);
+                        if (next.has(agent.id)) {
+                          next.delete(agent.id);
+                        } else {
+                          next.add(agent.id);
+                        }
+                        return next;
+                      });
+                    }}
+                    style={{ padding: '2px', marginTop: '2px' }}
+                  >
+                    <span style={{ display: 'inline-flex', transition: 'transform 0.2s', transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+                      <AngleRightIcon />
+                    </span>
+                  </Button>
+                  <div style={{ flex: 1 }}>
+                    <Title headingLevel="h4" size="md">{agent.name}</Title>
+                    <Content>
+                      <p style={{ margin: '4px 0 0', color: '#6a6e73', fontSize: '0.875rem' }}>
+                        {agent.description}
+                      </p>
+                    </Content>
+                  </div>
+                </div>
+                <Switch
+                  id={`ai-agent-${agent.id}`}
+                  aria-label={`Toggle ${agent.name}`}
+                  isChecked={agent.enabled}
+                  onChange={() => onToggleAgent(agent.id)}
+                />
               </div>
-              <Switch
-                id={`ai-agent-${agent.id}`}
-                aria-label={`Toggle ${agent.name}`}
-                isChecked={agent.enabled}
-                onChange={() => onToggleAgent(agent.id)}
-              />
+              {isExpanded && (
+                <div style={{ padding: '8px 0 4px 30px' }}>
+                  {(agentRbacAccess[agent.id] || []).map((entry, i) => (
+                    <div key={i} style={{ marginBottom: '8px' }}>
+                      <span style={{ fontWeight: 600 }}>{entry.role}</span>
+                      <p style={{ margin: '2px 0 0', color: '#6a6e73', fontSize: '0.85rem' }}>
+                        {entry.access}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
+            );
+          })}
         </ModalBody>
         <ModalFooter>
-          <Button variant="primary" onClick={onSave}>Save</Button>
+          <Button variant="primary" onClick={onSave} isDisabled={aiAgents.every((a, i) => a.enabled === savedAgents[i].enabled)}>Save</Button>
           <Button variant="link" onClick={onCancel}>Cancel</Button>
         </ModalFooter>
       </Modal>
