@@ -1609,15 +1609,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     >
                       Scheduler
                     </MenuItem>
-                    <MenuItem
-                      icon={<GlobeIcon />}
-                      onClick={() => {
-                        navigate('/settings/language');
-                        setIsUtilitiesDropdownOpen(false);
-                      }}
-                    >
-                      Language
-                    </MenuItem>
                   </MenuGroup>
                   <MenuGroup label="Identity & Access Management">
                     <MenuItem 
@@ -1740,14 +1731,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   }}
                 >
                   My User Access
-                </DropdownItem>
-                <DropdownItem
-                  onClick={() => {
-                    navigate('/user-preferences');
-                    setIsUserDropdownOpen(false);
-                  }}
-                >
-                  User Preferences
                 </DropdownItem>
                 <DropdownItem
                   onClick={() => {
