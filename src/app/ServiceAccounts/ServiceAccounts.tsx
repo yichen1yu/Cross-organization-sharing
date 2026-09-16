@@ -1,5 +1,9 @@
 import * as React from 'react';
 import {
+  Alert,
+  AlertActionCloseButton,
+  AlertGroup,
+  AlertVariant,
   Breadcrumb,
   BreadcrumbItem,
   Button,
@@ -89,8 +93,22 @@ const ServiceAccounts: React.FunctionComponent = () => {
   const [newSATDescription, setNewSATDescription] = React.useState('');
   const [newSATExpiration, setNewSATExpiration] = React.useState('');
   const [isExpirationOpen, setIsExpirationOpen] = React.useState(false);
-  const [credentialsSource, setCredentialsSource] = React.useState<'sa' | 'sat'>('sa');
+  const [credentialsSource, setCredentialsSource] = React.useState<'sa' | 'sat' | 'reset'>('sa');
+  const [isResetModalOpen, setIsResetModalOpen] = React.useState(false);
+  const [resetRow, setResetRow] = React.useState<ServiceAccountRow | null>(null);
+  const [isRevokeModalOpen, setIsRevokeModalOpen] = React.useState(false);
+  const [revokeRow, setRevokeRow] = React.useState<ServiceAccountRow | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const [deleteRow, setDeleteRow] = React.useState<ServiceAccountRow | null>(null);
+  const [alerts, setAlerts] = React.useState<{ key: number; variant: AlertVariant; title: string }[]>([]);
+  const alertIdRef = React.useRef(0);
   const [sortIndex, setSortIndex] = React.useState<number | null>(null);
+
+  const addAlert = (variant: AlertVariant, title: string) => {
+    const key = alertIdRef.current++;
+    setAlerts(prev => [...prev, { key, variant, title }]);
+    setTimeout(() => setAlerts(prev => prev.filter(a => a.key !== key)), 8000);
+  };
   const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>('asc');
 
   const filterPlaceholders: Record<FilterCategory, string> = {
@@ -152,6 +170,17 @@ const ServiceAccounts: React.FunctionComponent = () => {
 
   return (
     <>
+      <AlertGroup isToast isLiveRegion>
+        {alerts.map(alert => (
+          <Alert
+            key={alert.key}
+            variant={alert.variant}
+            title={alert.title}
+            actionClose={<AlertActionCloseButton onClose={() => setAlerts(prev => prev.filter(a => a.key !== alert.key))} />}
+          />
+        ))}
+      </AlertGroup>
+
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
           <BreadcrumbItem>Identity & Access Management</BreadcrumbItem>
@@ -305,11 +334,11 @@ const ServiceAccounts: React.FunctionComponent = () => {
                     popperProps={{ position: 'right' }}
                   >
                     <DropdownList>
-                      <DropdownItem>Reset credentials</DropdownItem>
+                      <DropdownItem onClick={() => { setOpenKebabFor(null); setResetRow(r); setIsResetModalOpen(true); }}>Reset credentials</DropdownItem>
                       {r.type === 'Service Access Token' && (
-                        <DropdownItem>Revoke credentials</DropdownItem>
+                        <DropdownItem onClick={() => { setOpenKebabFor(null); setRevokeRow(r); setIsRevokeModalOpen(true); }}>Revoke credentials</DropdownItem>
                       )}
-                      <DropdownItem>{r.type === 'Service Access Token' ? 'Delete service access token' : 'Delete service account'}</DropdownItem>
+                      <DropdownItem onClick={() => { setOpenKebabFor(null); setDeleteRow(r); setIsDeleteModalOpen(true); }}>{r.type === 'Service Access Token' ? 'Delete service access token' : 'Delete service account'}</DropdownItem>
                     </DropdownList>
                   </Dropdown>
                 </Td>
@@ -465,6 +494,102 @@ const ServiceAccounts: React.FunctionComponent = () => {
       </Modal>
 
       <Modal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        variant="small"
+        aria-labelledby="reset-credentials-modal-title"
+      >
+        <ModalHeader title="Reset service account credentials?" titleIconVariant={undefined} labelId="reset-credentials-modal-title" />
+        <ModalBody>
+          Client secret for <strong>{resetRow?.name}</strong> with client ID will be reset.
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="primary"
+            onClick={() => {
+              if (resetRow) {
+                setIsResetModalOpen(false);
+                setGeneratedClientId(resetRow.clientId);
+                setGeneratedSecret(generateSecret());
+                setHasCopiedCredentials(false);
+                setCredentialsSource('reset');
+                setIsCredentialsModalOpen(true);
+              }
+            }}
+          >
+            Reset
+          </Button>
+          <Button variant="link" onClick={() => setIsResetModalOpen(false)}>
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal
+        isOpen={isRevokeModalOpen}
+        onClose={() => setIsRevokeModalOpen(false)}
+        variant="small"
+        aria-labelledby="revoke-modal-title"
+      >
+        <ModalHeader title="Revoke service access token?" titleIconVariant="warning" labelId="revoke-modal-title" />
+        <ModalBody>
+          Revoking <strong>{revokeRow?.name}</strong> will invalidate this token and terminate any active sessions using it. This action cannot be undone.
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="danger"
+            onClick={() => {
+                addAlert(AlertVariant.info, `Service access token "${revokeRow?.name}" has been revoked.`);
+              setIsRevokeModalOpen(false);
+            }}
+          >
+            Revoke
+          </Button>
+          <Button variant="link" onClick={() => setIsRevokeModalOpen(false)}>
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        variant="small"
+        aria-labelledby="delete-modal-title"
+      >
+        <ModalHeader
+          title={deleteRow?.type === 'Service Access Token' ? 'Delete service access token?' : 'Delete service account?'}
+          titleIconVariant="warning"
+          labelId="delete-modal-title"
+        />
+        <ModalBody>
+          {deleteRow?.type === 'Service Access Token' ? (
+            <>Deleting <strong>{deleteRow?.name}</strong> will revoke this token, terminate any active sessions, and permanently remove it. This action cannot be undone.</>
+          ) : (
+            <>Deleting <strong>{deleteRow?.name}</strong> will permanently remove this service account and revoke all associated credentials. This action cannot be undone.</>
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            variant="danger"
+            onClick={() => {
+              if (deleteRow) {
+                const label = deleteRow.type === 'Service Access Token' ? 'Service access token' : 'Service account';
+                addAlert(AlertVariant.info, `${label} "${deleteRow.name}" has been deleted.`);
+                setRows(prev => prev.filter(r => r.id !== deleteRow.id));
+              }
+              setIsDeleteModalOpen(false);
+            }}
+          >
+            Delete
+          </Button>
+          <Button variant="link" onClick={() => setIsDeleteModalOpen(false)}>
+            Cancel
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      <Modal
         isOpen={isCredentialsModalOpen}
         variant="medium"
         aria-labelledby="credentials-modal-title"
@@ -545,19 +670,23 @@ const ServiceAccounts: React.FunctionComponent = () => {
             variant="secondary"
             isDisabled={!hasCopiedCredentials}
             onClick={() => {
-              const name = credentialsSource === 'sa' ? newSAName : newSATName;
-              const desc = credentialsSource === 'sa' ? newSADescription : newSATDescription;
-              const rowType = credentialsSource === 'sa' ? 'Service account' : 'Service Access Token';
-              setRows(prev => [{
-                id: `sa-${Date.now()}`,
-                name,
-                description: desc,
-                clientId: generatedClientId,
-                owner: 'yichenyu',
-                created: 'just now',
-                type: rowType,
-              }, ...prev]);
-              setIsCredentialsModalOpen(false);
+              if (credentialsSource === 'reset') {
+                setIsCredentialsModalOpen(false);
+              } else {
+                const name = credentialsSource === 'sa' ? newSAName : newSATName;
+                const desc = credentialsSource === 'sa' ? newSADescription : newSATDescription;
+                const rowType = credentialsSource === 'sa' ? 'Service account' : 'Service Access Token';
+                setRows(prev => [{
+                  id: `sa-${Date.now()}`,
+                  name,
+                  description: desc,
+                  clientId: generatedClientId,
+                  owner: 'yichenyu',
+                  created: 'just now',
+                  type: rowType,
+                }, ...prev]);
+                setIsCredentialsModalOpen(false);
+              }
             }}
           >
             Close
