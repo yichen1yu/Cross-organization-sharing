@@ -315,7 +315,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
                 <Td>
                   <Button variant="link" isInline>{r.name}</Button>
                   {r.type === 'Service Access Token' && (
-                    <Label color="blue" isCompact style={{ marginLeft: '8px' }}>Service access token</Label>
+                    <Label color="blue" isCompact style={{ marginLeft: '8px' }}>Token</Label>
                   )}
                 </Td>
                 <Td>{r.description || <span style={{ color: '#6a6e73' }}>&mdash;</span>}</Td>

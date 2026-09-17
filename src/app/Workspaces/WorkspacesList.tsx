@@ -92,9 +92,44 @@ const WorkspacesList: React.FunctionComponent = () => {
   const [selectedRequestRoles, setSelectedRequestRoles] = React.useState<Set<string>>(new Set());
   const [requestRolesPage, setRequestRolesPage] = React.useState(1);
   const [requestRolesPerPage, setRequestRolesPerPage] = React.useState(10);
+  const [selectedUserGroups, setSelectedUserGroups] = React.useState<Set<string>>(new Set());
 
   const myOrgName = 'Pinnacle Corp';
   const trustedOrgNames = ['Initech', 'Soylent', 'Acme Corp', 'Stark Industries', 'Massive Dynamic', 'Dunder Mifflin'];
+
+  const trustedOrgUserGroups: Record<string, { name: string; members: number }[]> = {
+    'Acme Corp': [
+      { name: 'Security Team', members: 5 },
+      { name: 'Compliance Auditors', members: 4 },
+      { name: 'QA Engineers', members: 9 },
+      { name: 'Data Science Team', members: 7 },
+      { name: 'Support Engineers', members: 8 },
+    ],
+    'Initech': [
+      { name: 'DevOps Engineers', members: 8 },
+      { name: 'Platform Engineers', members: 12 },
+      { name: 'SRE Team', members: 6 },
+    ],
+    'Soylent': [
+      { name: 'Cloud Architects', members: 3 },
+      { name: 'Infrastructure Team', members: 10 },
+    ],
+    'Stark Industries': [
+      { name: 'Administrators', members: 3 },
+      { name: 'Network Admins', members: 3 },
+      { name: 'Database Admins', members: 5 },
+      { name: 'Mobile Developers', members: 5 },
+    ],
+    'Massive Dynamic': [
+      { name: 'Product Managers', members: 4 },
+      { name: 'UX Designers', members: 6 },
+      { name: 'QA Engineers', members: 9 },
+    ],
+    'Dunder Mifflin': [
+      { name: 'Support Engineers', members: 8 },
+      { name: 'Compliance Auditors', members: 4 },
+    ],
+  };
 
   const [sharedSearch, setSharedSearch] = React.useState('');
   const [sharedView, setSharedView] = React.useState<'list' | 'byOrg'>('list');
@@ -234,6 +269,7 @@ const WorkspacesList: React.FunctionComponent = () => {
     setRequestRoleFilter('');
     setSelectedRequestRoles(new Set());
     setRequestRolesPage(1);
+    setSelectedUserGroups(new Set());
     setIsRequestWizardOpen(true);
   };
 
@@ -633,8 +669,9 @@ const WorkspacesList: React.FunctionComponent = () => {
           <Wizard
             onClose={() => setIsRequestWizardOpen(false)}
             onSave={() => {
+              const orgName = requestWhere === 'outside' && selectedTrustedOrg ? selectedTrustedOrg : myOrgName;
               setIsRequestWizardOpen(false);
-              addToast('Your access request has been submitted successfully.');
+              addToast(`Your access request has been submitted successfully. Admin from ${orgName} will review the request.`);
             }}
             header={
               <WizardHeader
@@ -658,7 +695,7 @@ const WorkspacesList: React.FunctionComponent = () => {
                     id="request-where-within"
                     name="request-where"
                     isChecked={requestWhere === 'within'}
-                    onChange={() => { setRequestWhere('within'); setSelectedTrustedOrg(null); }}
+                    onChange={() => { setRequestWhere('within'); setSelectedTrustedOrg(null); setSelectedUserGroups(new Set()); }}
                     label={`Within ${myOrgName} organization`}
                   />
                   <Radio
@@ -680,6 +717,7 @@ const WorkspacesList: React.FunctionComponent = () => {
                       onSelect={(_e, itemId) => {
                         const name = String(itemId ?? '');
                         if (name) setSelectedTrustedOrg(name);
+                        setSelectedUserGroups(new Set());
                         setIsTrustedOrgDropdownOpen(false);
                       }}
                       toggle={(toggleRef) => (
@@ -825,6 +863,55 @@ const WorkspacesList: React.FunctionComponent = () => {
               </div>
             </WizardStep>
 
+            {requestWhere === 'outside' && selectedTrustedOrg && (
+              <WizardStep
+                id="request-step-user-groups"
+                name="Select user group"
+                isDisabled={selectedRequestRoles.size === 0}
+                footer={{ isNextDisabled: selectedUserGroups.size === 0 }}
+              >
+                <div style={{ padding: 16 }}>
+                  <Title headingLevel="h3" size="lg">Select user group</Title>
+                  <p style={{ marginTop: 8 }}>
+                    Select from the user group(s) your organization shared with <strong>{selectedTrustedOrg}</strong>. If you cannot find the user group you are looking for, please contact the organization admin.
+                  </p>
+                  <div style={{ marginTop: 16 }}>
+                    <Table aria-label="User groups table" variant="compact">
+                      <Thead>
+                        <Tr>
+                          <Th screenReaderText="Select" />
+                          <Th width={60}>User group name</Th>
+                          <Th width={20}>Members</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {(trustedOrgUserGroups[selectedTrustedOrg] || []).map((group) => (
+                          <Tr key={group.name}>
+                            <Td
+                              select={{
+                                rowIndex: (trustedOrgUserGroups[selectedTrustedOrg] || []).findIndex(g => g.name === group.name),
+                                onSelect: (_event, isSelecting) => {
+                                  setSelectedUserGroups(prev => {
+                                    const next = new Set(prev);
+                                    if (isSelecting) next.add(group.name);
+                                    else next.delete(group.name);
+                                    return next;
+                                  });
+                                },
+                                isSelected: selectedUserGroups.has(group.name),
+                              }}
+                            />
+                            <Td dataLabel="User group name">{group.name}</Td>
+                            <Td dataLabel="Members">{group.members}</Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                  </div>
+                </div>
+              </WizardStep>
+            )}
+
             <WizardStep
               id="request-step-3"
               name="Review"
@@ -847,6 +934,12 @@ const WorkspacesList: React.FunctionComponent = () => {
                   <div>{isPermanent ? 'Permanent' : `${startDate} to ${endDate}`}</div>
                   <div style={{ fontWeight: 700 }}>Role(s)</div>
                   <div>{Array.from(selectedRequestRoles).join(', ')}</div>
+                  {requestWhere === 'outside' && selectedUserGroups.size > 0 && (
+                    <>
+                      <div style={{ fontWeight: 700 }}>User group(s)</div>
+                      <div>{Array.from(selectedUserGroups).join(', ')}</div>
+                    </>
+                  )}
                 </div>
               </div>
             </WizardStep>

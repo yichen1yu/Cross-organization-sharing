@@ -31,6 +31,7 @@ import {
   Dropdown,
   DropdownItem,
   DropdownList,
+  ExpandableSection,
   Flex,
   FlexItem,
   Form,
@@ -40,6 +41,7 @@ import {
   FormSelectOption,
   HelperText,
   HelperTextItem,
+  Label,
   Masthead,
   MastheadBrand,
   MastheadContent,
@@ -149,6 +151,13 @@ const SchedulerWizardContext = React.createContext<{
 
 export const useSchedulerWizard = () => React.useContext(SchedulerWizardContext);
 
+const AccessRequestContext = React.createContext<{
+  isAccessRequestHandled: boolean;
+  setAccessRequestHandled: (handled: boolean) => void;
+}>({ isAccessRequestHandled: false, setAccessRequestHandled: () => {} });
+
+export const useAccessRequest = () => React.useContext(AccessRequestContext);
+
 interface IAppLayout {
   children: React.ReactNode;
 }
@@ -205,6 +214,42 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [isNotificationDrawerOpen, setIsNotificationDrawerOpen] = React.useState(false);
   const [isNotificationActionsOpen, setIsNotificationActionsOpen] = React.useState(false);
   const [isSchedulerPanelOpen, setIsSchedulerPanelOpen] = React.useState(false);
+
+  // Review access request wizard state
+  const [isReviewAccessWizardOpen, setIsReviewAccessWizardOpen] = React.useState(false);
+  const [isAccessRequestHandled, setIsAccessRequestHandled] = React.useState(false);
+  const [reviewAccessAcceptChoice, setReviewAccessAcceptChoice] = React.useState<'approve' | 'deny' | null>(null);
+  const [reviewAccessVerifyEmail, setReviewAccessVerifyEmail] = React.useState('');
+  const [reviewAccessSelectedWorkspaces, setReviewAccessSelectedWorkspaces] = React.useState<Set<string>>(new Set());
+  const [reviewAccessUserGroupsExpanded, setReviewAccessUserGroupsExpanded] = React.useState(false);
+
+  const reviewAccessRequestData = {
+    requesterName: 'Sarah Chen',
+    requesterEmail: 'sarah.chen@initech.com',
+    organization: 'Initech',
+    orgId: '300123',
+    accessType: 'Outside of this organization',
+    accessDuration: '2025-10-01 to 2026-03-31',
+    roles: ['Inventory administrator', 'Compliance viewer'],
+    userGroups: ['DevOps Engineers', 'Platform Engineers', 'SRE Team'],
+  };
+
+  const reviewAccessWorkspaces = [
+    { id: 'ws-prod', name: 'Production', description: 'Production environment resources' },
+    { id: 'ws-staging', name: 'Staging', description: 'Staging and pre-production environment' },
+    { id: 'ws-dev', name: 'Development', description: 'Development and testing environment' },
+    { id: 'ws-cicd', name: 'CI/CD Pipeline', description: 'Continuous integration and deployment' },
+    { id: 'ws-sandbox', name: 'Sandbox', description: 'Experimental sandbox environment' },
+  ];
+
+  const openReviewAccessWizard = () => {
+    setReviewAccessAcceptChoice(null);
+    setReviewAccessVerifyEmail('');
+    setReviewAccessSelectedWorkspaces(new Set());
+    setReviewAccessUserGroupsExpanded(false);
+    setIsNotificationDrawerOpen(false);
+    setIsReviewAccessWizardOpen(true);
+  };
   const [schedulerActiveTab, setSchedulerActiveTab] = React.useState<number>(0);
   const [schedulerFilterNameOpen, setSchedulerFilterNameOpen] = React.useState(false);
   const [schedulerFilterName, setSchedulerFilterName] = React.useState('Filter name');
@@ -289,11 +334,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     setLockedFileType(options?.lockFileType ? (options.preselectedFileType || null) : null);
     setIsScheduleWizardOpen(true);
   }, []);
-  type ToastItem = { id: number; title: string; description?: React.ReactNode };
+  type ToastItem = { id: number; title: string; description?: React.ReactNode; variant?: 'success' | 'info' | 'warning' | 'danger' };
   const [toasts, setToasts] = React.useState<ToastItem[]>([]);
-  const addToast = (title: string, description?: React.ReactNode) => {
+  const addToast = (title: string, description?: React.ReactNode, variant?: 'success' | 'info' | 'warning' | 'danger') => {
     const id = Date.now() + Math.floor(Math.random() * 1000);
-    setToasts(prev => [...prev, { id, title, description }]);
+    setToasts(prev => [...prev, { id, title, description, variant }]);
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 8000);
   };
   const removeToast = (id: number) => setToasts(prev => prev.filter(t => t.id !== id));
@@ -2016,16 +2061,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   // Create notification drawer content
   const notificationDrawerContent = (
-    <DrawerPanelContent defaultSize="580px">
-      <DrawerHead>
-        <span style={{ fontWeight: 'bold' }}>Notifications</span>
-        <DrawerActions>
+    <DrawerPanelContent defaultSize="400px">
+      <NotificationDrawer>
+        <NotificationDrawerHeader
+          title="Notifications"
+          customText={`${isAccessRequestHandled ? 4 : 5} unread`}
+          onClose={onNotificationDrawerClose}
+        >
           <Dropdown
             isOpen={isNotificationActionsOpen}
             onOpenChange={(isOpen: boolean) => setIsNotificationActionsOpen(isOpen)}
-            popperProps={{
-              position: 'right'
-            }}
+            popperProps={{ position: 'right' }}
             toggle={(toggleRef: React.Ref<any>) => (
               <MenuToggle
                 ref={toggleRef}
@@ -2065,47 +2111,67 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </DropdownItem>
             </DropdownList>
           </Dropdown>
-          <DrawerCloseButton onClick={onNotificationDrawerClose} />
-        </DrawerActions>
-      </DrawerHead>
-      <DrawerContentBody>
-        <NotificationDrawer>
-          <NotificationDrawerBody>
-            <NotificationDrawerList>
-              <NotificationDrawerListItem variant="info">
-                <NotificationDrawerListItemHeader
-                  variant="info"
-                  title="System Update Available"
-                  srTitle="Info notification:"
-                />
-                <NotificationDrawerListItemBody timestamp="5 minutes ago">
-                  A new system update is available for installation. Click to view details.
-                </NotificationDrawerListItemBody>
-              </NotificationDrawerListItem>
-              <NotificationDrawerListItem variant="warning">
-                <NotificationDrawerListItemHeader
-                  variant="warning"
-                  title="Storage Space Low"
-                  srTitle="Warning notification:"
-                />
-                <NotificationDrawerListItemBody timestamp="15 minutes ago">
-                  Your storage space is running low. Consider removing unused files.
-                </NotificationDrawerListItemBody>
-              </NotificationDrawerListItem>
-              <NotificationDrawerListItem variant="success">
-                <NotificationDrawerListItemHeader
-                  variant="success"
-                  title="Backup Completed"
-                  srTitle="Success notification:"
-                />
-                <NotificationDrawerListItemBody timestamp="1 hour ago">
-                  Your scheduled backup has completed successfully.
-                </NotificationDrawerListItemBody>
-              </NotificationDrawerListItem>
-            </NotificationDrawerList>
-          </NotificationDrawerBody>
-        </NotificationDrawer>
-      </DrawerContentBody>
+        </NotificationDrawerHeader>
+        <NotificationDrawerBody>
+          <NotificationDrawerList>
+            <NotificationDrawerListItem variant="info" isRead={isAccessRequestHandled} onClick={openReviewAccessWizard} style={{ cursor: 'pointer' }}>
+              <NotificationDrawerListItemHeader
+                variant="info"
+                title="New access request received"
+                srTitle="Info notification:"
+              />
+              <NotificationDrawerListItemBody timestamp="Just now">
+                <Label isCompact style={{ marginBottom: 4 }}>Console - User Access</Label>
+                <div>Access request from <a href="#">sarah.chen@initech.com</a> of Initech is waiting for review.</div>
+              </NotificationDrawerListItemBody>
+            </NotificationDrawerListItem>
+            <NotificationDrawerListItem variant="info" isRead={false}>
+              <NotificationDrawerListItemHeader
+                variant="info"
+                title="Group updated"
+                srTitle="Info notification:"
+              />
+              <NotificationDrawerListItemBody timestamp="Just now">
+                <Label isCompact style={{ marginBottom: 4 }}>Console - User Access</Label>
+                <div><a href="#">jeffg-stage</a> updated the <a href="#">Platform Engineers</a> group.</div>
+              </NotificationDrawerListItemBody>
+            </NotificationDrawerListItem>
+            <NotificationDrawerListItem variant="info" isRead={false}>
+              <NotificationDrawerListItemHeader
+                variant="info"
+                title="System became stale"
+                srTitle="Info notification:"
+              />
+              <NotificationDrawerListItemBody timestamp="Just now">
+                <Label isCompact style={{ marginBottom: 4 }}>Red Hat Enterprise Linux - Inventory</Label>
+                <div>The state of system <a href="#">5ace0be2-ebec-4483-bc4c-6e88fea5b936</a> changed to stale in the inventory.</div>
+              </NotificationDrawerListItemBody>
+            </NotificationDrawerListItem>
+            <NotificationDrawerListItem variant="info" isRead={false}>
+              <NotificationDrawerListItemHeader
+                variant="info"
+                title="System became stale"
+                srTitle="Info notification:"
+              />
+              <NotificationDrawerListItemBody timestamp="Just now">
+                <Label isCompact style={{ marginBottom: 4 }}>Red Hat Enterprise Linux - Inventory</Label>
+                <div>The state of system <a href="#">d2515f8d-007f-4877-a61c-31ca4504d9fd</a> changed to stale in the inventory.</div>
+              </NotificationDrawerListItemBody>
+            </NotificationDrawerListItem>
+            <NotificationDrawerListItem variant="info" isRead={false}>
+              <NotificationDrawerListItemHeader
+                variant="info"
+                title="System became stale"
+                srTitle="Info notification:"
+              />
+              <NotificationDrawerListItemBody timestamp="Just now">
+                <Label isCompact style={{ marginBottom: 4 }}>Red Hat Enterprise Linux - Inventory</Label>
+                <div>The state of system <a href="#">03b49599-a7b7-4257-85fe-0e1b5bc65f72</a> changed to stale in the inventory.</div>
+              </NotificationDrawerListItemBody>
+            </NotificationDrawerListItem>
+          </NotificationDrawerList>
+        </NotificationDrawerBody>
+      </NotificationDrawer>
     </DrawerPanelContent>
   );
 
@@ -2547,10 +2613,11 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     <AnnotationProvider>
     <>
     <SchedulerWizardContext.Provider value={{ openSchedulerWizard, showToast: addToast }}>
+    <AccessRequestContext.Provider value={{ isAccessRequestHandled, setAccessRequestHandled: setIsAccessRequestHandled }}>
     <>
       <AlertGroup isToast isLiveRegion>
         {toasts.map(t => (
-          <Alert key={t.id} variant="success" title={t.title} actionClose={<AlertActionCloseButton onClose={() => removeToast(t.id)} />}>
+          <Alert key={t.id} variant={t.variant || 'success'} title={t.title} actionClose={<AlertActionCloseButton onClose={() => removeToast(t.id)} />}>
             {t.description}
           </Alert>
         ))}
@@ -3160,8 +3227,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           {/* Scheduler Drawer (outermost, right-side, global) */}
           <Drawer isExpanded={isSchedulerPanelOpen} isInline position="right">
             <DrawerContent panelContent={schedulerDrawerContent}>
-              {/* Notification Drawer (middle, right-side) */}
-              <Drawer isExpanded={isNotificationDrawerOpen} isInline position="right">
+              {/* Notification Drawer (middle, right-side, overlay) */}
+              <Drawer isExpanded={isNotificationDrawerOpen} position="right">
                 <DrawerContent panelContent={notificationDrawerContent}>
                   {/* Help Drawer (inner, left-side) */}
                   <Drawer isExpanded={isDrawerExpanded} isInline>
@@ -4787,7 +4854,191 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       )}
       
 
+    {isReviewAccessWizardOpen && (
+      <Modal isOpen onClose={() => setIsReviewAccessWizardOpen(false)} variant="large" aria-label="Review access request wizard" className="trusted-wizard-modal">
+        <Wizard
+          onClose={() => setIsReviewAccessWizardOpen(false)}
+          onSave={() => {
+            setIsReviewAccessWizardOpen(false);
+            setIsAccessRequestHandled(true);
+            addToast(
+              reviewAccessAcceptChoice === 'approve'
+                ? `Access request from ${reviewAccessRequestData.requesterName} has been approved. User group(s) in the request will have access to the selected workspace(s).`
+                : `Access request from ${reviewAccessRequestData.requesterName} has been denied.`,
+              undefined,
+              reviewAccessAcceptChoice === 'approve' ? 'success' : 'info'
+            );
+          }}
+          header={
+            <WizardHeader
+              title={`Review access request from ${reviewAccessRequestData.requesterName}`}
+              description="Review and manage this pending access request."
+              onClose={() => setIsReviewAccessWizardOpen(false)}
+            />
+          }
+          startIndex={1}
+        >
+          <WizardStep
+            id="review-access-step-1"
+            name="Review request"
+            footer={{ isBackHidden: true, isNextDisabled: reviewAccessAcceptChoice === null || !reviewAccessVerifyEmail.trim(), nextButtonText: reviewAccessAcceptChoice === 'deny' ? 'Submit' : 'Next' }}
+          >
+            <div style={{ padding: 16 }}>
+              <Title headingLevel="h3" size="lg">You have received an access request. Review the request info below:</Title>
+              <p style={{ marginTop: 8 }}>
+                Approving this request will grant the requester access to your organization&apos;s resources based on the roles and user groups specified.
+                For more information about access requests, <a href="#">click here</a>.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 32, rowGap: 16, marginTop: 16 }}>
+                <div>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Organization name</Title>
+                  <div style={{ marginTop: 4 }}>{reviewAccessRequestData.organization}</div>
+                </div>
+                <div>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Organization ID</Title>
+                  <div style={{ marginTop: 4 }}>{reviewAccessRequestData.orgId}</div>
+                </div>
+                <div>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Requester name</Title>
+                  <div style={{ marginTop: 4 }}>{reviewAccessRequestData.requesterName}</div>
+                </div>
+                <div>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Requester email</Title>
+                  <div style={{ marginTop: 4 }}>{reviewAccessRequestData.requesterEmail}</div>
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 32, rowGap: 16, marginTop: 16 }}>
+                <div>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Access duration</Title>
+                  <div style={{ marginTop: 4 }}>{reviewAccessRequestData.accessDuration}</div>
+                </div>
+                <div>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Requested role(s)</Title>
+                  <div style={{ marginTop: 4 }}>{reviewAccessRequestData.roles.join(', ')}</div>
+                </div>
+              </div>
+              <div style={{ marginTop: 16 }}>
+                <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Requested user groups</Title>
+                <div style={{ marginTop: 4 }}>{reviewAccessRequestData.userGroups.join(', ')}</div>
+              </div>
+              <div style={{ marginTop: 24 }}>
+                <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>
+                  Do you approve this access request? <span aria-hidden="true" style={{ color: 'var(--pf-v6-global--danger-color--100)' }}>*</span>
+                </Title>
+                <div style={{ marginTop: 12 }}>
+                  <Radio
+                    id="review-access-approve"
+                    name="review-access-choice"
+                    isChecked={reviewAccessAcceptChoice === 'approve'}
+                    onChange={() => setReviewAccessAcceptChoice('approve')}
+                    label="I approve this access request"
+                  />
+                  <Radio
+                    id="review-access-deny"
+                    name="review-access-choice"
+                    isChecked={reviewAccessAcceptChoice === 'deny'}
+                    onChange={() => setReviewAccessAcceptChoice('deny')}
+                    label="I DO NOT approve this access request"
+                    style={{ marginTop: 0 }}
+                  />
+                </div>
+              </div>
+              <div style={{ marginTop: 24 }}>
+                <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Please verify your email address</Title>
+                <div style={{ marginTop: 8, maxWidth: 420 }}>
+                  <TextInput
+                    id="review-access-verify-email"
+                    name="review-access-verify-email"
+                    type="email"
+                    value={reviewAccessVerifyEmail}
+                    onChange={(_event, value) => setReviewAccessVerifyEmail(value)}
+                    placeholder="name@example.com"
+                  />
+                </div>
+              </div>
+            </div>
+          </WizardStep>
+
+          <WizardStep
+            id="review-access-step-2"
+            name="Select workspace"
+            isDisabled={reviewAccessAcceptChoice === null || !reviewAccessVerifyEmail.trim()}
+            isHidden={reviewAccessAcceptChoice === 'deny'}
+            footer={{ isNextDisabled: reviewAccessSelectedWorkspaces.size === 0 }}
+          >
+            <div style={{ padding: 16 }}>
+              <Title headingLevel="h3" size="lg">Select workspace</Title>
+              <p style={{ marginTop: 8 }}>
+                Select the workspace(s) you want to grant access to for this request. The requested user groups will be assigned the requested roles within the selected workspace(s).
+              </p>
+              <div style={{ marginTop: 16 }}>
+                <Table aria-label="Select workspace table" variant="compact">
+                  <Thead>
+                    <Tr>
+                      <Th screenReaderText="Select" />
+                      <Th width={40}>Workspace name</Th>
+                      <Th width={60}>Description</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {reviewAccessWorkspaces.map((ws) => (
+                      <Tr key={ws.id}>
+                        <Td
+                          select={{
+                            rowIndex: reviewAccessWorkspaces.findIndex(w => w.id === ws.id),
+                            onSelect: (_event, isSelecting) => {
+                              setReviewAccessSelectedWorkspaces(prev => {
+                                const next = new Set(prev);
+                                if (isSelecting) next.add(ws.name);
+                                else next.delete(ws.name);
+                                return next;
+                              });
+                            },
+                            isSelected: reviewAccessSelectedWorkspaces.has(ws.name),
+                          }}
+                        />
+                        <Td dataLabel="Workspace name">{ws.name}</Td>
+                        <Td dataLabel="Description">{ws.description}</Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </div>
+            </div>
+          </WizardStep>
+
+          <WizardStep
+            id="review-access-step-3"
+            name="Review"
+            isDisabled={reviewAccessAcceptChoice === null || !reviewAccessVerifyEmail.trim() || reviewAccessSelectedWorkspaces.size === 0}
+            isHidden={reviewAccessAcceptChoice === 'deny'}
+            footer={{ nextButtonText: 'Submit' }}
+          >
+            <div style={{ padding: 16 }}>
+              <Title headingLevel="h3" size="lg">Review</Title>
+              <p style={{ marginTop: 8 }}>Review the access request details before submitting your decision.</p>
+              <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '200px 1fr', rowGap: 12 }}>
+                <div style={{ fontWeight: 700 }}>Organization</div>
+                <div>{reviewAccessRequestData.organization}</div>
+                <div style={{ fontWeight: 700 }}>Requester</div>
+                <div>{reviewAccessRequestData.requesterName} ({reviewAccessRequestData.requesterEmail})</div>
+                <div style={{ fontWeight: 700 }}>Access duration</div>
+                <div>{reviewAccessRequestData.accessDuration}</div>
+                <div style={{ fontWeight: 700 }}>Role(s)</div>
+                <div>{reviewAccessRequestData.roles.join(', ')}</div>
+                <div style={{ fontWeight: 700 }}>User group(s)</div>
+                <div>{reviewAccessRequestData.userGroups.join(', ')}</div>
+                <div style={{ fontWeight: 700 }}>Workspace(s)</div>
+                <div>{Array.from(reviewAccessSelectedWorkspaces).join(', ')}</div>
+              </div>
+            </div>
+          </WizardStep>
+        </Wizard>
+      </Modal>
+    )}
+
     </>
+    </AccessRequestContext.Provider>
     </SchedulerWizardContext.Provider>
     <AnnotationToggleBar />
     </>

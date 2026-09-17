@@ -34,10 +34,18 @@ import { TreeView } from '@patternfly/react-core';
 import { EllipsisVIcon, FilterIcon, CheckCircleIcon, ExclamationCircleIcon, SyncAltIcon, ExclamationTriangleIcon, ArrowRightIcon, ArrowLeftIcon, HistoryIcon } from '@patternfly/react-icons';
 import { Wizard, WizardStep, WizardHeader, Modal, ModalHeader, ModalBody, ModalFooter, Radio, TextInput, AlertGroup, Alert, AlertActionCloseButton, Form, FormGroup, FormGroupLabelHelp, Popover, HelperText, HelperTextItem, EmptyState, EmptyStateBody, EmptyStateFooter, EmptyStateActions, ToggleGroup, ToggleGroupItem, ExpandableSection } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
+import { useAccessRequest } from '@app/AppLayout/AppLayout';
 
 const TrustedOrganizations: React.FunctionComponent = () => {
   const location = useLocation();
+  const { isAccessRequestHandled, setAccessRequestHandled } = useAccessRequest();
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
+
+  React.useEffect(() => {
+    if (isAccessRequestHandled) {
+      setPendingData(prev => prev.filter(p => !(p.requestType === 'access' && p.orgId === '300123')));
+    }
+  }, [isAccessRequestHandled]);
 
   const handleTabClick = (event: React.MouseEvent<HTMLElement> | React.KeyboardEvent | MouseEvent, tabIndex: string | number) => {
     setActiveTabKey(tabIndex);
@@ -58,6 +66,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     direction: 'Incoming' | 'Outgoing';
     requestedDate: string;
     requester: string;
+    requestType?: 'trust' | 'access';
   };
 
   type ChangeLogEntry = {
@@ -91,6 +100,36 @@ const TrustedOrganizations: React.FunctionComponent = () => {
   const [acceptChoice, setAcceptChoice] = React.useState<'accept' | 'reject' | null>(null);
   const [verifyEmail, setVerifyEmail] = React.useState<string>('');
   const [configureChoice, setConfigureChoice] = React.useState<'yes' | 'no' | null>(null);
+
+  // Access request review wizard state
+  const [isAccessReviewWizardOpen, setIsAccessReviewWizardOpen] = React.useState(false);
+  const [accessReviewRequest, setAccessReviewRequest] = React.useState<PendingRequest | null>(null);
+  const [accessReviewAcceptChoice, setAccessReviewAcceptChoice] = React.useState<'approve' | 'deny' | null>(null);
+  const [accessReviewVerifyEmail, setAccessReviewVerifyEmail] = React.useState('');
+  const [accessReviewSelectedWorkspaces, setAccessReviewSelectedWorkspaces] = React.useState<Set<string>>(new Set());
+
+  const accessReviewRequestDetails = {
+    requesterEmail: 'sarah.chen@initech.com',
+    accessDuration: '2025-10-01 to 2026-03-31',
+    roles: ['Inventory administrator', 'Compliance viewer'],
+    userGroups: ['DevOps Engineers', 'Platform Engineers', 'SRE Team'],
+  };
+
+  const accessReviewWorkspaces = [
+    { id: 'ws-prod', name: 'Production', description: 'Production environment resources' },
+    { id: 'ws-staging', name: 'Staging', description: 'Staging and pre-production environment' },
+    { id: 'ws-dev', name: 'Development', description: 'Development and testing environment' },
+    { id: 'ws-cicd', name: 'CI/CD Pipeline', description: 'Continuous integration and deployment' },
+    { id: 'ws-sandbox', name: 'Sandbox', description: 'Experimental sandbox environment' },
+  ];
+
+  const openAccessReviewWizard = (req: PendingRequest) => {
+    setAccessReviewRequest(req);
+    setAccessReviewAcceptChoice(null);
+    setAccessReviewVerifyEmail('');
+    setAccessReviewSelectedWorkspaces(new Set());
+    setIsAccessReviewWizardOpen(true);
+  };
 
   // Revoke modal state
   const [isRevokeModalOpen, setIsRevokeModalOpen] = React.useState(false);
@@ -293,6 +332,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
   // ── Pending requests data ──────────────────────────────────────────────
 
   const [pendingData, setPendingData] = React.useState<PendingRequest[]>([
+    { organizationName: 'Initech', orgId: '300123', direction: 'Incoming', requestedDate: '2025-09-15', requester: 'Sarah Chen', requestType: 'access' },
     { organizationName: 'Wayne Enterprises', orgId: '200099', direction: 'Outgoing', requestedDate: '2025-08-22', requester: 'You' },
     { organizationName: 'Globell', orgId: '200045', direction: 'Incoming', requestedDate: '2025-08-22', requester: 'Alex Smith' },
     { organizationName: 'Pied Piper', orgId: '700891', direction: 'Incoming', requestedDate: '2025-09-10', requester: 'Jordan Lee' },
@@ -373,7 +413,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
   const [pendingSubTab, setPendingSubTab] = React.useState<string | number>(0);
 
   // Received (Incoming) filtering
-  const [receivedSortBy, setReceivedSortBy] = React.useState<{ index: number; direction: 'asc' | 'desc' | undefined }>({ index: 3, direction: 'desc' });
+  const [receivedSortBy, setReceivedSortBy] = React.useState<{ index: number; direction: 'asc' | 'desc' | undefined }>({ index: 4, direction: 'desc' });
   const [receivedPage, setReceivedPage] = React.useState(1);
   const [receivedPerPage, setReceivedPerPage] = React.useState(10);
   const [receivedTextFilter, setReceivedTextFilter] = React.useState('');
@@ -390,9 +430,10 @@ const TrustedOrganizations: React.FunctionComponent = () => {
       const dir = receivedSortBy.direction === 'desc' ? -1 : 1;
       switch (receivedSortBy.index) {
         case 0: return a.organizationName.localeCompare(b.organizationName) * dir;
-        case 1: return a.orgId.localeCompare(b.orgId) * dir;
-        case 2: return a.requester.localeCompare(b.requester) * dir;
-        case 3: return a.requestedDate.localeCompare(b.requestedDate) * dir;
+        case 1: return (a.requestType || 'trust').localeCompare(b.requestType || 'trust') * dir;
+        case 2: return a.orgId.localeCompare(b.orgId) * dir;
+        case 3: return a.requester.localeCompare(b.requester) * dir;
+        case 4: return a.requestedDate.localeCompare(b.requestedDate) * dir;
         default: return 0;
       }
     });
@@ -1002,10 +1043,11 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                   <Table aria-label="Received trusted organization requests table">
                     <Thead>
                       <Tr>
-                        <Th sort={{ sortBy: receivedSortBy, onSort: onReceivedSort, columnIndex: 0 }} width={25}>Organization name</Th>
-                        <Th sort={{ sortBy: receivedSortBy, onSort: onReceivedSort, columnIndex: 1 }} width={15}>Org ID</Th>
-                        <Th sort={{ sortBy: receivedSortBy, onSort: onReceivedSort, columnIndex: 2 }} width={20}>Requester</Th>
-                        <Th sort={{ sortBy: receivedSortBy, onSort: onReceivedSort, columnIndex: 3 }} width={20}>Requested date</Th>
+                        <Th sort={{ sortBy: receivedSortBy, onSort: onReceivedSort, columnIndex: 0 }} width={20}>Organization name</Th>
+                        <Th sort={{ sortBy: receivedSortBy, onSort: onReceivedSort, columnIndex: 1 }} width={15}>Type</Th>
+                        <Th sort={{ sortBy: receivedSortBy, onSort: onReceivedSort, columnIndex: 2 }} width={15}>Org ID</Th>
+                        <Th sort={{ sortBy: receivedSortBy, onSort: onReceivedSort, columnIndex: 3 }} width={20}>Requester</Th>
+                        <Th sort={{ sortBy: receivedSortBy, onSort: onReceivedSort, columnIndex: 4 }} width={15}>Requested date</Th>
                         <Th aria-label="Row actions" />
                       </Tr>
                     </Thead>
@@ -1013,11 +1055,16 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                       {receivedPaginated.map((row) => (
                         <Tr key={row.orgId}>
                           <Td dataLabel="Organization name">{row.organizationName}</Td>
+                          <Td dataLabel="Type">
+                            <Label color={row.requestType === 'access' ? 'blue' : 'grey'} isCompact>
+                              {row.requestType === 'access' ? 'Access request' : 'Organization request'}
+                            </Label>
+                          </Td>
                           <Td dataLabel="Org ID">{row.orgId}</Td>
                           <Td dataLabel="Requester">{row.requester}</Td>
                           <Td dataLabel="Requested date">{row.requestedDate}</Td>
                           <Td isActionCell>
-                            <Button variant="secondary" size="sm" onClick={() => openPendingWizard(row)}>
+                            <Button variant="secondary" size="sm" onClick={() => row.requestType === 'access' ? openAccessReviewWizard(row) : openPendingWizard(row)}>
                               Review request
                             </Button>
                           </Td>
@@ -1025,7 +1072,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                       ))}
                       {receivedPaginated.length === 0 && (
                         <Tr>
-                          <Td colSpan={5}>
+                          <Td colSpan={6}>
                             <EmptyState headingLevel="h3" titleText="No received requests" isFullHeight>
                               <EmptyStateBody>There are no incoming trusted organization requests at this time.</EmptyStateBody>
                             </EmptyState>
@@ -1542,6 +1589,196 @@ const TrustedOrganizations: React.FunctionComponent = () => {
               </WizardStep>
             </Wizard>
           )}
+        </Modal>
+      )}
+
+      {/* ────────────────── Access request review wizard ────────────────── */}
+      {isAccessReviewWizardOpen && accessReviewRequest && (
+        <Modal isOpen onClose={() => setIsAccessReviewWizardOpen(false)} variant="large" aria-label="Review access request wizard" className="trusted-wizard-modal">
+          <Wizard
+            onClose={() => setIsAccessReviewWizardOpen(false)}
+            onSave={() => {
+              setPendingData(prev => prev.filter(p => !(p.orgId === accessReviewRequest.orgId && p.requestType === 'access')));
+              setIsAccessReviewWizardOpen(false);
+              setAccessRequestHandled(true);
+              addChangeLogEntry(
+                accessReviewAcceptChoice === 'approve' ? 'Request accepted' : 'Request rejected',
+                `Access request from ${accessReviewRequest.requester} (${accessReviewRequest.organizationName}) ${accessReviewAcceptChoice === 'approve' ? 'approved' : 'denied'}`,
+                'admin@myorg.com'
+              );
+              addToast(
+                accessReviewAcceptChoice === 'approve'
+                  ? `Access request from ${accessReviewRequest.requester} has been approved. User group(s) in the request will have access to the selected workspace(s).`
+                  : `Access request from ${accessReviewRequest.requester} has been denied.`,
+                undefined,
+                accessReviewAcceptChoice === 'approve' ? 'success' : 'info'
+              );
+            }}
+            header={
+              <WizardHeader
+                title={`Review access request from ${accessReviewRequest.requester}`}
+                description="Review and manage this pending access request."
+                onClose={() => setIsAccessReviewWizardOpen(false)}
+              />
+            }
+            startIndex={1}
+          >
+            <WizardStep
+              id="access-review-step-1"
+              name="Review request"
+              footer={{ isBackHidden: true, isNextDisabled: accessReviewAcceptChoice === null || !accessReviewVerifyEmail.trim(), nextButtonText: accessReviewAcceptChoice === 'deny' ? 'Submit' : 'Next' }}
+            >
+              <div style={{ padding: 16 }}>
+                <Title headingLevel="h3" size="lg">You have received an access request. Review the request info below:</Title>
+                <p style={{ marginTop: 8 }}>
+                  Approving this request will grant the requester access to your organization&apos;s resources based on the roles and user groups specified.
+                  For more information about access requests, <a href="#">click here</a>.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 32, rowGap: 16, marginTop: 16 }}>
+                  <div>
+                    <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Organization name</Title>
+                    <div style={{ marginTop: 4 }}>{accessReviewRequest.organizationName}</div>
+                  </div>
+                  <div>
+                    <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Organization ID</Title>
+                    <div style={{ marginTop: 4 }}>{accessReviewRequest.orgId}</div>
+                  </div>
+                  <div>
+                    <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Requester name</Title>
+                    <div style={{ marginTop: 4 }}>{accessReviewRequest.requester}</div>
+                  </div>
+                  <div>
+                    <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Requester email</Title>
+                    <div style={{ marginTop: 4 }}>{accessReviewRequestDetails.requesterEmail}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', columnGap: 32, rowGap: 16, marginTop: 16 }}>
+                  <div>
+                    <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Access duration</Title>
+                    <div style={{ marginTop: 4 }}>{accessReviewRequestDetails.accessDuration}</div>
+                  </div>
+                  <div>
+                    <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Requested role(s)</Title>
+                    <div style={{ marginTop: 4 }}>{accessReviewRequestDetails.roles.join(', ')}</div>
+                  </div>
+                </div>
+                <div style={{ marginTop: 16 }}>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Requested user groups</Title>
+                  <div style={{ marginTop: 4 }}>{accessReviewRequestDetails.userGroups.join(', ')}</div>
+                </div>
+                <div style={{ marginTop: 24 }}>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>
+                    Do you approve this access request? <span aria-hidden="true" style={{ color: 'var(--pf-v6-global--danger-color--100)' }}>*</span>
+                  </Title>
+                  <div style={{ marginTop: 12 }}>
+                    <Radio
+                      id="access-review-approve"
+                      name="access-review-choice"
+                      isChecked={accessReviewAcceptChoice === 'approve'}
+                      onChange={() => setAccessReviewAcceptChoice('approve')}
+                      label="I approve this access request"
+                    />
+                    <Radio
+                      id="access-review-deny"
+                      name="access-review-choice"
+                      isChecked={accessReviewAcceptChoice === 'deny'}
+                      onChange={() => setAccessReviewAcceptChoice('deny')}
+                      label="I DO NOT approve this access request"
+                      style={{ marginTop: 0 }}
+                    />
+                  </div>
+                </div>
+                <div style={{ marginTop: 24 }}>
+                  <Title headingLevel="h4" size="md" style={{ fontWeight: 700 }}>Please verify your email address</Title>
+                  <div style={{ marginTop: 8, maxWidth: 420 }}>
+                    <TextInput
+                      id="access-review-verify-email"
+                      name="access-review-verify-email"
+                      type="email"
+                      value={accessReviewVerifyEmail}
+                      onChange={(_event, value) => setAccessReviewVerifyEmail(value)}
+                      placeholder="name@example.com"
+                    />
+                  </div>
+                </div>
+              </div>
+            </WizardStep>
+
+            <WizardStep
+              id="access-review-step-2"
+              name="Select workspace"
+              isDisabled={accessReviewAcceptChoice === null || !accessReviewVerifyEmail.trim()}
+              isHidden={accessReviewAcceptChoice === 'deny'}
+              footer={{ isNextDisabled: accessReviewSelectedWorkspaces.size === 0 }}
+            >
+              <div style={{ padding: 16 }}>
+                <Title headingLevel="h3" size="lg">Select workspace</Title>
+                <p style={{ marginTop: 8 }}>
+                  Select the workspace(s) you want to grant access to for this request. The requested user groups will be assigned the requested roles within the selected workspace(s).
+                </p>
+                <div style={{ marginTop: 16 }}>
+                  <Table aria-label="Select workspace table" variant="compact">
+                    <Thead>
+                      <Tr>
+                        <Th screenReaderText="Select" />
+                        <Th width={40}>Workspace name</Th>
+                        <Th width={60}>Description</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {accessReviewWorkspaces.map((ws) => (
+                        <Tr key={ws.id}>
+                          <Td
+                            select={{
+                              rowIndex: accessReviewWorkspaces.findIndex(w => w.id === ws.id),
+                              onSelect: (_event, isSelecting) => {
+                                setAccessReviewSelectedWorkspaces(prev => {
+                                  const next = new Set(prev);
+                                  if (isSelecting) next.add(ws.name);
+                                  else next.delete(ws.name);
+                                  return next;
+                                });
+                              },
+                              isSelected: accessReviewSelectedWorkspaces.has(ws.name),
+                            }}
+                          />
+                          <Td dataLabel="Workspace name">{ws.name}</Td>
+                          <Td dataLabel="Description">{ws.description}</Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </div>
+              </div>
+            </WizardStep>
+
+            <WizardStep
+              id="access-review-step-3"
+              name="Review"
+              isDisabled={accessReviewAcceptChoice === null || !accessReviewVerifyEmail.trim() || accessReviewSelectedWorkspaces.size === 0}
+              isHidden={accessReviewAcceptChoice === 'deny'}
+              footer={{ nextButtonText: 'Submit' }}
+            >
+              <div style={{ padding: 16 }}>
+                <Title headingLevel="h3" size="lg">Review</Title>
+                <p style={{ marginTop: 8 }}>Review the access request details before submitting your decision.</p>
+                <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '200px 1fr', rowGap: 12 }}>
+                  <div style={{ fontWeight: 700 }}>Organization</div>
+                  <div>{accessReviewRequest.organizationName}</div>
+                  <div style={{ fontWeight: 700 }}>Requester</div>
+                  <div>{accessReviewRequest.requester} ({accessReviewRequestDetails.requesterEmail})</div>
+                  <div style={{ fontWeight: 700 }}>Access duration</div>
+                  <div>{accessReviewRequestDetails.accessDuration}</div>
+                  <div style={{ fontWeight: 700 }}>Role(s)</div>
+                  <div>{accessReviewRequestDetails.roles.join(', ')}</div>
+                  <div style={{ fontWeight: 700 }}>User group(s)</div>
+                  <div>{accessReviewRequestDetails.userGroups.join(', ')}</div>
+                  <div style={{ fontWeight: 700 }}>Workspace(s)</div>
+                  <div>{Array.from(accessReviewSelectedWorkspaces).join(', ')}</div>
+                </div>
+              </div>
+            </WizardStep>
+          </Wizard>
         </Modal>
       )}
 
