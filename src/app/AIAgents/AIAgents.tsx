@@ -22,7 +22,6 @@ import {
   AlertGroup,
   AlertActionCloseButton,
   AlertVariant,
-  AlertVariant,
   Tooltip,
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr, ExpandableRowContent } from '@patternfly/react-table';
