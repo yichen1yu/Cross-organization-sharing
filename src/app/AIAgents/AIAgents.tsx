@@ -4,29 +4,15 @@ import {
   BreadcrumbItem,
   Button,
   Content,
-  Drawer,
-  DrawerActions,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerContentBody,
-  DrawerHead,
-  DrawerPanelContent,
   Dropdown,
   DropdownItem,
   DropdownList,
   MenuToggle,
   MenuToggleElement,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
   PageSection,
   Pagination,
   SearchInput,
   Switch,
-  Tab,
-  TabTitleText,
-  Tabs,
   Title,
   Toolbar,
   ToolbarContent,
@@ -36,43 +22,92 @@ import {
   AlertGroup,
   AlertActionCloseButton,
   AlertVariant,
+  AlertVariant,
+  Tooltip,
 } from '@patternfly/react-core';
-import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
+import { Table, Tbody, Td, Th, Thead, Tr, ExpandableRowContent } from '@patternfly/react-table';
 import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon } from '@patternfly/react-icons';
-import { useNavigate } from 'react-router-dom';
 
 type AIAgentRow = {
   id: string;
   name: string;
   description: string;
-  inheritAccess: boolean;
   lastRelease: string;
-  workspaces: string[];
+};
+
+const agentCapabilities: Record<string, { title: string; roles: string[] }[]> = {
+  ai1: [
+    { title: 'Product knowledge', roles: ['Inventory administrator', 'Compliance administrator'] },
+    { title: 'Documentation search', roles: ['Inventory Hosts viewer', 'Compliance viewer'] },
+    { title: 'Troubleshooting guidance', roles: ['Remediations administrator', 'Inventory administrator'] },
+    { title: 'Best practices', roles: ['Compliance viewer', 'Compliance administrator'] },
+    { title: 'Command examples', roles: ['Remediations viewer'] },
+  ],
+  ai2: [
+    { title: 'Console navigation', roles: ['User Access viewer'] },
+    { title: 'Personal settings', roles: ['User Access administrator', 'Notifications administrator'] },
+    { title: 'Access requests', roles: ['User Access administrator'] },
+    { title: 'Vulnerability insights', roles: ['Compliance viewer', 'Malware detection viewer'] },
+    { title: 'Task guidance', roles: ['Inventory administrator', 'Notifications administrator'] },
+  ],
+  ai3: [
+    { title: 'RHEL Q&A', roles: ['Inventory Hosts viewer', 'Compliance viewer'] },
+    { title: 'Troubleshooting support', roles: ['Remediations administrator', 'Inventory administrator'] },
+    { title: 'Log analysis', roles: ['Inventory Hosts viewer'] },
+    { title: 'Recommendations', roles: ['Compliance viewer', 'Remediations viewer'] },
+    { title: 'Command examples', roles: ['Remediations administrator'] },
+  ],
 };
 
 const initialRows: AIAgentRow[] = [
-  { id: 'ai1', name: 'Red Hat Insights Assistant', description: 'AI agent for Insights', inheritAccess: true, lastRelease: '3 months ago', workspaces: ['Default', 'Production US-East', 'Production EU-West', 'Staging'] },
-  { id: 'ai2', name: 'HCC Virtual Assistant', description: 'Helper agent across Hybrid Cloud Console', inheritAccess: false, lastRelease: '3 months ago', workspaces: ['Default', 'Staging'] },
-  { id: 'ai3', name: 'Red Hat Lightspeed Agent', description: 'AI agent for Red Hat Lightspeed', inheritAccess: true, lastRelease: '4 months ago', workspaces: ['Default', 'Production US-East', 'Development', 'Preview'] },
+  { id: 'ai1', name: 'Ask Red Hat', description: 'Find answers about Red Hat products, error messages, security vulnerabilities, general usage, and other content from product documentation and our knowledge base.', lastRelease: '3 months ago' },
+  { id: 'ai2', name: 'Hybrid Cloud Console', description: 'Learn about the Hybrid Cloud Console and configure settings like your personal information, request access from your admin, show critical vulnerabilities, and more.', lastRelease: '3 months ago' },
+  { id: 'ai3', name: 'RHEL Lightspeed', description: 'Get answers to RHEL-related questions, support with troubleshooting, help understanding log files, ask for recommendations, and more.', lastRelease: '4 months ago' },
 ];
 
-const workspaceSlugMap: Record<string, string> = {
-  'Default': 'workspace-default',
-  'Production US-East': 'workspace-a',
-  'Production EU-West': 'workspace-b',
-  'Preview': 'workspace-c',
-  'Staging': 'workspace-a',
-  'Development': 'workspace-default',
-};
+const userRoles = new Set([
+  'Inventory administrator',
+  'Compliance viewer',
+  'Remediations viewer',
+  'User Access viewer',
+  'Inventory Hosts viewer',
+]);
 
 const AIAgents: React.FunctionComponent = () => {
-  const navigate = useNavigate();
   const [rows, setRows] = React.useState<AIAgentRow[]>(initialRows);
-  const [selectedAgent, setSelectedAgent] = React.useState<AIAgentRow | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const [expandedRows, setExpandedRows] = React.useState<Set<string>>(new Set());
 
-  const [pendingToggleId, setPendingToggleId] = React.useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const userHasAccess = (roles: string[]) => roles.some(r => userRoles.has(r));
+
+  const buildDefaultAccess = () => {
+    const map: Record<string, Record<number, boolean>> = {};
+    for (const row of initialRows) {
+      const caps = agentCapabilities[row.id] || [];
+      map[row.id] = {};
+      caps.forEach((cap, i) => {
+        map[row.id][i] = userHasAccess(cap.roles);
+      });
+    }
+    return map;
+  };
+  const [capabilityAccess, setCapabilityAccess] = React.useState<Record<string, Record<number, boolean>>>(buildDefaultAccess);
+
+  const toggleCapabilityAccess = (agentId: string, capIndex: number) => {
+    const caps = agentCapabilities[agentId] || [];
+    const cap = caps[capIndex];
+    if (!cap || !userHasAccess(cap.roles)) return;
+    const agent = rows.find(r => r.id === agentId);
+    const currentlyOn = capabilityAccess[agentId]?.[capIndex] ?? false;
+    setCapabilityAccess(prev => ({
+      ...prev,
+      [agentId]: { ...prev[agentId], [capIndex]: !prev[agentId]?.[capIndex] },
+    }));
+    addAlert(
+      AlertVariant.info,
+      `"${cap.title}" capability for ${agent?.name} has been ${currentlyOn ? 'disabled' : 'enabled'}.`
+    );
+  };
+
   const [alerts, setAlerts] = React.useState<{ key: number; variant: AlertVariant; title: string }[]>([]);
   const alertKeyRef = React.useRef(0);
 
@@ -80,42 +115,6 @@ const AIAgents: React.FunctionComponent = () => {
     const key = alertKeyRef.current++;
     setAlerts(prev => [...prev, { key, variant, title }]);
     setTimeout(() => setAlerts(prev => prev.filter(a => a.key !== key)), 5000);
-  };
-
-  const onToggleClick = (id: string) => {
-    setPendingToggleId(id);
-    setIsModalOpen(true);
-  };
-
-  const onConfirmToggle = () => {
-    if (pendingToggleId) {
-      const agent = rows.find(r => r.id === pendingToggleId);
-      const newState = !agent?.inheritAccess;
-      setRows(prev => prev.map(r => r.id === pendingToggleId ? { ...r, inheritAccess: !r.inheritAccess } : r));
-      addAlert(
-        AlertVariant.success,
-        `Inherit user's access has been ${newState ? 'enabled' : 'disabled'} for ${agent?.name}`
-      );
-    }
-    setIsModalOpen(false);
-    setPendingToggleId(null);
-  };
-
-  const onCancelToggle = () => {
-    setIsModalOpen(false);
-    setPendingToggleId(null);
-  };
-
-  const pendingAgent = rows.find(r => r.id === pendingToggleId);
-
-  const onAgentRowClick = (agent: AIAgentRow) => {
-    setSelectedAgent(agent);
-    setIsDrawerOpen(true);
-  };
-
-  const onCloseDrawer = () => {
-    setIsDrawerOpen(false);
-    setSelectedAgent(null);
   };
 
   const [query, setQuery] = React.useState('');
@@ -156,84 +155,6 @@ const AIAgents: React.FunctionComponent = () => {
     },
   });
 
-  const [drawerKebabOpen, setDrawerKebabOpen] = React.useState(false);
-  const [drawerTabKey, setDrawerTabKey] = React.useState(0);
-  const [drawerWsPage, setDrawerWsPage] = React.useState(1);
-  const drawerWsPerPage = 5;
-
-  const drawerWorkspaces = selectedAgent?.workspaces || [];
-  const drawerWsPageRows = drawerWorkspaces.slice((drawerWsPage - 1) * drawerWsPerPage, drawerWsPage * drawerWsPerPage);
-
-  const drawerPanel = selectedAgent ? (
-    <DrawerPanelContent defaultSize="400px" style={{ display: 'flex', flexDirection: 'column' }}>
-      <DrawerHead>
-        <Title headingLevel="h2" size="lg">{selectedAgent.name}</Title>
-        <DrawerActions>
-          <Dropdown
-            isOpen={drawerKebabOpen}
-            onOpenChange={setDrawerKebabOpen}
-            toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
-              <MenuToggle ref={toggleRef} variant="plain" aria-label="Agent actions" onClick={() => setDrawerKebabOpen(!drawerKebabOpen)}>
-                <EllipsisVIcon />
-              </MenuToggle>
-            )}
-            popperProps={{ position: 'right' }}
-          >
-            <DropdownList>
-              <DropdownItem onClick={() => setDrawerKebabOpen(false)}>Edit</DropdownItem>
-              <DropdownItem onClick={() => setDrawerKebabOpen(false)}>Remove</DropdownItem>
-            </DropdownList>
-          </Dropdown>
-          <DrawerCloseButton onClick={onCloseDrawer} />
-        </DrawerActions>
-      </DrawerHead>
-      <DrawerContentBody>
-        <Tabs activeKey={drawerTabKey} onSelect={(_e, key) => { setDrawerTabKey(key as number); setDrawerWsPage(1); }}>
-          <Tab eventKey={0} title={<TabTitleText>Workspaces</TabTitleText>}>
-            <div style={{ padding: '16px 0' }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8, paddingRight: 4 }}>
-                <Pagination
-                  isCompact
-                  itemCount={drawerWorkspaces.length}
-                  perPage={drawerWsPerPage}
-                  page={drawerWsPage}
-                  onSetPage={(_, p) => setDrawerWsPage(p)}
-                  onPerPageSelect={() => {}}
-                  variant="top"
-                />
-              </div>
-              <Table aria-label="Agent workspace access" variant="compact">
-                <Thead>
-                  <Tr>
-                    <Th>Workspace</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {drawerWsPageRows.map((ws, i) => (
-                    <Tr key={i}>
-                      <Td>
-                        <Button
-                          variant="link"
-                          isInline
-                          onClick={() => {
-                            onCloseDrawer();
-                            navigate(`/workspaces/${workspaceSlugMap[ws] || ws.toLowerCase().replace(/\s+/g, '-')}`);
-                          }}
-                        >
-                          {ws}
-                        </Button>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </div>
-          </Tab>
-        </Tabs>
-      </DrawerContentBody>
-    </DrawerPanelContent>
-  ) : undefined;
-
   return (
     <>
       <AlertGroup isToast isLiveRegion>
@@ -246,26 +167,6 @@ const AIAgents: React.FunctionComponent = () => {
           />
         ))}
       </AlertGroup>
-
-      <Modal
-        isOpen={isModalOpen}
-        onClose={onCancelToggle}
-        variant="small"
-        aria-label="Confirm inherit access toggle"
-      >
-        <ModalHeader title={`${pendingAgent?.inheritAccess ? 'Disable' : 'Enable'} inherit user's access`} />
-        <ModalBody>
-          Are you sure you want to {pendingAgent?.inheritAccess ? 'disable' : 'enable'} inherit user&apos;s access for <strong>{pendingAgent?.name}</strong>?{' '}
-          {pendingAgent?.inheritAccess
-            ? 'Once confirmed, you will need to re-configure the access permissions for this agent.'
-            : 'Once confirmed, the current access configuration will be overridden and this agent will inherit the user\'s access instead.'
-          }
-        </ModalBody>
-        <ModalFooter>
-          <Button variant="primary" onClick={onConfirmToggle}>Confirm</Button>
-          <Button variant="link" onClick={onCancelToggle}>Cancel</Button>
-        </ModalFooter>
-      </Modal>
 
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
@@ -296,9 +197,6 @@ const AIAgents: React.FunctionComponent = () => {
       </PageSection>
 
       <PageSection hasBodyWrapper={false} isFilled style={{ paddingTop: 0 }}>
-        <Drawer isExpanded={isDrawerOpen}>
-          <DrawerContent panelContent={drawerPanel}>
-            <DrawerContentBody>
               <Toolbar>
                 <ToolbarContent>
                   <ToolbarGroup>
@@ -339,33 +237,46 @@ const AIAgents: React.FunctionComponent = () => {
                 </ToolbarContent>
               </Toolbar>
 
-              <Table aria-label="AI agents table">
+              <Table aria-label="AI agents table" isExpandable>
                 <Thead>
                   <Tr>
-                    <Th width={25} {...getSortParams(0)}>Name</Th>
-                    <Th width={35} {...getSortParams(1)}>Description</Th>
-                    <Th width={15}>Inherit user's access</Th>
+                    <Th screenReaderText="Expand" />
+                    <Th width={30} {...getSortParams(0)}>Name</Th>
+                    <Th width={45} {...getSortParams(1)}>Description</Th>
                     <Th width={15} {...getSortParams(2)}>Last release</Th>
                     <Th width={10}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
                   </Tr>
                 </Thead>
-                <Tbody>
-                  {pageRows.map(r => (
-                    <Tr
-                      key={r.id}
-                      isClickable
-                      isRowSelected={selectedAgent?.id === r.id}
-                      onRowClick={() => onAgentRowClick(r)}
-                    >
+                {pageRows.map((r, rowIndex) => (
+                  <Tbody key={r.id} isExpanded={expandedRows.has(r.id)}>
+                    <Tr>
+                      <Td
+                        expand={{
+                          rowIndex,
+                          isExpanded: expandedRows.has(r.id),
+                          onToggle: () => {
+                            setExpandedRows(prev => {
+                              const next = new Set(prev);
+                              if (next.has(r.id)) next.delete(r.id);
+                              else next.add(r.id);
+                              return next;
+                            });
+                          },
+                        }}
+                      />
                       <Td>{r.name}</Td>
-                      <Td>{r.description || <span style={{ color: '#6a6e73' }}>&mdash;</span>}</Td>
-                      <Td onClick={(e) => e.stopPropagation()}>
-                        <Switch
-                          id={`inherit-access-${r.id}`}
-                          aria-label={`Inherit user's access for ${r.name}`}
-                          isChecked={r.inheritAccess}
-                          onChange={() => onToggleClick(r.id)}
-                        />
+                      <Td>
+                        <Tooltip content={r.description} maxWidth="400px">
+                          <span style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}>
+                            {r.description}
+                          </span>
+                        </Tooltip>
                       </Td>
                       <Td>{r.lastRelease}</Td>
                       <Td isActionCell onClick={(e) => e.stopPropagation()}>
@@ -386,8 +297,55 @@ const AIAgents: React.FunctionComponent = () => {
                         </Dropdown>
                       </Td>
                     </Tr>
-                  ))}
-                </Tbody>
+                    {expandedRows.has(r.id) && (
+                      <Tr isExpanded>
+                        <Td colSpan={5}>
+                          <ExpandableRowContent>
+                            <Table aria-label={`${r.name} capabilities`} variant="compact" borders={false}>
+                              <Thead>
+                                <Tr>
+                                  <Th width={30}>Capability</Th>
+                                  <Th width={50}>Role(s)</Th>
+                                  <Th width={20}>User&apos;s access</Th>
+                                </Tr>
+                              </Thead>
+                              <Tbody>
+                                {(agentCapabilities[r.id] || []).map((cap, i) => {
+                                  const hasAccess = userHasAccess(cap.roles);
+                                  return (
+                                  <Tr key={i}>
+                                    <Td dataLabel="Capability">{cap.title}</Td>
+                                    <Td dataLabel="Role(s)">{cap.roles.join(', ')}</Td>
+                                    <Td dataLabel="User's default access">
+                                      {hasAccess ? (
+                                        <Switch
+                                          id={`cap-access-${r.id}-${i}`}
+                                          aria-label={`Toggle default access for ${cap.title}`}
+                                          isChecked={capabilityAccess[r.id]?.[i] ?? false}
+                                          onChange={() => toggleCapabilityAccess(r.id, i)}
+                                        />
+                                      ) : (
+                                        <Tooltip content="You don't have the required role(s) for this capability. Contact your organization admin to request access.">
+                                          <Switch
+                                            id={`cap-access-${r.id}-${i}`}
+                                            aria-label={`Toggle default access for ${cap.title}`}
+                                            isChecked={false}
+                                            isDisabled
+                                          />
+                                        </Tooltip>
+                                      )}
+                                    </Td>
+                                  </Tr>
+                                  );
+                                })}
+                              </Tbody>
+                            </Table>
+                          </ExpandableRowContent>
+                        </Td>
+                      </Tr>
+                    )}
+                  </Tbody>
+                ))}
               </Table>
 
               <div style={{ marginTop: 12, display: 'flex', justifyContent: 'flex-end' }}>
@@ -399,9 +357,6 @@ const AIAgents: React.FunctionComponent = () => {
                   onPerPageSelect={(_, n) => { setPerPage(n); setPage(1); }}
                 />
               </div>
-            </DrawerContentBody>
-          </DrawerContent>
-        </Drawer>
       </PageSection>
     </>
   );

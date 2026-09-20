@@ -114,7 +114,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
   const filterPlaceholders: Record<FilterCategory, string> = {
     Name: 'Filter by name',
     Description: 'Filter by description',
-    'Client ID': 'Filter by client ID',
+    'Client ID': 'Filter by client ID or username',
     Owner: 'Filter by owner',
     Type: '',
   };
@@ -225,7 +225,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
                 >
                   <DropdownList>
                     <DropdownItem onClick={() => handleFilterCategoryChange('Name')}>Name</DropdownItem>
-                    <DropdownItem onClick={() => handleFilterCategoryChange('Client ID')}>Client ID</DropdownItem>
+                    <DropdownItem onClick={() => handleFilterCategoryChange('Client ID')}>Client ID / Username</DropdownItem>
                     <DropdownItem onClick={() => handleFilterCategoryChange('Owner')}>Owner</DropdownItem>
                     <DropdownItem onClick={() => handleFilterCategoryChange('Type')}>Type</DropdownItem>
                   </DropdownList>
@@ -303,7 +303,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
             <Tr>
               <Th width={20} {...getSortParams(0)}>Name</Th>
               <Th width={25} {...getSortParams(1)}>Description</Th>
-              <Th width={20}>Client ID</Th>
+              <Th width={20}>Client ID / Username</Th>
               <Th width={15}>Owner</Th>
               <Th width={10} {...getSortParams(4)}>Time created</Th>
               <Th width={10}><span style={{ visibility: 'hidden' }}>Actions</span></Th>
@@ -605,7 +605,9 @@ const ServiceAccounts: React.FunctionComponent = () => {
               Credentials successfully generated
             </Title>
             <p style={{ color: '#6a6e73', marginTop: '8px' }}>
-              Connect to Red Hat cloud services or APIs using this client ID and secret
+              {credentialsSource === 'sat'
+                ? 'Connect to Red Hat cloud services or APIs using this username and token'
+                : 'Connect to Red Hat cloud services or APIs using this client ID and secret'}
             </p>
           </div>
 
@@ -618,7 +620,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
                 border: '1px solid #ededed',
                 borderRadius: '3px',
               }}>
-                Client ID
+                {credentialsSource === 'sat' ? 'Username' : 'Client ID'}
               </div>
               <ClipboardCopy
                 isReadOnly
@@ -638,7 +640,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
                 border: '1px solid #ededed',
                 borderRadius: '3px',
               }}>
-                Client secret
+                {credentialsSource === 'sat' ? 'Token' : 'Client secret'}
               </div>
               <ClipboardCopy
                 isReadOnly
@@ -652,13 +654,17 @@ const ServiceAccounts: React.FunctionComponent = () => {
           </div>
 
           <p style={{ color: '#6a6e73', marginTop: '16px', fontSize: '12px', textAlign: 'center' }}>
-            Make a copy of the client ID and secret to store in a safe place. The client secret won&apos;t appear again after closing this screen.
+            {credentialsSource === 'sat'
+              ? 'Make a copy of the username and token to store in a safe place. The token won\'t appear again after closing this screen.'
+              : 'Make a copy of the client ID and secret to store in a safe place. The client secret won\'t appear again after closing this screen.'}
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
             <Checkbox
               id="copied-credentials-check"
-              label="I have copied the client ID and secret"
+              label={credentialsSource === 'sat'
+                ? 'I have copied the username and token'
+                : 'I have copied the client ID and secret'}
               isChecked={hasCopiedCredentials}
               onChange={(_e, checked) => setHasCopiedCredentials(checked)}
             />

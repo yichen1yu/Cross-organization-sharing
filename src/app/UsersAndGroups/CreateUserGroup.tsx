@@ -6,6 +6,7 @@ import {
   Content,
   Form,
   FormGroup,
+  Label,
   MenuToggle,
   MenuToggleCheckbox,
   MenuToggleElement,
@@ -47,6 +48,7 @@ type ServiceAccountRow = {
   clientId: string;
   owner: string;
   created: string;
+  type: 'Service account' | 'Service Access Token';
 };
 
 type AIAgentRow = {
@@ -66,15 +68,15 @@ const allUsers: UserRow[] = [
 ];
 
 const allServiceAccounts: ServiceAccountRow[] = [
-  { id: 'sa1', name: 'iqe-rbac-on-rbac', description: 'RBAC on RBAC tests. DO NOT REMOVE!', clientId: '9e6729e3-2c31-4b45-90af-2e88ed654c0f', owner: 'iqe_rbac_v2_admin', created: '3 months ago' },
-  { id: 'sa2', name: 'iqe-rbac-on-rbac-read', description: 'RBAC on RBAC tests. DO NOT REMOVE!', clientId: 'b43b9c00-0107-43be-afa7-4ce45006b51c', owner: 'iqe_rbac_v2_admin', created: '3 months ago' },
-  { id: 'sa3', name: 'iqe-rbac-v2-e2e-service-account', description: 'DO NOT DELETE. This is an empty service account using during E2E testing', clientId: '6dfb7d72-cf19-40eb-9920-0e8de3d2bb40', owner: 'iqe_rbac_v2_admin', created: '4 months ago' },
-  { id: 'sa4', name: 'iqe-rbac-v2-service-account', description: 'DO NOT REMOVE! SA for RBAC Tests', clientId: '7fb2272f-2844-4fd0-bab3-dbdb0d85a91f', owner: 'iqe_rbac_v2_admin', created: '3 months ago' },
-  { id: 'sa5', name: 'libord', description: 'libord', clientId: 'f54cbb0-82e3-4f70-82be-a6f343746804', owner: 'iqe_rbac_v2_admin', created: '1 month ago' },
-  { id: 'sa6', name: 'SA for RBAC', description: 'DO NOT REMOVE! SA for RBAC Tests', clientId: 'd807b762-31c3-45d0-bffe-7f498b709c66', owner: 'iqe_rbac_v2_admin', created: '3 months ago' },
-  { id: 'sa7', name: 'SA Permissions for RBAC', description: 'DO NOT REMOVE! SA with Permissions for RBAC Tests', clientId: 'fe466d70-2aeb-4de7-6eb3-d48ff4729e62', owner: 'iqe_rbac_v2_admin', created: '2 months ago' },
-  { id: 'sa8', name: 'test405', description: 'test405', clientId: 'ab434b20-2276-4846-afdd-b0c/4ecba2f0', owner: 'iqe_rbac_v2_admin', created: '1 month ago' },
-  { id: 'sa9', name: 'testlibor', description: 'testlibor', clientId: 'cc9a0d3f-07dd-43a5-990b-d5a21d6d90a8', owner: 'iqe_rbac_v2_admin', created: '2 months ago' },
+  { id: 'sa1', name: 'iqe-rbac-on-rbac', description: 'RBAC on RBAC tests. DO NOT REMOVE!', clientId: '9e6729e3-2c31-4b45-90af-2e88ed654c0f', owner: 'iqe_rbac_v2_admin', created: '3 months ago', type: 'Service account' },
+  { id: 'sa2', name: 'iqe-rbac-on-rbac-read', description: 'RBAC on RBAC tests. DO NOT REMOVE!', clientId: 'b43b9c00-0107-43be-afa7-4ce45006b51c', owner: 'iqe_rbac_v2_admin', created: '3 months ago', type: 'Service Access Token' },
+  { id: 'sa3', name: 'iqe-rbac-v2-e2e-service-account', description: 'DO NOT DELETE. This is an empty service account using during E2E testing', clientId: '6dfb7d72-cf19-40eb-9920-0e8de3d2bb40', owner: 'iqe_rbac_v2_admin', created: '4 months ago', type: 'Service account' },
+  { id: 'sa4', name: 'iqe-rbac-v2-service-account', description: 'DO NOT REMOVE! SA for RBAC Tests', clientId: '7fb2272f-2844-4fd0-bab3-dbdb0d85a91f', owner: 'iqe_rbac_v2_admin', created: '3 months ago', type: 'Service Access Token' },
+  { id: 'sa5', name: 'libord', description: 'libord', clientId: 'f54cbb0-82e3-4f70-82be-a6f343746804', owner: 'iqe_rbac_v2_admin', created: '1 month ago', type: 'Service account' },
+  { id: 'sa6', name: 'SA for RBAC', description: 'DO NOT REMOVE! SA for RBAC Tests', clientId: 'd807b762-31c3-45d0-bffe-7f498b709c66', owner: 'iqe_rbac_v2_admin', created: '3 months ago', type: 'Service Access Token' },
+  { id: 'sa7', name: 'SA Permissions for RBAC', description: 'DO NOT REMOVE! SA with Permissions for RBAC Tests', clientId: 'fe466d70-2aeb-4de7-6eb3-d48ff4729e62', owner: 'iqe_rbac_v2_admin', created: '2 months ago', type: 'Service account' },
+  { id: 'sa8', name: 'test405', description: 'test405', clientId: 'ab434b20-2276-4846-afdd-b0c/4ecba2f0', owner: 'iqe_rbac_v2_admin', created: '1 month ago', type: 'Service Access Token' },
+  { id: 'sa9', name: 'testlibor', description: 'testlibor', clientId: 'cc9a0d3f-07dd-43a5-990b-d5a21d6d90a8', owner: 'iqe_rbac_v2_admin', created: '2 months ago', type: 'Service account' },
 ];
 
 const allAIAgents: AIAgentRow[] = [
@@ -393,7 +395,7 @@ const CreateUserGroup: React.FunctionComponent = () => {
                   <Th screenReaderText="Select" />
                   <Th>Name</Th>
                   <Th>Description</Th>
-                  <Th>Client ID</Th>
+                  <Th>Client ID / Username</Th>
                   <Th>Owner</Th>
                   <Th>Time created</Th>
                 </Tr>
@@ -402,7 +404,12 @@ const CreateUserGroup: React.FunctionComponent = () => {
                 {saPageRows.map(s => (
                   <Tr key={s.id}>
                     <Td select={{ rowIndex: 0, onSelect: () => setSelectedSAs(toggleSet(selectedSAs, s.id)), isSelected: selectedSAs.has(s.id) }} />
-                    <Td>{s.name}</Td>
+                    <Td>
+                      {s.name}
+                      {s.type === 'Service Access Token' && (
+                        <Label color="blue" isCompact style={{ marginLeft: '8px' }}>Token</Label>
+                      )}
+                    </Td>
                     <Td>{s.description}</Td>
                     <Td>{s.clientId}</Td>
                     <Td>{s.owner}</Td>

@@ -156,6 +156,45 @@ const agentRbacAccess: Record<string, { role: string; access: string }[]> = {
   ],
 };
 
+const agentCapabilities: Record<string, { title: string; description: string }[]> = {
+  lightspeed: [
+    { title: 'Conversational assistance', description: 'Answer questions about Red Hat products, services, and configurations in natural language.' },
+    { title: 'Troubleshooting workflows', description: 'Guide users through diagnostic steps to identify and resolve common issues across Red Hat platforms.' },
+    { title: 'Documentation search', description: 'Surface relevant Red Hat documentation, knowledge base articles, and solution guides.' },
+    { title: 'Configuration guidance', description: 'Provide recommended settings and best practices for deploying and managing Red Hat products.' },
+  ],
+  'insights-advisor': [
+    { title: 'Providing detailed information', description: 'Explaining concepts, commands, and procedures related to RHEL and general Linux system administration.' },
+    { title: 'Troubleshooting guidance', description: 'Offering steps and resources to help you diagnose and resolve issues.' },
+    { title: 'Finding relevant documentation', description: 'Using the Red Hat customer portal to search for official documentation, knowledge base articles, CVEs, and errata.' },
+    { title: 'Explaining best practices', description: 'Guiding you on recommended configurations and security practices for RHEL environments.' },
+    { title: 'Offering command examples', description: 'Providing the correct syntax and usage for various Linux commands.' },
+  ],
+  'ansible-ai': [
+    { title: 'Playbook generation', description: 'Automatically generate Ansible Playbooks from natural language descriptions of desired automation tasks.' },
+    { title: 'Role scaffolding', description: 'Create well-structured Ansible roles with recommended directory layouts and default variables.' },
+    { title: 'Task suggestions', description: 'Suggest task sequences and modules based on the automation goal and target infrastructure.' },
+    { title: 'Syntax validation', description: 'Validate YAML syntax and Ansible-specific constructs in real time during content creation.' },
+  ],
+  'openshift-ai': [
+    { title: 'Cluster diagnostics', description: 'Analyze cluster health metrics and identify potential issues with nodes, pods, and network connectivity.' },
+    { title: 'Workload optimization', description: 'Recommend resource limits, requests, and scaling policies based on observed workload patterns.' },
+    { title: 'Upgrade planning', description: 'Provide pre-upgrade checks and migration guidance for OpenShift version upgrades.' },
+    { title: 'Security posture review', description: 'Identify misconfigurations, exposed services, and non-compliant security contexts in cluster workloads.' },
+  ],
+  'image-builder-ai': [
+    { title: 'Composition recommendations', description: 'Suggest optimal package sets and configurations based on the target deployment environment.' },
+    { title: 'Image optimization', description: 'Identify unnecessary packages and recommend image slimming strategies to reduce footprint.' },
+    { title: 'Compliance alignment', description: 'Ensure built images align with organizational security baselines and hardening standards.' },
+  ],
+  'compliance-ai': [
+    { title: 'Policy analysis', description: 'Evaluate system configurations against compliance frameworks such as CIS, DISA STIG, and PCI-DSS.' },
+    { title: 'Remediation suggestions', description: 'Generate actionable remediation steps for policy violations with estimated impact assessments.' },
+    { title: 'Posture trending', description: 'Track compliance posture over time and highlight regression patterns across managed systems.' },
+    { title: 'Audit reporting', description: 'Produce audit-ready compliance reports with evidence mapping and control coverage summaries.' },
+  ],
+};
+
 type ToastAlert = {
   key: number;
   variant: AlertVariant;

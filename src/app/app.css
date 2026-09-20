@@ -35,9 +35,20 @@ body { margin: 0; }
  */
 :root {
   --pf-t--global--border--width--main--default: 1px;
-  --pf-t--global--border--color--main--default: white;
+  --pf-t--global--border--width--extra-strong: 3px;
+  --pf-t--global--border--color--main--default: #d2d2d2;
+  --pf-t--global--border--color--default: #d2d2d2;
+  --pf-t--global--border--color--clicked: #0066cc;
+  --pf-t--global--border--color--high-contrast: #151515;
   --pf-t--global--text-decoration--link--line--default: none;
   --pf-t--global--text-decoration--link--line--hover: none;
+  --pf-t--global--motion--duration--md: 200ms;
+  --pf-t--global--motion--timing-function--decelerate: cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Hide the main page container border that the polyfill above would otherwise show */
+.pf-v6-c-page__main-container {
+  border: none;
 }
 
 
