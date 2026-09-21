@@ -2852,7 +2852,12 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             </Form>
           </WizardStep>
           <WizardStep name="Frequency" id="step-frequency" footer={<ScheduleWizardBackNextFooter isNextDisabled={!allCronValid} />}>
-            <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>Frequency</Title>
+            <Title headingLevel="h2" size="lg" style={{ marginBottom: wizardInstances.some(inst => inst.task?.startsWith('Subscription Usage')) ? '8px' : '16px' }}>Frequency</Title>
+            {wizardInstances.some(inst => inst.task?.startsWith('Subscription Usage')) && (
+              <Content component="p" style={{ marginBottom: '16px', color: 'var(--pf-t--global--text--color--subtle)' }}>
+                Subscription Usage reports only include data from the end of the previous reporting period to the next report date.
+              </Content>
+            )}
             <Flex style={{ marginBottom: '16px' }} alignItems={{ default: 'alignItemsCenter' }}>
               <FlexItem>
                 <Switch
