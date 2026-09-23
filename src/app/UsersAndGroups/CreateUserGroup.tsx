@@ -109,6 +109,9 @@ const CreateUserGroup: React.FunctionComponent = () => {
   const [isSaFilterOpen, setIsSaFilterOpen] = React.useState(false);
   const [isSaBulkOpen, setIsSaBulkOpen] = React.useState(false);
   const [saShowSelected, setSaShowSelected] = React.useState(false);
+  const [saTypeFilter, setSaTypeFilter] = React.useState<'All' | 'Service account' | 'Service Access Token'>('All');
+  const [saFilterAttribute, setSaFilterAttribute] = React.useState<'Name' | 'Type'>('Name');
+  const [isSaTypeSelectOpen, setIsSaTypeSelectOpen] = React.useState(false);
 
   // AI agents tab state
   const [selectedAgents, setSelectedAgents] = React.useState<Set<string>>(new Set());
@@ -134,9 +137,10 @@ const CreateUserGroup: React.FunctionComponent = () => {
   const filteredSAs = React.useMemo(() => {
     let list = allServiceAccounts;
     if (saQuery.trim()) list = list.filter(s => s.name.toLowerCase().includes(saQuery.trim().toLowerCase()));
+    if (saTypeFilter !== 'All') list = list.filter(s => s.type === saTypeFilter);
     if (saShowSelected) list = list.filter(s => selectedSAs.has(s.id));
     return list;
-  }, [saQuery, saShowSelected, selectedSAs]);
+  }, [saQuery, saTypeFilter, saShowSelected, selectedSAs]);
   const saPageRows = filteredSAs.slice((saPage - 1) * saPerPage, saPage * saPerPage);
   const allSAsOnPageSelected = saPageRows.length > 0 && saPageRows.every(s => selectedSAs.has(s.id));
   const someSAsOnPageSelected = saPageRows.some(s => selectedSAs.has(s.id)) && !allSAsOnPageSelected;
@@ -353,22 +357,40 @@ const CreateUserGroup: React.FunctionComponent = () => {
                       onOpenChange={setIsSaFilterOpen}
                       toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
                         <MenuToggle ref={toggleRef} onClick={() => setIsSaFilterOpen(!isSaFilterOpen)} icon={<FilterIcon />}>
-                          Name
+                          {saFilterAttribute}
                         </MenuToggle>
                       )}
                     >
                       <DropdownList>
-                        <DropdownItem onClick={() => setIsSaFilterOpen(false)}>Name</DropdownItem>
+                        <DropdownItem onClick={() => { setSaFilterAttribute('Name'); setIsSaFilterOpen(false); }}>Name</DropdownItem>
+                        <DropdownItem onClick={() => { setSaFilterAttribute('Type'); setIsSaFilterOpen(false); }}>Type</DropdownItem>
                       </DropdownList>
                     </Dropdown>
                   </ToolbarItem>
                   <ToolbarItem>
-                    <SearchInput
-                      placeholder="Filter by Name"
-                      value={saQuery}
-                      onChange={(_, v) => { setSaQuery(v); setSaPage(1); }}
-                      onClear={() => { setSaQuery(''); setSaPage(1); }}
-                    />
+                    {saFilterAttribute === 'Name' ? (
+                      <SearchInput
+                        placeholder="Filter by Name"
+                        value={saQuery}
+                        onChange={(_, v) => { setSaQuery(v); setSaPage(1); }}
+                        onClear={() => { setSaQuery(''); setSaPage(1); }}
+                      />
+                    ) : (
+                      <Dropdown
+                        isOpen={isSaTypeSelectOpen}
+                        onOpenChange={setIsSaTypeSelectOpen}
+                        toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                          <MenuToggle ref={toggleRef} onClick={() => setIsSaTypeSelectOpen(!isSaTypeSelectOpen)} style={{ minWidth: '200px' }}>
+                            {saTypeFilter === 'All' ? 'Filter by type' : saTypeFilter}
+                          </MenuToggle>
+                        )}
+                      >
+                        <DropdownList>
+                          <DropdownItem onClick={() => { setSaTypeFilter('Service account'); setIsSaTypeSelectOpen(false); setSaPage(1); }}>Service account</DropdownItem>
+                          <DropdownItem onClick={() => { setSaTypeFilter('Service Access Token'); setIsSaTypeSelectOpen(false); setSaPage(1); }}>Service Access Token</DropdownItem>
+                        </DropdownList>
+                      </Dropdown>
+                    )}
                   </ToolbarItem>
                 </ToolbarGroup>
                 <ToolbarItem>

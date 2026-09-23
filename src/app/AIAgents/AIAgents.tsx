@@ -25,7 +25,7 @@ import {
   Tooltip,
 } from '@patternfly/react-core';
 import { Table, Tbody, Td, Th, Thead, Tr, ExpandableRowContent } from '@patternfly/react-table';
-import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon } from '@patternfly/react-icons';
+import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon, OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 
 type AIAgentRow = {
   id: string;
@@ -305,7 +305,14 @@ const AIAgents: React.FunctionComponent = () => {
                                 <Tr>
                                   <Th width={30}>Capability</Th>
                                   <Th width={50}>Role(s)</Th>
-                                  <Th width={20}>User&apos;s access</Th>
+                                  <Th width={20}>
+                                    User&apos;s access{' '}
+                                    <Tooltip
+                                      content="AI agent access cannot exceed your own permissions. Capabilities unavailable to you will also be unavailable to the agent. To request additional access, contact your organization administrator."
+                                    >
+                                      <OutlinedQuestionCircleIcon style={{ marginLeft: 6, color: '#6a6e73', cursor: 'pointer' }} />
+                                    </Tooltip>
+                                  </Th>
                                 </Tr>
                               </Thead>
                               <Tbody>

@@ -1840,6 +1840,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     '/red-hat-access-requests',
     '/service-accounts',
     '/ai-agents',
+    '/ai-agents-b',
     '/authentication-policy',
     '/learning-resources-iam',
     '/organization/organization-wide-access',
@@ -1893,13 +1894,14 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     { 
       label: 'Access Management', 
       path: '/user-access', 
-      isActive: ['/user-access', '/roles', '/ai-agents'].includes(location.pathname) || location.pathname.startsWith('/workspaces') || location.pathname.startsWith('/users-and-groups'),
+      isActive: ['/user-access', '/roles', '/ai-agents', '/ai-agents-b'].includes(location.pathname) || location.pathname.startsWith('/workspaces') || location.pathname.startsWith('/users-and-groups'),
       isExpandable: true,
       subItems: [
         { label: 'Users and Groups', path: '/users-and-groups', isActive: location.pathname.startsWith('/users-and-groups') },
         { label: 'Roles', path: '/roles', isActive: location.pathname === '/roles' },
         { label: 'Workspaces', path: '/workspaces', isActive: location.pathname.startsWith('/workspaces') },
         { label: 'AI Agents', path: '/ai-agents', isActive: location.pathname === '/ai-agents' },
+        { label: 'AI Agents Version B', path: '/ai-agents-b', isActive: location.pathname === '/ai-agents-b' },
       ]
     },
     {

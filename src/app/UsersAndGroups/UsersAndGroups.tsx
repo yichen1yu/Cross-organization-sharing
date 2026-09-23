@@ -687,8 +687,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
                                 <Thead>
                                   <Tr>
                                     <Th>Name</Th>
-                                    <Th>Client ID</Th>
-                                    <Th>Owner</Th>
+                                    <Th>Client ID / Username</Th>
                                   </Tr>
                                 </Thead>
                                 <Tbody>
@@ -696,7 +695,6 @@ const UsersAndGroups: React.FunctionComponent = () => {
                                     <Tr key={i}>
                                       <Td>{sa.name}</Td>
                                       <Td>{sa.clientId}</Td>
-                                      <Td>{sa.owner}</Td>
                                     </Tr>
                                   ))}
                                 </Tbody>

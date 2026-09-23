@@ -17,6 +17,7 @@ import { LearningResourcesIAM } from '@app/LearningResourcesIAM/LearningResource
 import { MyUserAccess } from '@app/MyUserAccess/MyUserAccess'; 
 import { ServiceAccounts } from '@app/ServiceAccounts/ServiceAccounts';
 import { AIAgents } from '@app/AIAgents/AIAgents';
+import { AIAgentsVersionB } from '@app/AIAgents/AIAgentsVersionB';
 import { UserAccess } from '@app/UserAccess/UserAccess';
 import { Support } from '@app/Support/Support';
 import { Users } from '@app/Users/Users';
@@ -326,6 +327,12 @@ const routes: AppRouteConfig[] = [
     exact: true,
     path: '/ai-agents',
     title: 'AI Agents | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <AIAgentsVersionB />,
+    exact: true,
+    path: '/ai-agents-b',
+    title: 'AI Agents Version B | Red Hat Hybrid Cloud Console',
   },
   {
     element: <GeneralSettings />,
