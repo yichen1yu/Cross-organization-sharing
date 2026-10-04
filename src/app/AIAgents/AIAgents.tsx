@@ -35,6 +35,11 @@ type AIAgentRow = {
 };
 
 const agentCapabilities: Record<string, { title: string; roles: string[] }[]> = {
+  'rh-support': [
+    { title: 'Read support cases', roles: ['Support viewer', 'Support administrator'] },
+    { title: 'Write support tickets', roles: ['Support administrator'] },
+    { title: 'Escalate support tickets', roles: ['Support administrator'] },
+  ],
   ai1: [
     { title: 'Product knowledge', roles: ['Inventory administrator', 'Compliance administrator'] },
     { title: 'Documentation search', roles: ['Inventory Hosts viewer', 'Compliance viewer'] },
@@ -56,12 +61,48 @@ const agentCapabilities: Record<string, { title: string; roles: string[] }[]> = 
     { title: 'Recommendations', roles: ['Compliance viewer', 'Remediations viewer'] },
     { title: 'Command examples', roles: ['Remediations administrator'] },
   ],
+  'insights-advisor': [
+    { title: 'Providing detailed information', roles: ['Inventory Hosts viewer', 'Compliance viewer'] },
+    { title: 'Troubleshooting guidance', roles: ['Remediations administrator', 'Inventory administrator'] },
+    { title: 'Finding relevant documentation', roles: ['Inventory Hosts viewer'] },
+    { title: 'Explaining best practices', roles: ['Compliance viewer', 'Compliance administrator'] },
+    { title: 'Offering command examples', roles: ['Remediations viewer'] },
+  ],
+  'ansible-ai': [
+    { title: 'Playbook generation', roles: ['Remediations administrator'] },
+    { title: 'Role scaffolding', roles: ['Inventory administrator'] },
+    { title: 'Task suggestions', roles: ['Remediations administrator', 'Inventory administrator'] },
+    { title: 'Syntax validation', roles: ['Remediations viewer'] },
+  ],
+  'openshift-ai': [
+    { title: 'Cluster diagnostics', roles: ['Inventory administrator', 'Compliance viewer'] },
+    { title: 'Workload optimization', roles: ['Inventory administrator'] },
+    { title: 'Upgrade planning', roles: ['Compliance administrator'] },
+    { title: 'Security posture review', roles: ['Compliance viewer', 'Compliance administrator'] },
+  ],
+  'image-builder-ai': [
+    { title: 'Composition recommendations', roles: ['Inventory administrator'] },
+    { title: 'Image optimization', roles: ['Inventory Hosts viewer'] },
+    { title: 'Compliance alignment', roles: ['Compliance viewer', 'Compliance administrator'] },
+  ],
+  'compliance-ai': [
+    { title: 'Policy analysis', roles: ['Compliance viewer', 'Compliance administrator'] },
+    { title: 'Remediation suggestions', roles: ['Remediations administrator'] },
+    { title: 'Posture trending', roles: ['Compliance viewer'] },
+    { title: 'Audit reporting', roles: ['Compliance administrator'] },
+  ],
 };
 
 const initialRows: AIAgentRow[] = [
+  { id: 'rh-support', name: 'Red Hat Support', description: 'AI-powered support assistant for case management, knowledge base search, and guided resolution.', lastRelease: '1 month ago' },
   { id: 'ai1', name: 'Ask Red Hat', description: 'Find answers about Red Hat products, error messages, security vulnerabilities, general usage, and other content from product documentation and our knowledge base.', lastRelease: '3 months ago' },
   { id: 'ai2', name: 'Hybrid Cloud Console', description: 'Learn about the Hybrid Cloud Console and configure settings like your personal information, request access from your admin, show critical vulnerabilities, and more.', lastRelease: '3 months ago' },
   { id: 'ai3', name: 'RHEL Lightspeed', description: 'Get answers to RHEL-related questions, support with troubleshooting, help understanding log files, ask for recommendations, and more.', lastRelease: '4 months ago' },
+  { id: 'insights-advisor', name: 'Insights Advisor', description: 'Proactive risk analysis and remediation recommendations for RHEL systems.', lastRelease: '3 months ago' },
+  { id: 'ansible-ai', name: 'Ansible Lightspeed', description: 'AI-powered content creation for Ansible Playbooks and roles.', lastRelease: '3 months ago' },
+  { id: 'openshift-ai', name: 'OpenShift AI Assistant', description: 'Contextual guidance for cluster operations, troubleshooting, and workload management.', lastRelease: '4 months ago' },
+  { id: 'image-builder-ai', name: 'Image Builder AI', description: 'Intelligent recommendations for image composition and optimization.', lastRelease: '2 months ago' },
+  { id: 'compliance-ai', name: 'Compliance AI', description: 'Automated compliance posture analysis and policy recommendations.', lastRelease: '5 months ago' },
 ];
 
 const userRoles = new Set([
@@ -70,6 +111,8 @@ const userRoles = new Set([
   'Remediations viewer',
   'User Access viewer',
   'Inventory Hosts viewer',
+  'Support viewer',
+  'Support administrator',
 ]);
 
 const AIAgents: React.FunctionComponent = () => {
@@ -78,13 +121,25 @@ const AIAgents: React.FunctionComponent = () => {
 
   const userHasAccess = (roles: string[]) => roles.some(r => userRoles.has(r));
 
+  const defaultOffCapabilities: Record<string, Set<string>> = {
+    ai1: new Set(['Command examples']),
+    ai2: new Set(['Vulnerability insights', 'Task guidance']),
+    ai3: new Set(['Log analysis', 'Command examples']),
+    'insights-advisor': new Set(['Offering command examples', 'Finding relevant documentation']),
+    'ansible-ai': new Set(['Syntax validation', 'Role scaffolding']),
+    'openshift-ai': new Set(['Upgrade planning', 'Security posture review']),
+    'image-builder-ai': new Set(['Compliance alignment']),
+    'compliance-ai': new Set(['Posture trending', 'Audit reporting']),
+  };
+
   const buildDefaultAccess = () => {
     const map: Record<string, Record<number, boolean>> = {};
     for (const row of initialRows) {
       const caps = agentCapabilities[row.id] || [];
+      const offSet = defaultOffCapabilities[row.id];
       map[row.id] = {};
       caps.forEach((cap, i) => {
-        map[row.id][i] = userHasAccess(cap.roles);
+        map[row.id][i] = offSet ? !offSet.has(cap.title) : true;
       });
     }
     return map;
@@ -264,19 +319,7 @@ const AIAgents: React.FunctionComponent = () => {
                         }}
                       />
                       <Td>{r.name}</Td>
-                      <Td>
-                        <Tooltip content={r.description} maxWidth="400px">
-                          <span style={{
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                          }}>
-                            {r.description}
-                          </span>
-                        </Tooltip>
-                      </Td>
+                      <Td>{r.description}</Td>
                       <Td>{r.lastRelease}</Td>
                       <Td isActionCell onClick={(e) => e.stopPropagation()}>
                         <Dropdown

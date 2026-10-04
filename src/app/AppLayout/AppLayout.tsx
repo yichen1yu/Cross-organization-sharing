@@ -138,10 +138,16 @@ import {
   MinusCircleIcon,
   PlusCircleIcon,
   GlobeIcon,
-  WrenchIcon
+  WrenchIcon,
+  AngleRightIcon,
+  AngleDownIcon,
+  TreeviewIcon
 } from '@patternfly/react-icons';
 import { Table, Thead, Tbody, Tr, Th, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { AnnotationProvider, AnnotationOverlay, AnnotationPanel, AnnotationToggleBar, useAnnotations } from '@app/AnnotationOverlay/AnnotationOverlay';
+import { useWorkspace, allWorkspaces, WorkspaceNode } from '@app/utils/WorkspaceContext';
+import { Popper } from '@patternfly/react-core/dist/esm/helpers/Popper/Popper';
+import { Panel, PanelMain, PanelMainBody, PanelFooter } from '@patternfly/react-core';
 
 type SchedulerWizardOptions = { preselectedService?: string; preselectedTask?: string; preselectedFileType?: string; lockService?: boolean; lockTask?: boolean; lockFileType?: boolean };
 const SchedulerWizardContext = React.createContext<{
@@ -214,6 +220,15 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [isNotificationDrawerOpen, setIsNotificationDrawerOpen] = React.useState(false);
   const [isNotificationActionsOpen, setIsNotificationActionsOpen] = React.useState(false);
   const [isSchedulerPanelOpen, setIsSchedulerPanelOpen] = React.useState(false);
+
+  // Workspace selector state
+  const { workspaces, selectedWorkspace, setSelectedWorkspace } = useWorkspace();
+  const [isWorkspaceSelectorOpen, setIsWorkspaceSelectorOpen] = React.useState(false);
+  const [workspaceSearchValue, setWorkspaceSearchValue] = React.useState('');
+  const [selectedWsId, setSelectedWsId] = React.useState<string | null>(selectedWorkspace?.id ?? null);
+  const [expandedWsNodes, setExpandedWsNodes] = React.useState<Set<string>>(new Set(['uxd', 'ws-default']));
+  const wsToggleRef = React.useRef<HTMLButtonElement>(null);
+  const wsMenuRef = React.useRef<HTMLDivElement>(null);
 
   // Review access request wizard state
   const [isReviewAccessWizardOpen, setIsReviewAccessWizardOpen] = React.useState(false);
@@ -1434,6 +1449,186 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     }
   };
 
+  // Workspace selector helpers — build tree hierarchy from flat workspace list
+  type WsTreeNode = { id: string; name: string; children: WsTreeNode[] };
+
+  const buildWsTree = (parentId?: string): WsTreeNode[] =>
+    workspaces
+      .filter((w) => w.parentId === parentId)
+      .map((w) => ({
+        id: w.id,
+        name: w.name,
+        children: buildWsTree(w.id),
+      }));
+
+  const wsTreeData = React.useMemo(() => buildWsTree(undefined), [workspaces]);
+
+  const toggleWsExpand = (id: string) => {
+    setExpandedWsNodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // Keep selectedWsId in sync with the workspace context
+  React.useEffect(() => {
+    if (selectedWorkspace) {
+      setSelectedWsId(selectedWorkspace.id);
+    }
+  }, [selectedWorkspace]);
+
+  const filterWsTree = (items: WsTreeNode[], term: string): WsTreeNode[] =>
+    items
+      .map((item) => {
+        const nameMatches = item.name.toLowerCase().includes(term);
+        const filteredChildren = filterWsTree(item.children, term);
+        if (nameMatches || filteredChildren.length > 0) {
+          return { ...item, children: filteredChildren.length > 0 ? filteredChildren : item.children };
+        }
+        return null;
+      })
+      .filter(Boolean) as WsTreeNode[];
+
+  const filteredWsTreeData = workspaceSearchValue.trim()
+    ? filterWsTree(wsTreeData, workspaceSearchValue.trim().toLowerCase())
+    : wsTreeData;
+
+  const onWsSelectConfirm = () => {
+    if (selectedWsId) {
+      const ws = workspaces.find((w) => w.id === selectedWsId);
+      if (ws) {
+        setSelectedWorkspace(ws);
+      }
+    }
+    setIsWorkspaceSelectorOpen(false);
+    navigate('/workspaces');
+  };
+
+  // Render a single tree node with connector lines
+  const renderWsTreeNode = (node: WsTreeNode, isLast: boolean, isRoot: boolean, depth: number = 0) => {
+    const hasChildren = node.children.length > 0;
+    const isExpanded = expandedWsNodes.has(node.id);
+    const isSelected = selectedWsId === node.id;
+    const indent = depth * 24;
+
+    return (
+      <li
+        key={node.id}
+        style={{
+          position: 'relative',
+          listStyle: 'none',
+        }}
+      >
+        {/* Vertical connector line — centered under parent's chevron */}
+        {!isRoot && (
+          <div
+            style={{
+              position: 'absolute',
+              left: indent - 1,
+              top: 0,
+              bottom: isLast ? 'calc(100% - 20px)' : 0,
+              borderLeft: '1px solid var(--pf-t--global--border--color--default, #d2d2d2)',
+              zIndex: 1,
+            }}
+          />
+        )}
+        {/* Horizontal branch line — from vertical line to node content */}
+        {!isRoot && (
+          <div
+            style={{
+              position: 'absolute',
+              left: indent - 1,
+              top: 20,
+              width: 16,
+              borderTop: '1px solid var(--pf-t--global--border--color--default, #d2d2d2)',
+              zIndex: 1,
+            }}
+          />
+        )}
+        {/* Node row — full-width highlight, indent via paddingLeft */}
+        <div
+          onClick={() => setSelectedWsId(node.id)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '8px 4px',
+            paddingLeft: indent + 4,
+            cursor: 'pointer',
+            borderRadius: 4,
+            gap: 0,
+            background: isSelected ? 'var(--pf-t--global--background--color--primary--clicked, #e7e7e7)' : 'transparent',
+          }}
+          onMouseEnter={(e) => {
+            if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'var(--pf-t--global--background--color--primary--hover, #f0f0f0)';
+          }}
+          onMouseLeave={(e) => {
+            if (!isSelected) (e.currentTarget as HTMLElement).style.background = 'transparent';
+          }}
+        >
+          {hasChildren ? (
+            <Button
+              variant="plain"
+              aria-label={isExpanded ? 'Collapse' : 'Expand'}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleWsExpand(node.id);
+              }}
+              icon={isExpanded ? <AngleDownIcon /> : <AngleRightIcon />}
+              style={{
+                padding: '2px',
+                width: 24,
+                height: 24,
+                flexShrink: 0,
+                '--pf-v6-c-button--FontSize': '14px',
+                '--pf-v6-c-button--m-plain--Color': '#6a6e73',
+                '--pf-v6-c-button__icon--Color': '#6a6e73',
+              } as React.CSSProperties}
+            />
+          ) : (
+            <span style={{ width: 24, flexShrink: 0 }} />
+          )}
+          <span
+            style={{
+              fontSize: 'var(--pf-t--global--font--size--body--default, 0.875rem)',
+              fontFamily: 'var(--pf-t--global--font--family--body, RedHatText, helvetica, arial, sans-serif)',
+              lineHeight: 'var(--pf-t--global--font--line-height--body, 1.5)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {node.name}
+          </span>
+        </div>
+        {/* Children */}
+        {hasChildren && isExpanded && (
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+            {node.children.map((child, idx) =>
+              renderWsTreeNode(child, idx === node.children.length - 1, false, depth + 1)
+            )}
+          </ul>
+        )}
+      </li>
+    );
+  };
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        wsToggleRef.current && !wsToggleRef.current.contains(event.target as Node) &&
+        wsMenuRef.current && !wsMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsWorkspaceSelectorOpen(false);
+      }
+    };
+    if (isWorkspaceSelectorOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isWorkspaceSelectorOpen]);
+
   const masthead = (
     <Masthead>
       <MastheadMain>
@@ -1476,6 +1671,59 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           </Tooltip>
         </div>
         
+        {/* Workspace Selector */}
+        <div style={{ marginLeft: '4px', marginRight: '4px' }}>
+          <MenuToggle
+            ref={wsToggleRef}
+            onClick={() => {
+              setIsWorkspaceSelectorOpen(!isWorkspaceSelectorOpen);
+              setWorkspaceSearchValue('');
+            }}
+            isExpanded={isWorkspaceSelectorOpen}
+            aria-label="Workspace selector"
+            style={{ fontSize: '14px' }}
+          >
+            <TreeviewIcon style={{ marginRight: 6 }} />
+            {selectedWorkspace.name}
+          </MenuToggle>
+        </div>
+        <Popper
+          triggerRef={wsToggleRef}
+          popperRef={wsMenuRef}
+          popper={
+            <div ref={wsMenuRef}>
+              <Panel variant="raised" style={{ minWidth: '300px', maxHeight: '400px', display: 'flex', flexDirection: 'column' }}>
+                <PanelMain style={{ flex: 1, overflowY: 'auto' }}>
+                  <PanelMainBody style={{ padding: 0 }}>
+                    <div style={{ padding: '8px 8px 4px' }}>
+                      <SearchInput
+                        aria-label="Find a workspace by name"
+                        placeholder="Find a workspace by name"
+                        value={workspaceSearchValue}
+                        onChange={(_e, value) => setWorkspaceSearchValue(value)}
+                        onClear={() => setWorkspaceSearchValue('')}
+                      />
+                    </div>
+                    <ul style={{ margin: 0, padding: '0 4px 4px', listStyle: 'none' }} role="tree" aria-label="Workspace selector">
+                      {filteredWsTreeData.map((node, idx) =>
+                        renderWsTreeNode(node, idx === filteredWsTreeData.length - 1, true)
+                      )}
+                    </ul>
+                  </PanelMainBody>
+                </PanelMain>
+                <PanelFooter style={{ padding: '8px 12px' }}>
+                  <Button variant="secondary" isBlock onClick={onWsSelectConfirm}>
+                    Select Workspace
+                  </Button>
+                </PanelFooter>
+              </Panel>
+            </div>
+          }
+          isVisible={isWorkspaceSelectorOpen}
+          appendTo={() => document.body}
+          zIndex={9999}
+        />
+
         {/* Expandable Search Input */}
         <div 
           ref={searchContainerRef}
@@ -1736,7 +1984,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   aria-label="User menu"
                   icon={<UserIcon />}
                 >
-                  Ned Username
+                  Alex Admin
                 </MenuToggle>
               )}
               shouldFocusToggleOnSelect
@@ -1746,7 +1994,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   <DescriptionList isCompact>
                     <DescriptionListGroup>
                       <DescriptionListTerm>Username:</DescriptionListTerm>
-                      <DescriptionListDescription>Ned Username</DescriptionListDescription>
+                      <DescriptionListDescription>Alex Admin</DescriptionListDescription>
                     </DescriptionListGroup>
                     <DescriptionListGroup>
                       <DescriptionListTerm>Account number:</DescriptionListTerm>
@@ -1841,6 +2089,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     '/service-accounts',
     '/ai-agents',
     '/ai-agents-b',
+    '/audit-log',
     '/authentication-policy',
     '/learning-resources-iam',
     '/organization/organization-wide-access',
@@ -1894,7 +2143,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     { 
       label: 'Access Management', 
       path: '/user-access', 
-      isActive: ['/user-access', '/roles', '/ai-agents', '/ai-agents-b'].includes(location.pathname) || location.pathname.startsWith('/workspaces') || location.pathname.startsWith('/users-and-groups'),
+      isActive: ['/user-access', '/roles', '/ai-agents', '/ai-agents-b', '/audit-log'].includes(location.pathname) || location.pathname.startsWith('/workspaces') || location.pathname.startsWith('/users-and-groups'),
       isExpandable: true,
       subItems: [
         { label: 'Users and Groups', path: '/users-and-groups', isActive: location.pathname.startsWith('/users-and-groups') },
@@ -1902,6 +2151,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         { label: 'Workspaces', path: '/workspaces', isActive: location.pathname.startsWith('/workspaces') },
         { label: 'AI Agents', path: '/ai-agents', isActive: location.pathname === '/ai-agents' },
         { label: 'AI Agents Version B', path: '/ai-agents-b', isActive: location.pathname === '/ai-agents-b' },
+        { label: 'Audit Log', path: '/audit-log', isActive: location.pathname === '/audit-log' },
       ]
     },
     {

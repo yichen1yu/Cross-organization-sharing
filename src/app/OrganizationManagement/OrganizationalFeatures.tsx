@@ -117,7 +117,10 @@ type AiAgent = {
 };
 
 const initialAiAgents: AiAgent[] = [
-  { id: 'lightspeed', name: 'Red Hat Lightspeed', description: 'AI assistant for troubleshooting, configuration, and product guidance across the Hybrid Cloud Console.', enabled: true },
+  { id: 'rh-support', name: 'Red Hat Support', description: 'AI-powered support assistant for case management, knowledge base search, and guided resolution.', enabled: true },
+  { id: 'ai1', name: 'Ask Red Hat', description: 'Find answers about Red Hat products, error messages, security vulnerabilities, general usage, and other content from product documentation and our knowledge base.', enabled: true },
+  { id: 'ai2', name: 'Hybrid Cloud Console', description: 'Learn about the Hybrid Cloud Console and configure settings like your personal information, request access from your admin, show critical vulnerabilities, and more.', enabled: true },
+  { id: 'ai3', name: 'RHEL Lightspeed', description: 'Get answers to RHEL-related questions, support with troubleshooting, help understanding log files, ask for recommendations, and more.', enabled: true },
   { id: 'insights-advisor', name: 'Insights Advisor', description: 'Proactive risk analysis and remediation recommendations for RHEL systems.', enabled: true },
   { id: 'ansible-ai', name: 'Ansible Lightspeed', description: 'AI-powered content creation for Ansible Playbooks and roles.', enabled: false },
   { id: 'openshift-ai', name: 'OpenShift AI Assistant', description: 'Contextual guidance for cluster operations, troubleshooting, and workload management.', enabled: false },
@@ -126,10 +129,21 @@ const initialAiAgents: AiAgent[] = [
 ];
 
 const agentRbacAccess: Record<string, { role: string; access: string }[]> = {
-  lightspeed: [
-    { role: 'Lightspeed Admin', access: 'Full read/write access to Lightspeed configuration, model settings, and usage policies' },
-    { role: 'Lightspeed Viewer', access: 'Read-only access to Lightspeed conversation logs and analytics dashboards' },
-    { role: 'Lightspeed Operator', access: 'Manage prompt templates, response filters, and context sources' },
+  'rh-support': [
+    { role: 'Support Admin', access: 'Full access to support case management, escalation, and knowledge base configuration' },
+    { role: 'Support Viewer', access: 'Read-only access to support cases, case history, and communications' },
+  ],
+  ai1: [
+    { role: 'Ask Red Hat Admin', access: 'Full access to product knowledge configuration and documentation indexing' },
+    { role: 'Ask Red Hat User', access: 'Use AI-powered product Q&A, troubleshooting guidance, and documentation search' },
+  ],
+  ai2: [
+    { role: 'Console AI Admin', access: 'Configure console navigation AI, access request workflows, and vulnerability insights' },
+    { role: 'Console AI User', access: 'Use AI-assisted console navigation, personal settings, and task guidance' },
+  ],
+  ai3: [
+    { role: 'RHEL Lightspeed Admin', access: 'Full access to RHEL Q&A configuration, log analysis settings, and recommendation policies' },
+    { role: 'RHEL Lightspeed User', access: 'Use AI-powered RHEL troubleshooting, log analysis, and command examples' },
   ],
   'insights-advisor': [
     { role: 'Advisor Admin', access: 'Full access to recommendation rules, risk profiles, and remediation playbooks' },
@@ -157,11 +171,31 @@ const agentRbacAccess: Record<string, { role: string; access: string }[]> = {
 };
 
 const agentCapabilities: Record<string, { title: string; description: string }[]> = {
-  lightspeed: [
-    { title: 'Conversational assistance', description: 'Answer questions about Red Hat products, services, and configurations in natural language.' },
-    { title: 'Troubleshooting workflows', description: 'Guide users through diagnostic steps to identify and resolve common issues across Red Hat platforms.' },
+  'rh-support': [
+    { title: 'Read support cases', description: 'View and search existing support cases, case history, and associated communications.' },
+    { title: 'Write support tickets', description: 'Create new support tickets and update existing cases with comments and attachments.' },
+    { title: 'Escalate support tickets', description: 'Raise the priority or severity of support tickets and request expedited resolution.' },
+  ],
+  ai1: [
+    { title: 'Product knowledge', description: 'Answer questions about Red Hat products, error messages, security vulnerabilities, and general usage.' },
     { title: 'Documentation search', description: 'Surface relevant Red Hat documentation, knowledge base articles, and solution guides.' },
-    { title: 'Configuration guidance', description: 'Provide recommended settings and best practices for deploying and managing Red Hat products.' },
+    { title: 'Troubleshooting guidance', description: 'Guide users through diagnostic steps to identify and resolve common issues.' },
+    { title: 'Best practices', description: 'Provide recommended configurations and security practices for Red Hat environments.' },
+    { title: 'Command examples', description: 'Provide the correct syntax and usage for various Linux and Red Hat commands.' },
+  ],
+  ai2: [
+    { title: 'Console navigation', description: 'Help users find and navigate features within the Hybrid Cloud Console.' },
+    { title: 'Personal settings', description: 'Assist with configuring personal information, notifications, and preferences.' },
+    { title: 'Access requests', description: 'Guide users through requesting access from their organization administrator.' },
+    { title: 'Vulnerability insights', description: 'Surface critical vulnerabilities and security advisories relevant to your environment.' },
+    { title: 'Task guidance', description: 'Provide step-by-step guidance for common console tasks and workflows.' },
+  ],
+  ai3: [
+    { title: 'RHEL Q&A', description: 'Answer RHEL-related questions about configuration, administration, and troubleshooting.' },
+    { title: 'Troubleshooting support', description: 'Help diagnose and resolve issues with RHEL systems and services.' },
+    { title: 'Log analysis', description: 'Help understand log files and identify patterns indicating issues.' },
+    { title: 'Recommendations', description: 'Provide recommendations for system optimization and best practices.' },
+    { title: 'Command examples', description: 'Provide correct syntax and usage for RHEL-specific commands.' },
   ],
   'insights-advisor': [
     { title: 'Providing detailed information', description: 'Explaining concepts, commands, and procedures related to RHEL and general Linux system administration.' },
@@ -210,6 +244,32 @@ const OrganizationalFeatures: React.FunctionComponent = () => {
   const [expandedAgents, setExpandedAgents] = React.useState<Set<string>>(new Set());
   const alertIdRef = React.useRef(0);
 
+  const defaultOffCapabilities: Record<string, string[]> = {
+    ai1: ['Command examples'],
+    ai2: ['Vulnerability insights', 'Task guidance'],
+    ai3: ['Log analysis', 'Command examples'],
+    'insights-advisor': ['Offering command examples', 'Finding relevant documentation'],
+    'ansible-ai': ['Syntax validation', 'Role scaffolding'],
+    'openshift-ai': ['Upgrade planning', 'Security posture review'],
+    'image-builder-ai': ['Compliance alignment'],
+    'compliance-ai': ['Posture trending', 'Audit reporting'],
+  };
+
+  const buildInitialCapabilityState = (): Record<string, Record<string, boolean>> => {
+    const state: Record<string, Record<string, boolean>> = {};
+    for (const [agentId, caps] of Object.entries(agentCapabilities)) {
+      state[agentId] = {};
+      const offSet = new Set(defaultOffCapabilities[agentId] || []);
+      caps.forEach((cap) => {
+        state[agentId][cap.title] = !offSet.has(cap.title);
+      });
+    }
+    return state;
+  };
+
+  const [capabilityToggles, setCapabilityToggles] = React.useState<Record<string, Record<string, boolean>>>(buildInitialCapabilityState);
+  const [savedCapabilityToggles, setSavedCapabilityToggles] = React.useState<Record<string, Record<string, boolean>>>(buildInitialCapabilityState);
+
   const addAlert = (variant: AlertVariant, title: string, description?: React.ReactNode) => {
     const key = alertIdRef.current++;
     setAlerts((prev) => [...prev, { key, variant, title, description }]);
@@ -228,51 +288,55 @@ const OrganizationalFeatures: React.FunctionComponent = () => {
     );
   };
 
+  const onToggleCapability = (agentId: string, capTitle: string) => {
+    setCapabilityToggles((prev) => ({
+      ...prev,
+      [agentId]: {
+        ...prev[agentId],
+        [capTitle]: !prev[agentId]?.[capTitle],
+      },
+    }));
+  };
+
   const onOpenModal = () => {
     setSavedAgents(aiAgents);
+    setSavedCapabilityToggles(JSON.parse(JSON.stringify(capabilityToggles)));
     setIsAiModalOpen(true);
   };
 
   const onSave = () => {
-    const enabled: string[] = [];
-    const disabled: string[] = [];
+    const capChanged = JSON.stringify(capabilityToggles) !== JSON.stringify(savedCapabilityToggles);
+    const agentChanged = aiAgents.some((a, i) => a.enabled !== savedAgents[i].enabled);
 
-    aiAgents.forEach((agent) => {
-      const prev = savedAgents.find((a) => a.id === agent.id);
-      if (prev && prev.enabled !== agent.enabled) {
-        if (agent.enabled) {
-          enabled.push(agent.name);
-        } else {
-          disabled.push(agent.name);
-        }
-      }
-    });
-
-    if (enabled.length === 0 && disabled.length === 0) {
+    if (!capChanged && !agentChanged) {
       setIsAiModalOpen(false);
       return;
     }
 
-    const parts: string[] = [];
-    if (enabled.length > 0) {
-      parts.push(`Enabled: ${enabled.join(', ')}`);
-    }
-    if (disabled.length > 0) {
-      parts.push(`Disabled: ${disabled.join(', ')}`);
+    const changedAgentNames: string[] = [];
+    for (const [agentId, caps] of Object.entries(capabilityToggles)) {
+      const saved = savedCapabilityToggles[agentId] || {};
+      const current = caps || {};
+      if (JSON.stringify(current) !== JSON.stringify(saved)) {
+        const agent = aiAgents.find(a => a.id === agentId);
+        if (agent) changedAgentNames.push(agent.name);
+      }
     }
 
     addAlert(
       AlertVariant.success,
-      'AI agent settings updated across all organization',
-      <>{parts.join('. ')}. This change affects all users in your organization.</>
+      'AI feature settings updated successfully',
+      <>Capabilities for {changedAgentNames.join(', ')} has updated successfully. This affects all users in your organization.</>
     );
 
     setSavedAgents(aiAgents);
+    setSavedCapabilityToggles(JSON.parse(JSON.stringify(capabilityToggles)));
     setIsAiModalOpen(false);
   };
 
   const onCancel = () => {
     setAiAgents(savedAgents);
+    setCapabilityToggles(JSON.parse(JSON.stringify(savedCapabilityToggles)));
     setIsAiModalOpen(false);
   };
 
@@ -389,7 +453,7 @@ const OrganizationalFeatures: React.FunctionComponent = () => {
           title="AI Features"
           description="Enable or disable individual AI agents across your organization. Changes apply to all users."
         />
-        <ModalBody>
+        <ModalBody style={{ maxHeight: '60vh', overflowY: 'auto' }}>
           <div
             style={{
               display: 'flex',
@@ -448,7 +512,20 @@ const OrganizationalFeatures: React.FunctionComponent = () => {
                     </span>
                   </Button>
                   <div style={{ flex: 1 }}>
-                    <Title headingLevel="h4" size="md">{agent.name}</Title>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Title headingLevel="h4" size="md">{agent.name}</Title>
+                      {(() => {
+                        const caps = agentCapabilities[agent.id] || [];
+                        const total = caps.length;
+                        if (total === 0) return null;
+                        const enabledCount = caps.filter(cap => capabilityToggles[agent.id]?.[cap.title] ?? true).length;
+                        return (
+                          <span style={{ fontSize: '0.875rem', color: '#6a6e73' }}>
+                            ({enabledCount}/{total})
+                          </span>
+                        );
+                      })()}
+                    </div>
                     <Content>
                       <p style={{ margin: '4px 0 0', color: '#6a6e73', fontSize: '0.875rem' }}>
                         {agent.description}
@@ -456,21 +533,33 @@ const OrganizationalFeatures: React.FunctionComponent = () => {
                     </Content>
                   </div>
                 </div>
-                <Switch
-                  id={`ai-agent-${agent.id}`}
-                  aria-label={`Toggle ${agent.name}`}
-                  isChecked={agent.enabled}
-                  onChange={() => onToggleAgent(agent.id)}
-                />
               </div>
               {isExpanded && (
                 <div style={{ padding: '8px 0 4px 30px' }}>
-                  {(agentRbacAccess[agent.id] || []).map((entry, i) => (
-                    <div key={i} style={{ marginBottom: '8px' }}>
-                      <span style={{ fontWeight: 600 }}>{entry.role}</span>
-                      <p style={{ margin: '2px 0 0', color: '#6a6e73', fontSize: '0.85rem' }}>
-                        {entry.access}
-                      </p>
+                  {(agentCapabilities[agent.id] || []).map((cap, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        padding: '6px 0',
+                        borderBottom: i < (agentCapabilities[agent.id] || []).length - 1 ? '1px solid var(--pf-v6-global--BorderColor--100, #d2d2d2)' : 'none',
+                      }}
+                    >
+                      <div style={{ flex: 1, paddingRight: 12 }}>
+                        <span style={{ fontSize: '0.875rem' }}>{cap.title}</span>
+                        <p style={{ margin: '2px 0 0', color: '#6a6e73', fontSize: '0.85rem' }}>
+                          {cap.description}
+                        </p>
+                      </div>
+                      <Switch
+                        id={`cap-${agent.id}-${i}`}
+                        aria-label={`Toggle ${cap.title}`}
+                        isChecked={capabilityToggles[agent.id]?.[cap.title] ?? true}
+                        onChange={() => onToggleCapability(agent.id, cap.title)}
+                        isDisabled={!agent.enabled}
+                      />
                     </div>
                   ))}
                 </div>
@@ -480,7 +569,10 @@ const OrganizationalFeatures: React.FunctionComponent = () => {
           })}
         </ModalBody>
         <ModalFooter>
-          <Button variant="primary" onClick={onSave} isDisabled={aiAgents.every((a, i) => a.enabled === savedAgents[i].enabled)}>Save</Button>
+          <Button variant="primary" onClick={onSave} isDisabled={
+            aiAgents.every((a, i) => a.enabled === savedAgents[i].enabled) &&
+            JSON.stringify(capabilityToggles) === JSON.stringify(savedCapabilityToggles)
+          }>Save</Button>
           <Button variant="link" onClick={onCancel}>Cancel</Button>
         </ModalFooter>
       </Modal>

@@ -39,7 +39,7 @@ const Homepage: React.FunctionComponent = () => {
   const navigate = useNavigate();
   
   // Get user name (currently hardcoded, matching the username dropdown)
-  const userName = "Ned";
+  const userName = "Alex";
 
   // CSS styles for explore capability cards hover effects and column spans
   const cardHoverStyle = `

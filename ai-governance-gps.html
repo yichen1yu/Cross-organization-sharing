@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Governance — Golden Path Story</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700&family=Red+Hat+Text:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ───── PF TOKENS ───── */
+:root {
+  --pf-t-black-900:#151515; --pf-t-black-800:#212427; --pf-t-black-700:#3c3f42;
+  --pf-t-black-500:#6a6e73; --pf-t-black-400:#8a8d90; --pf-t-black-300:#b8bbbe;
+  --pf-t-black-200:#d2d2d2; --pf-t-black-100:#f0f0f0; --pf-t-white:#fff;
+  --pf-t-blue-400:#0066cc; --pf-t-blue-100:#e7f1fa;
+  --pf-t-green-500:#3e8635; --pf-t-green-50:#e7f4e4;
+  --pf-t-red-500:#c9190b; --pf-t-red-50:#faeae8;
+  --pf-t-gold-400:#f0ab00; --pf-t-gold-50:#fdf7e7;
+  --pf-t-teal-400:#009596; --pf-t-teal-50:#e0f6f6;
+  --pf-t-purple-400:#6753ac; --pf-t-purple-50:#f2f0fc;
+  --pf-font:'Red Hat Text',helvetica,arial,sans-serif;
+  --pf-heading:'Red Hat Display',helvetica,arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--pf-font);background:#1a1a1a;overflow:hidden;height:100vh;color:#fff;font-size:14px;}
+
+/* ───── PRESENTATION SHELL ───── */
+.pres-top{height:64px;padding:0 40px;display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;flex-shrink:0;}
+.pres-left{display:flex;align-items:center;gap:12px;}
+.pres-badge{background:#ee0000;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:3px;letter-spacing:.6px;}
+.pres-title{font-family:var(--pf-heading);font-size:18px;font-weight:600;color:#fff;}
+.pres-sep{width:1px;height:28px;background:#444;margin:0 4px;}
+.pres-persona{display:flex;align-items:center;gap:8px;font-family:var(--pf-heading);font-size:15px;font-weight:600;color:#fff;}
+.pres-persona-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.pres-persona-avatar.alex{background:#009596;}
+.pres-persona-avatar.priya{background:#6753ac;}
+.pres-persona-avatar.future{background:#f0ab00;}
+.pres-persona-role{font-size:14px;font-weight:400;color:#999;margin-left:2px;}
+.pres-right{display:flex;align-items:center;gap:12px;}
+.pres-step{font-size:12px;color:#ee0000;font-weight:700;background:rgba(238,0,0,.12);padding:3px 12px;border-radius:14px;}
+.pres-desc{padding:0 40px 8px;font-size:15px;line-height:1.55;color:#ccc;max-width:none;}
+
+.pres-nav{position:fixed;bottom:0;left:0;right:0;height:44px;background:#111;display:flex;align-items:center;justify-content:center;gap:24px;z-index:1000;border-top:1px solid #333;}
+.pres-nav button{background:none;border:1px solid #555;color:#fff;padding:5px 14px;border-radius:3px;cursor:pointer;font-family:var(--pf-font);font-size:12px;transition:all .15s;}
+.pres-nav button:hover:not(:disabled){background:#333;border-color:#aaa;}
+.pres-nav button:disabled{opacity:.3;cursor:default;}
+.nav-dots{display:flex;gap:7px;}
+.nav-dot{width:7px;height:7px;border-radius:50%;background:#444;transition:all .2s;cursor:pointer;}
+.nav-dot:hover{background:#888;}
+.nav-dot.on{background:#ee0000;width:18px;border-radius:4px;}
+
+.slide{display:none;flex-direction:column;height:calc(100vh - 64px - 44px);}
+.slide.active{display:flex;}
+.screen-wrap{flex:1;padding:0 40px;display:flex;justify-content:center;overflow:hidden;}
+.screen-frame{width:100%;max-width:1200px;border-radius:6px;overflow:hidden;box-shadow:0 6px 30px rgba(0,0,0,.5);border:1px solid #333;position:relative;}
+
+/* ══════════════════════════════════════
+   PF MASTHEAD
+   ══════════════════════════════════════ */
+.pf-mh{height:48px;background:var(--pf-t-black-900);display:flex;align-items:center;padding:0 16px;flex-shrink:0;}
+.pf-mh-ham{color:#d2d2d2;font-size:18px;cursor:pointer;padding:0 8px;display:flex;align-items:center;}
+.pf-mh-logo{margin:0 10px 0 4px;display:flex;align-items:center;}
+.pf-mh-brand{color:#d2d2d2;font-size:14px;font-weight:400;white-space:nowrap;}
+.pf-mh-brand span{margin-left:4px;font-size:10px;color:#8a8d90;}
+.pf-mh-right{margin-left:auto;display:flex;align-items:center;gap:4px;}
+.pf-mh-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:#d2d2d2;font-size:14px;cursor:pointer;transition:background .15s;}
+.pf-mh-icon:hover{background:rgba(255,255,255,.08);}
+.pf-mh-icon svg{width:16px;height:16px;fill:#d2d2d2;}
+.pf-mh-sep{width:1px;height:24px;background:#3c3f42;margin:0 4px;}
+.pf-mh-user{display:flex;align-items:center;gap:8px;padding:4px 8px;cursor:pointer;border-radius:4px;transition:background .15s;}
+.pf-mh-user:hover{background:rgba(255,255,255,.08);}
+.pf-mh-avatar{width:28px;height:28px;border-radius:50%;background:var(--pf-t-teal-400);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+.pf-mh-uname{color:#d2d2d2;font-size:13px;white-space:nowrap;}
+.pf-mh-uname span{margin-left:3px;font-size:10px;color:#8a8d90;}
+
+/* ══════════════════════════════════════
+   PF NAV SIDEBAR
+   ══════════════════════════════════════ */
+.pf-body{display:flex;flex:1;overflow:hidden;}
+.pf-nav{width:220px;background:var(--pf-t-black-800);padding:8px 0;flex-shrink:0;overflow-y:auto;}
+.pf-nav-i{display:block;padding:8px 16px 8px 20px;color:#c9c9c9;text-decoration:none;font-size:14px;border-left:3px solid transparent;cursor:pointer;transition:all .1s;}
+.pf-nav-i:hover{background:rgba(255,255,255,.06);color:#e0e0e0;}
+.pf-nav-i.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:#73bcf7;font-weight:500;}
+.pf-nav-sec{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 8px 20px;color:#c9c9c9;font-size:14px;cursor:pointer;border-left:3px solid transparent;transition:all .1s;}
+.pf-nav-sec:hover{background:rgba(255,255,255,.06);}
+.pf-nav-sec .chev{color:#8a8d90;font-size:10px;transition:transform .2s;}
+.pf-nav-sub .pf-nav-i{padding-left:36px;font-size:13px;}
+.pf-nav-hr{border:none;border-top:1px solid #3c3f42;margin:6px 0;}
+
+/* ══════════════════════════════════════
+   PF PAGE CONTENT
+   ══════════════════════════════════════ */
+.pf-page{flex:1;padding:20px 24px;overflow-y:auto;background:var(--pf-t-black-100);}
+.pf-bc{font-size:13px;color:var(--pf-t-black-500);margin-bottom:8px;}
+.pf-bc a{color:var(--pf-t-blue-400);text-decoration:none;}
+.pf-bc a:hover{text-decoration:underline;}
+.pf-bc .sep{margin:0 6px;color:var(--pf-t-black-300);}
+.pf-h1{font-family:var(--pf-heading);font-size:24px;font-weight:400;color:var(--pf-t-black-900);margin-bottom:4px;}
+.pf-subtitle{font-size:14px;color:var(--pf-t-black-500);margin-bottom:20px;line-height:1.5;}
+
+/* PF TABS */
+.pf-tabs{display:flex;gap:0;border-bottom:1px solid var(--pf-t-black-200);margin-bottom:20px;}
+.pf-tab{padding:10px 16px;font-size:14px;color:var(--pf-t-black-500);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.pf-tab:hover{color:var(--pf-t-black-900);}
+.pf-tab.on{color:var(--pf-t-black-900);font-weight:500;border-bottom-color:var(--pf-t-blue-400);}
+
+/* PF TOOLBAR */
+.pf-toolbar{display:flex;align-items:center;margin-bottom:16px;gap:10px;}
+.pf-toolbar-left{display:flex;align-items:center;gap:8px;flex:1;}
+.pf-filter-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--pf-t-blue-400);border-radius:4px;font-size:13px;color:var(--pf-t-blue-400);background:var(--pf-t-white);cursor:pointer;}
+.pf-filter-chip svg{width:10px;height:10px;fill:var(--pf-t-blue-400);}
+.pf-search{display:flex;align-items:center;border:1px solid var(--pf-t-black-200);border-radius:4px;background:var(--pf-t-white);padding:0 10px;height:34px;}
+.pf-search svg{width:14px;height:14px;fill:var(--pf-t-black-400);margin-right:6px;flex-shrink:0;}
+.pf-search input{border:none;outline:none;font-family:var(--pf-font);font-size:13px;color:var(--pf-t-black-900);background:transparent;width:180px;}
+.pf-search input::placeholder{color:var(--pf-t-black-400);}
+.pf-pagination{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:13px;color:var(--pf-t-black-700);white-space:nowrap;}
+.pf-pagination b{font-weight:600;}
+.pf-pg-btn{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:1px solid var(--pf-t-black-200);border-radius:4px;background:var(--pf-t-white);cursor:pointer;color:var(--pf-t-black-500);font-size:12px;}
+
+/* ══════════════════════════════════════
+   PF TABLE
+   ══════════════════════════════════════ */
+.pf-table{width:100%;border-collapse:collapse;background:var(--pf-t-white);}
+.pf-table thead th{text-align:left;padding:10px 16px;font-size:14px;font-weight:600;color:var(--pf-t-black-500);border-bottom:1px solid var(--pf-t-black-200);white-space:nowrap;}
+.pf-table tbody td{padding:12px 16px;font-size:14px;color:var(--pf-t-black-900);border-bottom:1px solid var(--pf-t-black-200);vertical-align:top;}
+.pf-table tbody tr:hover{background:#fafafa;}
+.pf-table tbody tr.warn-row{background:#fffbf0;}
+.pf-table tbody tr.err-row{background:#fff5f5;}
+
+/* PF LABEL */
+.pf-label{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:30px;font-size:12px;font-weight:500;white-space:nowrap;}
+.pf-label .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pf-label--green{background:var(--pf-t-green-50);color:var(--pf-t-green-500);}
+.pf-label--green .dot{background:var(--pf-t-green-500);}
+.pf-label--blue{background:var(--pf-t-blue-100);color:var(--pf-t-blue-400);}
+.pf-label--blue .dot{background:var(--pf-t-blue-400);}
+.pf-label--gold{background:var(--pf-t-gold-50);color:#795600;}
+.pf-label--gold .dot{background:var(--pf-t-gold-400);}
+.pf-label--red{background:var(--pf-t-red-50);color:var(--pf-t-red-500);}
+.pf-label--red .dot{background:var(--pf-t-red-500);}
+.pf-label--teal{background:var(--pf-t-teal-50);color:var(--pf-t-teal-400);}
+.pf-label--teal .dot{background:var(--pf-t-teal-400);}
+.pf-label--purple{background:var(--pf-t-purple-50);color:var(--pf-t-purple-400);}
+.pf-label--purple .dot{background:var(--pf-t-purple-400);}
+
+/* ══════════════════════════════════════
+   PF CARD
+   ══════════════════════════════════════ */
+.pf-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.pf-card{background:var(--pf-t-white);border:1px solid var(--pf-t-black-200);border-radius:8px;padding:20px;display:flex;flex-direction:column;}
+.pf-card-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.pf-card-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;}
+.pf-card h3{font-family:var(--pf-heading);font-size:16px;font-weight:500;color:var(--pf-t-black-900);margin-bottom:6px;}
+.pf-card p{font-size:13px;color:var(--pf-t-black-500);line-height:1.5;flex:1;margin-bottom:14px;}
+
+/* PF BUTTONS */
+.pf-btn{display:inline-flex;align-items:center;justify-content:center;padding:6px 16px;border-radius:4px;font-family:var(--pf-font);font-size:14px;font-weight:400;cursor:pointer;transition:all .15s;border:none;}
+.pf-btn--primary{background:var(--pf-t-blue-400);color:var(--pf-t-white);}
+.pf-btn--primary:hover{background:#004c99;}
+.pf-btn--secondary{background:var(--pf-t-white);color:var(--pf-t-blue-400);border:1px solid var(--pf-t-blue-400);}
+.pf-btn--secondary:hover{background:var(--pf-t-blue-100);}
+.pf-btn--link{background:none;color:var(--pf-t-blue-400);padding:6px 0;}
+.pf-btn--link:hover{color:#004c99;}
+.pf-btn--control{background:var(--pf-t-white);color:var(--pf-t-black-900);border:1px solid var(--pf-t-black-200);}
+
+/* ══════════════════════════════════════
+   PF MODAL
+   ══════════════════════════════════════ */
+.pf-modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:20;}
+.pf-modal{background:var(--pf-t-white);border-radius:8px;width:580px;max-height:82%;display:flex;flex-direction:column;box-shadow:0 6px 20px rgba(3,3,3,.18),0 0 4px rgba(3,3,3,.06);}
+.pf-modal-hd{padding:20px 24px 12px;display:flex;align-items:flex-start;justify-content:space-between;}
+.pf-modal-hd h2{font-family:var(--pf-heading);font-size:20px;font-weight:500;color:var(--pf-t-black-900);}
+.pf-modal-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:none;cursor:pointer;color:var(--pf-t-black-500);font-size:18px;border-radius:4px;}
+.pf-modal-close:hover{background:var(--pf-t-black-100);}
+.pf-modal-desc{padding:0 24px 12px;font-size:14px;color:var(--pf-t-black-500);line-height:1.5;}
+.pf-modal-bd{padding:0 24px;overflow-y:auto;flex:1;}
+.pf-modal-ft{padding:16px 24px;border-top:1px solid var(--pf-t-black-200);display:flex;align-items:center;gap:12px;flex-shrink:0;}
+
+/* ALL TOGGLE */
+.pf-all-row{display:flex;align-items:center;gap:8px;padding:8px 0 12px;border-bottom:1px solid var(--pf-t-black-200);margin-bottom:8px;}
+.pf-all-row span{font-size:14px;color:var(--pf-t-black-900);font-weight:500;}
+
+/* AGENT ROWS */
+.ag-row{padding:12px 0;border-bottom:1px solid var(--pf-t-black-100);}
+.ag-row:last-child{border-bottom:none;}
+.ag-top{display:flex;align-items:flex-start;gap:0;}
+.ag-exp{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:var(--pf-t-black-500);font-size:11px;border-radius:4px;flex-shrink:0;transition:all .15s;}
+.ag-exp:hover{background:var(--pf-t-black-100);}
+.ag-exp.open{transform:rotate(90deg);}
+.ag-info{flex:1;min-width:0;}
+.ag-name{font-size:14px;font-weight:600;color:var(--pf-t-black-900);margin-bottom:2px;}
+.ag-desc{font-size:13px;color:var(--pf-t-black-500);line-height:1.4;}
+.ag-tgl{margin-left:12px;flex-shrink:0;}
+
+/* PF SWITCH */
+.pf-sw{position:relative;width:38px;height:20px;display:inline-block;flex-shrink:0;}
+.pf-sw input{opacity:0;width:0;height:0;position:absolute;}
+.pf-sw .track{position:absolute;inset:0;background:var(--pf-t-black-400);border-radius:10px;cursor:pointer;transition:background .15s;}
+.pf-sw .track::before{content:'';position:absolute;height:14px;width:14px;left:3px;bottom:3px;background:var(--pf-t-white);border-radius:50%;transition:transform .15s;}
+.pf-sw input:checked+.track{background:var(--pf-t-blue-400);}
+.pf-sw input:checked+.track::before{transform:translateX(18px);}
+
+/* EXPANDED CAPABILITIES */
+.cap-panel{padding:8px 0 0 28px;}
+.cap-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--pf-t-black-100);}
+.cap-item:last-child{border-bottom:none;}
+.cap-info .cap-name{font-size:14px;font-weight:500;color:var(--pf-t-black-900);margin-bottom:1px;}
+.cap-info .cap-desc{font-size:12px;color:var(--pf-t-black-500);line-height:1.4;}
+.cap-item.off .cap-name{color:var(--pf-t-black-400);}
+
+/* ══════════════════════════════════════
+   IDE CHROME
+   ══════════════════════════════════════ */
+.ide{width:100%;height:100%;display:flex;background:#1e1e1e;}
+.ide-sb{width:44px;background:#252526;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:12px;flex-shrink:0;}
+.ide-sb-i{width:28px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;color:#858585;font-size:14px;cursor:pointer;}
+.ide-sb-i.on{color:#fff;border-left:2px solid #0078d4;}
+.ide-ft{width:180px;background:#252526;border-right:1px solid #333;padding:4px 0;flex-shrink:0;overflow-y:auto;}
+.ide-ft .hd{padding:6px 10px;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.5px;font-weight:600;}
+.ide-ft .fi{padding:3px 10px 3px 22px;font-size:13px;color:#ccc;font-family:'JetBrains Mono',monospace;cursor:pointer;}
+.ide-ft .fi:hover{background:rgba(255,255,255,.05);}
+.ide-ft .fi.af{background:rgba(255,255,255,.1);color:#fff;}
+.ide-ft .fo{color:#e8ab53;}
+.ide-mn{flex:1;display:flex;flex-direction:column;}
+.ide-tabs{height:32px;background:#252526;display:flex;border-bottom:1px solid #333;}
+.ide-tab{padding:0 12px;font-size:13px;color:#888;display:flex;align-items:center;gap:5px;border-right:1px solid #333;font-family:'JetBrains Mono',monospace;}
+.ide-tab.at{background:#1e1e1e;color:#fff;border-top:2px solid #0078d4;}
+.ide-sp{flex:1;display:flex;overflow:hidden;}
+.ide-ed{flex:1;padding:10px;color:#d4d4d4;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;overflow-y:auto;}
+.ide-ed .n{color:#555;margin-right:10px;display:inline-block;width:20px;text-align:right;user-select:none;}
+.ide-ed .k{color:#569cd6;}.ide-ed .s{color:#ce9178;}.ide-ed .c{color:#6a9955;}.ide-ed .f{color:#dcdcaa;}
+
+/* ── CHAT PANEL ── */
+.chat{width:380px;background:#1e1e1e;border-left:1px solid #333;display:flex;flex-direction:column;}
+.ch-hd{padding:8px 12px;border-bottom:1px solid #333;display:flex;align-items:center;gap:6px;}
+.ch-hd .ci{color:#ee0000;font-size:14px;font-weight:700;}
+.ch-hd .ct{color:#fff;font-size:14px;font-weight:600;}
+.ch-hd .cb{background:#333;color:#aaa;font-size:11px;padding:2px 7px;border-radius:10px;margin-left:auto;}
+.ch-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;}
+.msg{max-width:95%;}
+.msg.u{align-self:flex-end;}
+.msg.a{align-self:flex-start;}
+.msg .au{font-size:11px;color:#888;margin-bottom:2px;font-weight:600;}
+.msg.u .au{text-align:right;}
+.msg .bb{padding:8px 11px;border-radius:7px;font-size:13px;line-height:1.6;}
+.msg.u .bb{background:#264f78;color:#e0e0e0;border-bottom-right-radius:2px;}
+.msg.a .bb{background:#2d2d2d;color:#d4d4d4;border-bottom-left-radius:2px;border:1px solid #404040;}
+.bb code{background:rgba(255,255,255,.1);padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:12px;}
+
+.denied{background:rgba(201,25,11,.15);border:1px solid #c9190b;border-radius:5px;padding:8px 10px;margin:8px 0;}
+.denied .dt{color:#c9190b;font-weight:600;font-size:13px;margin-bottom:3px;}
+.denied .dd{color:#ccc;font-size:12px;line-height:1.5;}
+.ok-box{background:rgba(62,134,53,.15);border:1px solid #3e8635;border-radius:5px;padding:8px 10px;margin:8px 0;}
+.ok-box .ot{color:#3e8635;font-weight:600;font-size:13px;margin-bottom:3px;}
+.ok-box .od{color:#ccc;font-size:12px;line-height:1.5;}
+.dup{background:rgba(240,171,0,.1);border:1px solid rgba(240,171,0,.4);border-radius:5px;padding:8px 10px;margin:8px 0;}
+.dup .dpt{color:#f0ab00;font-weight:600;font-size:13px;margin-bottom:3px;}
+.dup .dpd{font-size:12px;color:#d4d4d4;line-height:1.5;}
+.draft{background:#1a1a1a;border:1px solid #404040;border-radius:5px;padding:9px;margin:8px 0;font-size:12px;line-height:1.6;}
+.draft .dl{color:#888;font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.draft .df{margin-bottom:2px;color:#ccc;}.draft .df strong{color:#9cdcfe;}
+.req-btn{margin-top:6px;display:inline-block;padding:4px 11px;border:1px solid #0078d4;color:#4daafc;background:rgba(0,120,212,.1);border-radius:4px;font-size:12px;cursor:pointer;font-family:var(--pf-font);}
+.ch-in{padding:8px 12px;border-top:1px solid #333;display:flex;gap:6px;}
+.ch-in input{flex:1;background:#333;border:1px solid #555;border-radius:5px;padding:6px 9px;color:#ddd;font-size:13px;font-family:var(--pf-font);outline:none;}
+.ch-in input::placeholder{color:#777;}
+.ch-in button{background:#0078d4;border:none;color:#fff;border-radius:5px;padding:6px 11px;cursor:pointer;font-size:13px;}
+</style>
+</head>
+<body>
+
+<!-- ── PRESENTATION TOP BAR ── -->
+<div class="pres-top">
+  <div class="pres-left"><span class="pres-badge">GPS</span><span class="pres-title">AI Governance</span><div class="pres-sep"></div><span class="pres-persona" id="sp"><span class="pres-persona-avatar alex" id="sp-av">A</span><span id="sp-name">Alex</span><span class="pres-persona-role" id="sp-role">Org Admin</span></span></div>
+  <div class="pres-right"><span class="pres-step" id="sn">Step 1 of 5</span></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 1 — EVENT LOG
+     ═══════════════════════════════════════════ -->
+<div class="slide active" id="s1">
+  <div class="pres-desc">Alex logs into HCC and checks the Event Log. He notices the Support Agent created duplicate and malformed tickets. <span style="color:#f0ab00;">Live prototype — interactive.</span></div>
+  <div class="screen-wrap" style="padding:0 12px;"><div class="screen-frame" style="max-width:none;">
+    <iframe src="http://localhost:9000/audit-log" style="width:100%;height:100%;border:none;"></iframe>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 2 — ORGANIZATIONAL FEATURES + MODAL
+     ═══════════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="pres-desc">Alex opens the AI Features modal. <span style="color:#f0ab00;">Live prototype — click "Manage" on AI Features, expand agents, toggle capabilities.</span></div>
+  <div class="screen-wrap" style="padding:0 12px;"><div class="screen-frame" style="max-width:none;">
+    <iframe src="http://localhost:9000/organization/organizational-features" style="width:100%;height:100%;border:none;"></iframe>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 3 — PRIYA IDE: READ-ONLY
+     ═══════════════════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="pres-desc">Priya needs to file a support ticket for a RHEL patching failure. She prompts in Cursor but is told the Support MCP is restricted to read-only. The agent can help draft, but Priya must file the ticket manually.</div>
+  <div class="screen-wrap"><div class="screen-frame">
+    <div class="ide">
+      <div class="ide-sb"><div class="ide-sb-i">📁</div><div class="ide-sb-i">🔍</div><div class="ide-sb-i">⎇</div><div class="ide-sb-i on" style="font-size:13px">💬</div><div class="ide-sb-i">🧩</div></div>
+      <div class="ide-ft"><div class="hd">Explorer</div><div class="fi"><span class="fo">📂</span> acme-infra/</div><div class="fi" style="padding-left:32px"><span class="fo">📂</span> playbooks/</div><div class="fi af" style="padding-left:42px">📄 patch-rhel9.yml</div><div class="fi" style="padding-left:42px">📄 deploy-app.yml</div><div class="fi" style="padding-left:32px"><span class="fo">📂</span> inventory/</div><div class="fi" style="padding-left:42px">📄 production.ini</div><div class="fi" style="padding-left:32px">📄 ansible.cfg</div></div>
+      <div class="ide-mn"><div class="ide-tabs"><div class="ide-tab at">📄 patch-rhel9.yml</div><div class="ide-tab">📄 production.ini</div></div><div class="ide-sp">
+        <div class="ide-ed"><div><span class="n"> 1</span><span class="c">---</span></div><div><span class="n"> 2</span><span class="k">- name</span>: <span class="s">Patch RHEL 9 servers</span></div><div><span class="n"> 3</span>  <span class="k">hosts</span>: <span class="s">rhel9_production</span></div><div><span class="n"> 4</span>  <span class="k">become</span>: <span class="s">true</span></div><div><span class="n"> 5</span>  <span class="k">tasks</span>:</div><div><span class="n"> 6</span>    <span class="k">- name</span>: <span class="s">Update all packages</span></div><div><span class="n"> 7</span>      <span class="f">ansible.builtin.dnf</span>:</div><div><span class="n"> 8</span>        <span class="k">name</span>: <span class="s">"*"</span></div><div><span class="n"> 9</span>        <span class="k">state</span>: <span class="s">latest</span></div><div><span class="n">10</span>        <span class="k">security</span>: <span class="s">true</span></div><div><span class="n">11</span>      <span class="k">register</span>: <span class="s">patch_result</span></div><div><span class="n">12</span></div><div><span class="n">13</span>    <span class="k">- name</span>: <span class="s">Check for reboot</span></div><div><span class="n">14</span>      <span class="f">ansible.builtin.command</span>:</div><div><span class="n">15</span>        <span class="k">cmd</span>: <span class="s">needs-restarting -r</span></div></div>
+        <div class="chat"><div class="ch-hd"><span class="ci">▣</span><span class="ct">Red Hat Support MCP</span><span class="cb">Connected</span></div><div class="ch-msgs">
+          <div class="msg a"><div class="au">Support MCP</div><div class="bb">👋 Hi Priya! I'm connected to your Red Hat account at <strong>Acme Corp</strong>. How can I help?</div></div>
+          <div class="msg u"><div class="au">Priya</div><div class="bb">My RHEL 9 patching playbook failed on prod-web-03. I need to open a support ticket for this.</div></div>
+          <div class="msg a"><div class="au">Support MCP</div><div class="bb">I can see the failure on <code>prod-web-03</code> — a <code>dnf</code> dependency conflict with <code>kernel-core-5.14.0-427</code>.<div class="denied"><div class="dt">⛔ Write access restricted</div><div class="dd">Your organization's policy restricts the Support MCP to <strong>read-only</strong> mode. I cannot create or submit tickets directly.<br><br>However, I can still help you <strong>draft</strong> the ticket content. You'll need to copy and submit it manually.</div></div>Want me to help draft the ticket?</div></div>
+          <div class="msg u"><div class="au">Priya</div><div class="bb">Yes, please help me draft it.</div></div>
+        </div><div class="ch-in"><input placeholder="Ask Support MCP..."><button>↑</button></div></div>
+      </div></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 4 — PRIYA IDE: DRAFT + DUP CHECK
+     ═══════════════════════════════════════════ -->
+<div class="slide" id="s4">
+  <div class="pres-desc">The Support MCP scans for duplicates (none found), then drafts a ticket. Priya requests edits and the MCP updates the draft. When ready, she copies it to the portal.</div>
+  <div class="screen-wrap"><div class="screen-frame">
+    <div class="ide">
+      <div class="ide-sb"><div class="ide-sb-i">📁</div><div class="ide-sb-i">🔍</div><div class="ide-sb-i">⎇</div><div class="ide-sb-i on" style="font-size:13px">💬</div><div class="ide-sb-i">🧩</div></div>
+      <div class="ide-ft"><div class="hd">Explorer</div><div class="fi"><span class="fo">📂</span> acme-infra/</div><div class="fi" style="padding-left:32px"><span class="fo">📂</span> playbooks/</div><div class="fi af" style="padding-left:42px">📄 patch-rhel9.yml</div><div class="fi" style="padding-left:42px">📄 deploy-app.yml</div><div class="fi" style="padding-left:32px"><span class="fo">📂</span> inventory/</div><div class="fi" style="padding-left:42px">📄 production.ini</div></div>
+      <div class="ide-mn"><div class="ide-tabs"><div class="ide-tab at">📄 patch-rhel9.yml</div><div class="ide-tab">📄 production.ini</div></div><div class="ide-sp">
+        <div class="ide-ed"><div><span class="n"> 1</span><span class="c">---</span></div><div><span class="n"> 2</span><span class="k">- name</span>: <span class="s">Patch RHEL 9 servers</span></div><div><span class="n"> 3</span>  <span class="k">hosts</span>: <span class="s">rhel9_production</span></div><div><span class="n"> 4</span>  <span class="k">become</span>: <span class="s">true</span></div><div><span class="n"> 5</span>  <span class="k">tasks</span>:</div><div><span class="n"> 6</span>    <span class="k">- name</span>: <span class="s">Update all packages</span></div><div><span class="n"> 7</span>      <span class="f">ansible.builtin.dnf</span>:</div><div><span class="n"> 8</span>        <span class="k">name</span>: <span class="s">"*"</span></div><div><span class="n"> 9</span>        <span class="k">state</span>: <span class="s">latest</span></div><div><span class="n">10</span>        <span class="k">security</span>: <span class="s">true</span></div></div>
+        <div class="chat"><div class="ch-hd"><span class="ci">▣</span><span class="ct">Red Hat Support MCP</span><span class="cb">Connected</span></div><div class="ch-msgs">
+
+          <!-- MCP scans for duplicates — none found -->
+          <div class="msg a"><div class="au">Support MCP</div><div class="bb">Let me first check for similar existing tickets…<div class="ok-box" style="background:rgba(0,149,150,.1);border-color:#009596;"><div class="ot" style="color:#009596;">✓ Duplicate scan complete</div><div class="od">Scanned <strong>23 open cases</strong> in your org matching keywords <code>dnf</code>, <code>dependency conflict</code>, <code>prod-web-03</code>.<br><br>No similar tickets found — safe to file a new one.</div></div>Here's a draft based on your org's ticket format:</div></div>
+
+          <!-- Initial draft -->
+          <div class="msg a"><div class="au">Support MCP</div><div class="bb"><div class="draft"><div class="dl">📋 Draft Support Ticket</div><div class="df"><strong>Summary:</strong> RHEL 9 dnf dependency conflict during security patching on prod-web-03</div><div class="df"><strong>Severity:</strong> 2 (High) — production system affected</div><div class="df"><strong>Product:</strong> Red Hat Enterprise Linux 9.4</div><div class="df"><strong>Component:</strong> dnf / package management</div><div class="df"><strong>Description:</strong><br><span style="color:#ccc">Security patching playbook failed on host prod-web-03 with dependency conflict:<br><code>kernel-core-5.14.0-427.el9 conflicts with kernel-core-5.14.0-362.el9</code><br><br>Attempted: <code>dnf update --security --best</code><br>Environment: RHEL 9.4, Ansible-managed, production tier</span></div></div></div></div>
+
+          <!-- Priya requests edits -->
+          <div class="msg u"><div class="au">Priya</div><div class="bb">Two changes: bump severity to 1 (Urgent) since this is blocking a release, and add that we also tried <code>dnf clean all</code> before retrying.</div></div>
+
+          <!-- MCP applies edits -->
+          <div class="msg a"><div class="au">Support MCP</div><div class="bb">Updated — here are the changes:<div class="draft"><div class="dl">📋 Draft Support Ticket <span style="color:#3e8635;font-size:10px;text-transform:none;letter-spacing:0;">— updated</span></div><div class="df"><strong>Summary:</strong> RHEL 9 dnf dependency conflict during security patching on prod-web-03</div><div class="df"><strong>Severity:</strong> <span style="background:rgba(62,134,53,.2);padding:1px 4px;border-radius:3px;color:#3e8635;">1 (Urgent) — blocking release deployment</span></div><div class="df"><strong>Product:</strong> Red Hat Enterprise Linux 9.4</div><div class="df"><strong>Component:</strong> dnf / package management</div><div class="df"><strong>Description:</strong><br><span style="color:#ccc">Security patching playbook failed on host prod-web-03 with dependency conflict:<br><code>kernel-core-5.14.0-427.el9 conflicts with kernel-core-5.14.0-362.el9</code><br><br>Attempted: <code>dnf update --security --best</code><br><span style="background:rgba(62,134,53,.2);padding:1px 4px;border-radius:3px;color:#3e8635;">Also ran <code>dnf clean all</code> and retried — same failure.</span><br>Environment: RHEL 9.4, Ansible-managed, production tier</span></div></div>Ready to copy?<br><button class="req-btn" id="s4-copy-btn" onclick="s4Copy()" style="border-color:#3e8635;color:#3e8635;background:rgba(62,134,53,.1);margin-top:4px;">📋 Copy to clipboard</button></div></div>
+
+          <!-- Priya confirms (hidden until click) -->
+          <div class="msg u" id="s4-reply" style="display:none;"><div class="au">Priya</div><div class="bb">Perfect, copying now. Thanks!</div></div>
+
+        </div><div class="ch-in"><input placeholder="Ask Support MCP..."><button>↑</button></div></div>
+      </div></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 5 — PRIYA IDE: REQUEST ACCESS
+     ═══════════════════════════════════════════ -->
+<div class="slide" id="s5">
+  <div class="pres-desc">The Support MCP offers Priya the option to request write access. Priya submits the request, which goes to Alex for review. He will re-evaluate what access level is appropriate.</div>
+  <div class="screen-wrap"><div class="screen-frame">
+    <div class="ide">
+      <div class="ide-sb"><div class="ide-sb-i">📁</div><div class="ide-sb-i">🔍</div><div class="ide-sb-i">⎇</div><div class="ide-sb-i on" style="font-size:13px">💬</div><div class="ide-sb-i">🧩</div></div>
+      <div class="ide-ft"><div class="hd">Explorer</div><div class="fi"><span class="fo">📂</span> acme-infra/</div><div class="fi" style="padding-left:32px"><span class="fo">📂</span> playbooks/</div><div class="fi af" style="padding-left:42px">📄 patch-rhel9.yml</div><div class="fi" style="padding-left:42px">📄 deploy-app.yml</div><div class="fi" style="padding-left:32px"><span class="fo">📂</span> inventory/</div><div class="fi" style="padding-left:42px">📄 production.ini</div></div>
+      <div class="ide-mn"><div class="ide-tabs"><div class="ide-tab at">📄 patch-rhel9.yml</div><div class="ide-tab">📄 production.ini</div></div><div class="ide-sp">
+        <div class="ide-ed"><div><span class="n"> 1</span><span class="c">---</span></div><div><span class="n"> 2</span><span class="k">- name</span>: <span class="s">Patch RHEL 9 servers</span></div><div><span class="n"> 3</span>  <span class="k">hosts</span>: <span class="s">rhel9_production</span></div><div><span class="n"> 4</span>  <span class="k">become</span>: <span class="s">true</span></div><div><span class="n"> 5</span>  <span class="k">tasks</span>:</div><div><span class="n"> 6</span>    <span class="k">- name</span>: <span class="s">Update all packages</span></div><div><span class="n"> 7</span>      <span class="f">ansible.builtin.dnf</span>:</div><div><span class="n"> 8</span>        <span class="k">name</span>: <span class="s">"*"</span></div><div><span class="n"> 9</span>        <span class="k">state</span>: <span class="s">latest</span></div><div><span class="n">10</span>        <span class="k">security</span>: <span class="s">true</span></div></div>
+        <div class="chat"><div class="ch-hd"><span class="ci">▣</span><span class="ct">Red Hat Support MCP</span><span class="cb">Connected</span></div><div class="ch-msgs">
+
+          <div class="msg a"><div class="au">Support MCP</div><div class="bb" id="s5-prompt">I noticed you've had to manually copy and submit tickets <strong>3 times</strong> this month. Would you like to request <strong>write access</strong> so I can file tickets directly on your behalf?<br><br><span style="font-size:12px;color:#999;">This request goes to your org admin (Alex) for approval. Your current access won't change until approved.</span><br><div id="s5-btns" style="display:flex;gap:8px;margin-top:10px;"><button class="req-btn" onclick="s5Choose('request')" style="padding:6px 14px;font-size:12px;">🔓 Request write access</button><button class="req-btn" onclick="s5Choose('skip')" style="border-color:#555;color:#999;background:rgba(255,255,255,.05);padding:6px 14px;font-size:12px;">Not now</button></div></div></div>
+
+          <!-- Priya reply (hidden until click) -->
+          <div class="msg u" id="s5-reply" style="display:none;"><div class="au">Priya</div><div class="bb" id="s5-reply-text"></div></div>
+
+          <!-- MCP response (hidden until click) -->
+          <div class="msg a" id="s5-response" style="display:none;"><div class="au">Support MCP</div><div class="bb" id="s5-response-text"></div></div>
+
+        </div><div class="ch-in"><input placeholder="Ask Support MCP..."><button>↑</button></div></div>
+      </div></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SLIDE 6 — FUTURE: AI AGENTS ACCESS MODEL
+     ═══════════════════════════════════════════ -->
+<div class="slide" id="s6">
+  <div class="pres-desc">By default, AI agents will inherit the access level of the user they act on behalf of — they can never have more privilege than their human. Users can further customize and restrict any agent's capabilities to ensure compliance and boundaries.</div>
+  <div class="screen-wrap" style="padding:0 12px;"><div class="screen-frame" style="max-width:none;">
+    <iframe src="http://localhost:9000/ai-agents" style="width:100%;height:100%;border:none;"></iframe>
+  </div></div>
+</div>
+
+<!-- ── BOTTOM NAV ── -->
+<div class="pres-nav">
+  <button id="pb" onclick="go(-1)" disabled>← Prev</button>
+  <div class="nav-dots"><div class="nav-dot on" id="d1" onclick="goTo(1)"></div><div class="nav-dot" id="d2" onclick="goTo(2)"></div><div class="nav-dot" id="d3" onclick="goTo(3)"></div><div class="nav-dot" id="d4" onclick="goTo(4)"></div><div class="nav-dot" id="d5" onclick="goTo(5)"></div><div class="nav-dot" id="d6" onclick="goTo(6)"></div></div>
+  <button id="nb" onclick="go(1)">Next →</button>
+</div>
+
+<script>
+let c=1;const T=6;
+const P={
+  1:{name:'Alex',role:'Org Admin',init:'A',cls:'alex'},
+  2:{name:'Alex',role:'Org Admin',init:'A',cls:'alex'},
+  3:{name:'Priya',role:'IT Specialist',init:'P',cls:'priya'},
+  4:{name:'Priya',role:'IT Specialist',init:'P',cls:'priya'},
+  5:{name:'Priya',role:'IT Specialist',init:'P',cls:'priya'},
+  6:{name:'Future',role:'Access Model',init:'★',cls:'future'}
+};
+function goTo(n){if(n<1||n>T||n===c)return;document.getElementById('s'+c).classList.remove('active');document.getElementById('d'+c).classList.remove('on');c=n;document.getElementById('s'+c).classList.add('active');document.getElementById('d'+c).classList.add('on');var sn=document.getElementById('sn');if(c===6){sn.style.display='none';}else{sn.style.display='';sn.textContent='Step '+c+' of 5';}const p=P[c],av=document.getElementById('sp-av');av.textContent=p.init;av.className='pres-persona-avatar '+p.cls;document.getElementById('sp-name').textContent=p.name;document.getElementById('sp-role').textContent=p.role;document.getElementById('pb').disabled=c===1;document.getElementById('nb').disabled=c===T;}
+function go(d){const n=c+d;if(n<1||n>T)return;document.getElementById('s'+c).classList.remove('active');document.getElementById('d'+c).classList.remove('on');c=n;document.getElementById('s'+c).classList.add('active');document.getElementById('d'+c).classList.add('on');var sn=document.getElementById('sn');if(c===6){sn.style.display='none';}else{sn.style.display='';sn.textContent='Step '+c+' of 5';}const p=P[c],av=document.getElementById('sp-av');av.textContent=p.init;av.className='pres-persona-avatar '+p.cls;document.getElementById('sp-name').textContent=p.name;document.getElementById('sp-role').textContent=p.role;document.getElementById('pb').disabled=c===1;document.getElementById('nb').disabled=c===T;}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+
+/* ── Slide 4: Copy to clipboard interaction ── */
+function s4Copy(){
+  var btn=document.getElementById('s4-copy-btn');
+  btn.textContent='✓ Copied!';btn.style.color='#3e8635';btn.style.cursor='default';btn.onclick=null;
+  var reply=document.getElementById('s4-reply');
+  setTimeout(function(){reply.style.display='';reply.style.opacity='0';reply.style.transition='opacity .4s';setTimeout(function(){reply.style.opacity='1';scrollChat(reply);},30);},600);
+}
+
+/* ── Slide 5: Request / Not now interaction ── */
+function s5Choose(choice){
+  var btns=document.getElementById('s5-btns');btns.style.display='none';
+  var reply=document.getElementById('s5-reply');
+  var replyText=document.getElementById('s5-reply-text');
+  var resp=document.getElementById('s5-response');
+  var respText=document.getElementById('s5-response-text');
+  if(choice==='request'){
+    replyText.innerHTML='Yes, that would save me a lot of time. Go ahead and send the request.';
+    respText.innerHTML='<div class="ok-box"><div class="ot">✓ Access request submitted</div><div class="od"><strong>Requested:</strong> Write access for Support MCP<br><strong>Sent to:</strong> Alex (org admin)<br><strong>Status:</strong> Pending review<br><br>Alex will evaluate whether this access level is appropriate for your role. You\'ll be notified once a decision is made.</div></div>In the meantime, I\'m still here to help draft and diagnose! 👋';
+  } else {
+    replyText.innerHTML='Not right now — I\'ll keep doing it manually for the time being.';
+    respText.innerHTML='No problem at all! You can always request access later by asking me. I\'ll keep helping you draft tickets in the meantime. 👋';
+  }
+  setTimeout(function(){reply.style.display='';reply.style.opacity='0';reply.style.transition='opacity .4s';setTimeout(function(){reply.style.opacity='1';scrollChat(reply);},30);
+    setTimeout(function(){resp.style.display='';resp.style.opacity='0';resp.style.transition='opacity .4s';setTimeout(function(){resp.style.opacity='1';scrollChat(resp);},30);},800);
+  },400);
+}
+
+function scrollChat(el){var p=el.closest('.ch-msgs');if(p)p.scrollTop=p.scrollHeight;}
+</script>
+</body>
+</html>
