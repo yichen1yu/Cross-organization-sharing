@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { IAppRoute, IAppRouteGroup, routes } from '@app/routes';
 import {
@@ -146,7 +147,6 @@ import {
 import { Table, Thead, Tbody, Tr, Th, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { AnnotationProvider, AnnotationOverlay, AnnotationPanel, AnnotationToggleBar, useAnnotations } from '@app/AnnotationOverlay/AnnotationOverlay';
 import { useWorkspace, allWorkspaces, WorkspaceNode } from '@app/utils/WorkspaceContext';
-import { Popper } from '@patternfly/react-core/dist/esm/helpers/Popper/Popper';
 import { Panel, PanelMain, PanelMainBody, PanelFooter } from '@patternfly/react-core';
 
 type SchedulerWizardOptions = { preselectedService?: string; preselectedTask?: string; preselectedFileType?: string; lockService?: boolean; lockTask?: boolean; lockFileType?: boolean };
@@ -1687,11 +1687,22 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             {selectedWorkspace.name}
           </MenuToggle>
         </div>
-        <Popper
-          triggerRef={wsToggleRef}
-          popperRef={wsMenuRef}
-          popper={
-            <div ref={wsMenuRef}>
+        {isWorkspaceSelectorOpen && ReactDOM.createPortal(
+          <div
+            ref={wsMenuRef}
+            style={{
+              position: 'absolute',
+              top: (() => {
+                const rect = wsToggleRef.current?.getBoundingClientRect();
+                return rect ? rect.bottom + window.scrollY : 0;
+              })(),
+              left: (() => {
+                const rect = wsToggleRef.current?.getBoundingClientRect();
+                return rect ? rect.left + window.scrollX : 0;
+              })(),
+              zIndex: 9999,
+            }}
+          >
               <Panel variant="raised" style={{ minWidth: '300px', maxHeight: '400px', display: 'flex', flexDirection: 'column' }}>
                 <PanelMain style={{ flex: 1, overflowY: 'auto' }}>
                   <PanelMainBody style={{ padding: 0 }}>
@@ -1717,12 +1728,9 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   </Button>
                 </PanelFooter>
               </Panel>
-            </div>
-          }
-          isVisible={isWorkspaceSelectorOpen}
-          appendTo={() => document.body}
-          zIndex={9999}
-        />
+          </div>,
+          document.body
+        )}
 
         {/* Expandable Search Input */}
         <div 
