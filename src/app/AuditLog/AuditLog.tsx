@@ -45,7 +45,7 @@ const auditData: AuditEntry[] = [
     agentLabel: 'Support Agent',
     action: 'Created support ticket',
     resource: 'CASE-0045',
-    resourceNote: 'malformed',
+    resourceNote: 'duplicate',
   },
   {
     date: 'Oct 1, 2026 09:38 AM',
@@ -171,7 +171,7 @@ const AuditLog: React.FunctionComponent = () => {
                   {entry.resource}
                   {entry.resourceNote && (
                     <Label
-                      color={entry.resourceNote === 'malformed' ? 'red' : entry.resourceNote === 'duplicate' ? 'orange' : 'grey'}
+                      color={entry.resourceNote === 'duplicate' ? 'orange' : 'grey'}
                       isCompact
                       style={{ marginLeft: '8px' }}
                     >
