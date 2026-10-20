@@ -246,7 +246,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     accessType: 'Outside of this organization',
     accessDuration: '2025-10-01 to 2026-03-31',
     roles: ['Inventory administrator', 'Compliance viewer'],
-    userGroups: ['DevOps Engineers', 'Platform Engineers', 'SRE Team'],
+    userGroups: ['Platform Engineers'],
   };
 
   const reviewAccessWorkspaces = [
@@ -2181,7 +2181,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         { label: 'Identity Provider Integration', path: '/organization/identity-provider-integration', isActive: location.pathname === '/organization/identity-provider-integration' },
       ]
     },
-    { label: 'Service Accounts', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
+    { label: 'Service Accounts & Tokens', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
     { label: 'Learning Resources', path: '/learning-resources-iam', isActive: location.pathname === '/learning-resources-iam' },
   ];
 
@@ -2274,7 +2274,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   );
 
   const drawerContent = (
-    <DrawerPanelContent defaultSize="580px">
+    <DrawerPanelContent hasNoBorder defaultSize="580px">
       <DrawerHead>
         <Title headingLevel="h2" size="lg">
           <QuestionCircleIcon style={{ marginRight: '8px' }} />
@@ -2321,7 +2321,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   // Create notification drawer content
   const notificationDrawerContent = (
-    <DrawerPanelContent defaultSize="400px">
+    <DrawerPanelContent hasNoBorder defaultSize="400px" style={{ boxShadow: isNotificationDrawerOpen ? '-10px 0 9px -8px rgba(41, 41, 41, 0.15)' : 'none' }}>
       <NotificationDrawer>
         <NotificationDrawerHeader
           title="Notifications"
@@ -2587,7 +2587,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   };
 
   const schedulerDrawerContent = (
-    <DrawerPanelContent defaultSize="540px">
+    <DrawerPanelContent hasNoBorder defaultSize="540px">
       <DrawerHead style={{ paddingTop: '24px' }}>
         <Title headingLevel="h2" size="lg">
           Scheduler

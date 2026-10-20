@@ -277,7 +277,7 @@ body{font-family:var(--pf-font);background:#1a1a1a;overflow:hidden;height:100vh;
      SLIDE 1 — EVENT LOG
      ═══════════════════════════════════════════ -->
 <div class="slide active" id="s1">
-  <div class="pres-desc">Alex logs into HCC and checks the Event Log. He notices the Support Agent created duplicated tickets. <span style="color:#f0ab00;">Live prototype — interactive.</span></div>
+  <div class="pres-desc">Alex logs into HCC and checks the Audit Log. He notices the Support Agent created duplicated tickets. <span style="color:#f0ab00;">Live prototype — interactive.</span></div>
   <div class="screen-wrap" style="padding:0 12px;"><div class="screen-frame" style="max-width:none;">
     <iframe src="https://yichen1yu.github.io/Cross-organization-sharing/audit-log" style="width:100%;height:100%;border:none;"></iframe>
   </div></div>
@@ -353,7 +353,7 @@ body{font-family:var(--pf-font);background:#1a1a1a;overflow:hidden;height:100vh;
      SLIDE 5 — PRIYA IDE: REQUEST ACCESS
      ═══════════════════════════════════════════ -->
 <div class="slide" id="s5">
-  <div class="pres-desc">The Support MCP offers Priya the option to request write access. Priya submits the request, which goes to Alex for review. He will re-evaluate what access level is appropriate.</div>
+  <div class="pres-desc">The Support MCP offers Priya the option to request write access. Priya submits the request, which goes to her org admin for review.</div>
   <div class="screen-wrap"><div class="screen-frame">
     <div class="ide">
       <div class="ide-sb"><div class="ide-sb-i">📁</div><div class="ide-sb-i">🔍</div><div class="ide-sb-i">⎇</div><div class="ide-sb-i on" style="font-size:13px">💬</div><div class="ide-sb-i">🧩</div></div>
@@ -362,7 +362,7 @@ body{font-family:var(--pf-font);background:#1a1a1a;overflow:hidden;height:100vh;
         <div class="ide-ed"><div><span class="n"> 1</span><span class="c">---</span></div><div><span class="n"> 2</span><span class="k">- name</span>: <span class="s">Patch RHEL 9 servers</span></div><div><span class="n"> 3</span>  <span class="k">hosts</span>: <span class="s">rhel9_production</span></div><div><span class="n"> 4</span>  <span class="k">become</span>: <span class="s">true</span></div><div><span class="n"> 5</span>  <span class="k">tasks</span>:</div><div><span class="n"> 6</span>    <span class="k">- name</span>: <span class="s">Update all packages</span></div><div><span class="n"> 7</span>      <span class="f">ansible.builtin.dnf</span>:</div><div><span class="n"> 8</span>        <span class="k">name</span>: <span class="s">"*"</span></div><div><span class="n"> 9</span>        <span class="k">state</span>: <span class="s">latest</span></div><div><span class="n">10</span>        <span class="k">security</span>: <span class="s">true</span></div></div>
         <div class="chat"><div class="ch-hd"><span class="ci">▣</span><span class="ct">Red Hat Support MCP</span><span class="cb">Connected</span></div><div class="ch-msgs">
 
-          <div class="msg a"><div class="au">Support MCP</div><div class="bb" id="s5-prompt">I noticed you've had to manually copy and submit tickets <strong>3 times</strong> this month. Would you like to request <strong>write access</strong> so I can file tickets directly on your behalf?<br><br><span style="font-size:12px;color:#999;">This request goes to your org admin (Alex) for approval. Your current access won't change until approved.</span><br><div id="s5-btns" style="display:flex;gap:8px;margin-top:10px;"><button class="req-btn" onclick="s5Choose('request')" style="padding:6px 14px;font-size:12px;">🔓 Request write access</button><button class="req-btn" onclick="s5Choose('skip')" style="border-color:#555;color:#999;background:rgba(255,255,255,.05);padding:6px 14px;font-size:12px;">Not now</button></div></div></div>
+          <div class="msg a"><div class="au">Support MCP</div><div class="bb" id="s5-prompt">I noticed you've had to manually copy and submit tickets <strong>3 times</strong> this month. Would you like to request <strong>write access</strong> so I can file tickets directly on your behalf?<br><br><span style="font-size:12px;color:#999;">This request goes to your org admin for approval. Your current access won't change until approved.</span><br><div id="s5-btns" style="display:flex;gap:8px;margin-top:10px;"><button class="req-btn" onclick="s5Choose('request')" style="padding:6px 14px;font-size:12px;">🔓 Request write access</button><button class="req-btn" onclick="s5Choose('skip')" style="border-color:#555;color:#999;background:rgba(255,255,255,.05);padding:6px 14px;font-size:12px;">Not now</button></div></div></div>
 
           <!-- Priya reply (hidden until click) -->
           <div class="msg u" id="s5-reply" style="display:none;"><div class="au">Priya</div><div class="bb" id="s5-reply-text"></div></div>
@@ -406,6 +406,10 @@ const P={
 function goTo(n){if(n<1||n>T||n===c)return;document.getElementById('s'+c).classList.remove('active');document.getElementById('d'+c).classList.remove('on');c=n;document.getElementById('s'+c).classList.add('active');document.getElementById('d'+c).classList.add('on');var sn=document.getElementById('sn');if(c===6){sn.style.display='none';}else{sn.style.display='';sn.textContent='Step '+c+' of 5';}const p=P[c],av=document.getElementById('sp-av');av.textContent=p.init;av.className='pres-persona-avatar '+p.cls;document.getElementById('sp-name').textContent=p.name;document.getElementById('sp-role').textContent=p.role;document.getElementById('pb').disabled=c===1;document.getElementById('nb').disabled=c===T;}
 function go(d){const n=c+d;if(n<1||n>T)return;document.getElementById('s'+c).classList.remove('active');document.getElementById('d'+c).classList.remove('on');c=n;document.getElementById('s'+c).classList.add('active');document.getElementById('d'+c).classList.add('on');var sn=document.getElementById('sn');if(c===6){sn.style.display='none';}else{sn.style.display='';sn.textContent='Step '+c+' of 5';}const p=P[c],av=document.getElementById('sp-av');av.textContent=p.init;av.className='pres-persona-avatar '+p.cls;document.getElementById('sp-name').textContent=p.name;document.getElementById('sp-role').textContent=p.role;document.getElementById('pb').disabled=c===1;document.getElementById('nb').disabled=c===T;}
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')go(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(-1);});
+/* Recapture focus from iframes when clicking outside them */
+document.addEventListener('click',e=>{if(e.target.tagName!=='IFRAME')window.focus();});
+/* Also try to capture arrow keys even when iframe has focus */
+window.addEventListener('blur',()=>{setTimeout(()=>{window.addEventListener('keydown',function refocus(e){if(['ArrowRight','ArrowLeft','ArrowUp','ArrowDown'].includes(e.key)){window.focus();window.removeEventListener('keydown',refocus);}},{capture:true});},100);});
 
 /* ── Slide 4: Copy to clipboard interaction ── */
 function s4Copy(){
@@ -424,7 +428,7 @@ function s5Choose(choice){
   var respText=document.getElementById('s5-response-text');
   if(choice==='request'){
     replyText.innerHTML='Yes, that would save me a lot of time. Go ahead and send the request.';
-    respText.innerHTML='<div class="ok-box"><div class="ot">✓ Access request submitted</div><div class="od"><strong>Requested:</strong> Write access for Support MCP<br><strong>Sent to:</strong> Alex (org admin)<br><strong>Status:</strong> Pending review<br><br>Alex will evaluate whether this access level is appropriate for your role. You\'ll be notified once a decision is made.</div></div>In the meantime, I\'m still here to help draft and diagnose! 👋';
+    respText.innerHTML='<div class="ok-box"><div class="ot">✓ Access request submitted</div><div class="od"><strong>Requested:</strong> Write access for Support MCP<br><strong>Sent to:</strong> Org admin<br><strong>Status:</strong> Pending review<br><br>Your org admin will evaluate whether this access level is appropriate for your role. You\'ll be notified once a decision is made.</div></div>In the meantime, I\'m still here to help draft and diagnose! 👋';
   } else {
     replyText.innerHTML='Not right now — I\'ll keep doing it manually for the time being.';
     respText.innerHTML='No problem at all! You can always request access later by asking me. I\'ll keep helping you draft tickets in the meantime. 👋';

@@ -112,7 +112,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
     requesterEmail: 'sarah.chen@initech.com',
     accessDuration: '2025-10-01 to 2026-03-31',
     roles: ['Inventory administrator', 'Compliance viewer'],
-    userGroups: ['DevOps Engineers', 'Platform Engineers', 'SRE Team'],
+    userGroups: ['Platform Engineers'],
   };
 
   const accessReviewWorkspaces = [
@@ -296,6 +296,15 @@ const TrustedOrganizations: React.FunctionComponent = () => {
   const [foreignGroupSearch, setForeignGroupSearch] = React.useState('');
 
   const generateForeignGroupsForOrg = React.useCallback((orgId: string): ForeignGroupRow[] => {
+    if (orgId === '200045') {
+      return [
+        { id: 'fg-200045-0', name: 'Engineering leads', members: 8 },
+        { id: 'fg-200045-1', name: 'Product managers', members: 4 },
+        { id: 'fg-200045-2', name: 'Design ops', members: 3 },
+        { id: 'fg-200045-3', name: 'QA engineers', members: 6 },
+        { id: 'fg-200045-4', name: 'DevOps', members: 5 },
+      ];
+    }
     const names = [
       'Engineering', 'Operations', 'Cloud Services', 'Data Platform',
       'Security Ops', 'DevOps', 'Analytics', 'Infrastructure',
@@ -668,12 +677,16 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                 <DrawerContent
                   panelContent={
                     <DrawerPanelContent
+                      hasNoBorder
                       defaultSize="560px"
                       style={{
                         height: 'calc(100vh - var(--pf-v6-c-page__main-section--PaddingTop, 0px) - 32px)',
                         display: 'flex',
                         flexDirection: 'column',
                         overflow: 'hidden',
+                        boxShadow: isDetailsOpen
+                          ? '-10px 0 9px -8px rgba(41, 41, 41, 0.15)'
+                          : 'none',
                       }}
                     >
                       <DrawerHead>

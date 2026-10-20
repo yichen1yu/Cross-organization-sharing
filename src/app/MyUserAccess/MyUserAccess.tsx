@@ -70,7 +70,7 @@ const MyUserAccess: React.FunctionComponent = () => {
   const [searchValue, setSearchValue] = React.useState('');
 
   const drawerPanelContent = selectedGroup ? (
-    <DrawerPanelContent widths={{ default: 'width_33' }} minSize="320px">
+    <DrawerPanelContent hasNoBorder widths={{ default: 'width_33' }} minSize="320px">
       <DrawerHead>
         <Title headingLevel="h3" size="lg">{selectedGroup.name}</Title>
         <DrawerActions>

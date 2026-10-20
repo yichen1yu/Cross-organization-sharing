@@ -13,6 +13,10 @@ import {
   Dropdown,
   DropdownItem,
   DropdownList,
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateBody,
+  EmptyStateFooter,
   Form,
   FormGroup,
   Label,
@@ -25,13 +29,17 @@ import {
   PageSection,
   Pagination,
   SearchInput,
+  Switch,
   TextInput,
   Title,
   Toolbar,
   ToolbarContent,
+  ToolbarFilter,
   ToolbarItem,
   ToolbarGroup,
+  LabelGroup,
 } from '@patternfly/react-core';
+import { PlusCircleIcon } from '@patternfly/react-icons';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { EllipsisVIcon, ExternalLinkAltIcon, FilterIcon, HelpIcon, KeyIcon } from '@patternfly/react-icons';
 
@@ -103,6 +111,7 @@ const ServiceAccounts: React.FunctionComponent = () => {
   const [alerts, setAlerts] = React.useState<{ key: number; variant: AlertVariant; title: string }[]>([]);
   const alertIdRef = React.useRef(0);
   const [sortIndex, setSortIndex] = React.useState<number | null>(null);
+  const [showEmptyState, setShowEmptyState] = React.useState(false);
 
   const addAlert = (variant: AlertVariant, title: string) => {
     const key = alertIdRef.current++;
@@ -184,14 +193,22 @@ const ServiceAccounts: React.FunctionComponent = () => {
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
           <BreadcrumbItem>Identity & Access Management</BreadcrumbItem>
-          <BreadcrumbItem isActive>Service Accounts</BreadcrumbItem>
+          <BreadcrumbItem isActive>Service Accounts &amp; Tokens</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
 
       <PageSection hasBodyWrapper={false}>
-        <Title headingLevel="h1" size="2xl">Service Accounts</Title>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Title headingLevel="h1" size="2xl">Service Accounts &amp; Tokens</Title>
+          <Switch
+            id="empty-state-toggle"
+            label="Empty state"
+            isChecked={showEmptyState}
+            onChange={(_e, checked) => setShowEmptyState(checked)}
+          />
+        </div>
         <Content>
-          <p style={{ margin: 0, color: '#6a6e73' }}>Use service accounts to securely and automatically connect and authenticate services or applications without requiring an end user's credentials or direct interaction.</p>
+          <p style={{ margin: 0, color: '#6a6e73' }}>Use service accounts and tokens to securely and automatically connect and authenticate services or applications without requiring an end user's credentials or direct interaction.</p>
           <div style={{ marginTop: '8px' }}>
             <Button
               variant="link"
@@ -210,6 +227,36 @@ const ServiceAccounts: React.FunctionComponent = () => {
       </PageSection>
 
       <PageSection hasBodyWrapper={false} isFilled style={{ paddingTop: 0 }}>
+        {showEmptyState ? (
+          <EmptyState headingLevel="h2" icon={PlusCircleIcon} titleText="No service accounts yet" variant="lg">
+            <EmptyStateBody>
+              To get started, create a service account.
+            </EmptyStateBody>
+            <EmptyStateFooter>
+              <EmptyStateActions>
+                <Dropdown
+                  isOpen={isCreateOpen}
+                  onOpenChange={setIsCreateOpen}
+                  toggle={(toggleRef: React.Ref<MenuToggleElement>) => (
+                    <MenuToggle
+                      ref={toggleRef}
+                      onClick={() => setIsCreateOpen(!isCreateOpen)}
+                      variant="primary"
+                    >
+                      Create new
+                    </MenuToggle>
+                  )}
+                >
+                  <DropdownList>
+                    <DropdownItem onClick={() => { setIsCreateOpen(false); setNewSAName(''); setNewSADescription(''); setIsCreateSAModalOpen(true); }}>Service account</DropdownItem>
+                    <DropdownItem onClick={() => { setIsCreateOpen(false); setNewSATName(''); setNewSATDescription(''); setNewSATExpiration(''); setIsCreateSATModalOpen(true); }}>Service Access Tokens</DropdownItem>
+                  </DropdownList>
+                </Dropdown>
+              </EmptyStateActions>
+            </EmptyStateFooter>
+          </EmptyState>
+        ) : (
+        <>
         <Toolbar>
           <ToolbarContent>
             <ToolbarGroup>
@@ -296,6 +343,22 @@ const ServiceAccounts: React.FunctionComponent = () => {
               />
             </ToolbarItem>
           </ToolbarContent>
+          {(query.trim() || typeFilter) && (
+            <ToolbarContent>
+              <ToolbarItem>
+                <LabelGroup categoryName={filterCategory}>
+                  {filterCategory === 'Type' && typeFilter ? (
+                    <Label variant="outline" onClose={() => { setTypeFilter(''); setPage(1); }}>{typeFilter}</Label>
+                  ) : query.trim() ? (
+                    <Label variant="outline" onClose={() => { setQuery(''); setPage(1); }}>{query}</Label>
+                  ) : null}
+                </LabelGroup>
+              </ToolbarItem>
+              <ToolbarItem>
+                <Button variant="link" onClick={() => { setQuery(''); setTypeFilter(''); setPage(1); }}>Clear all filters</Button>
+              </ToolbarItem>
+            </ToolbarContent>
+          )}
         </Toolbar>
 
         <Table aria-label="Service accounts table">
@@ -356,6 +419,8 @@ const ServiceAccounts: React.FunctionComponent = () => {
             onPerPageSelect={(_, n) => { setPerPage(n); setPage(1); }}
           />
         </div>
+        </>
+        )}
       </PageSection>
 
       <Modal

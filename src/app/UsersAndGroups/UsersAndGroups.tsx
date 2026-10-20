@@ -608,7 +608,7 @@ const UsersAndGroups: React.FunctionComponent = () => {
             <Drawer isExpanded={isGroupDrawerOpen} isInline>
               <DrawerContent panelContent={
                 selectedGroup ? (
-                  <DrawerPanelContent widths={{ default: 'width_33' }} style={{ borderLeft: '1px solid var(--pf-t--global--border--color--default)' }}>
+                  <DrawerPanelContent hasNoBorder widths={{ default: 'width_33' }}>
                     <DrawerHead>
                       <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }} alignItems={{ default: 'alignItemsCenter' }}>
                         <FlexItem>

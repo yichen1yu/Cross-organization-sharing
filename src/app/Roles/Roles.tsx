@@ -112,8 +112,9 @@ const Roles: React.FunctionComponent = () => {
 
   const drawerPanel = (
     <DrawerPanelContent
+      hasNoBorder
       defaultSize="480px"
-      style={{ height: 'calc(100vh - 180px)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+      style={{ height: 'calc(100vh - 180px)', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: isDrawerOpen ? '-10px 0 9px -8px rgba(41, 41, 41, 0.15)' : 'none' }}
     >
       <DrawerHead>
         <Title headingLevel="h2" size="lg">{selectedRole?.name ?? 'Role'}</Title>

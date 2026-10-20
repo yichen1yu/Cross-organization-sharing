@@ -378,7 +378,7 @@ const Workspaces: React.FunctionComponent = () => {
             }}
             header={
               <WizardHeader
-                title={`Grant access to Production`}
+                title={`Grant access to ${wsMeta.name}`}
                 description="Review and configure access."
                 onClose={() => setIsGrantWizardOpen(false)}
               />
@@ -641,7 +641,7 @@ const Workspaces: React.FunctionComponent = () => {
                  <Drawer isExpanded={isDetailsPanelOpen} isInline={false} position="right" style={{ minHeight: 'calc(100vh - 220px)' }}>
                   <DrawerContent
                     panelContent={
-                      <DrawerPanelContent defaultSize="400px" style={{ display: 'flex', flexDirection: 'column' }}>
+                      <DrawerPanelContent hasNoBorder defaultSize="400px" style={{ display: 'flex', flexDirection: 'column', boxShadow: isDetailsPanelOpen ? '-10px 0 9px -8px rgba(41, 41, 41, 0.15)' : 'none' }}>
                         <DrawerHead>
                           <Title headingLevel="h2" size="lg">{detailsPanelRow?.groupName}</Title>
                           <DrawerActions>

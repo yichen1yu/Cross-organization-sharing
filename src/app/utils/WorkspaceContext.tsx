@@ -12,7 +12,7 @@ export type WorkspaceNode = {
 
 export const allWorkspaces: WorkspaceNode[] = [
   // My organization
-  { id: 'uxd', slug: 'uxd', name: 'Acme Corp', description: 'This is the root workspace.', level: 0 },
+  { id: 'uxd', slug: 'uxd', name: 'Pinnacle Corp', description: 'This is the root workspace.', level: 0 },
   { id: 'ws-default', slug: 'workspace-default', name: 'Workspace default', description: 'This is a description of Workspace default.', parentId: 'uxd', level: 1 },
   { id: 'ws-ungrouped', slug: 'workspace-ungrouped-hosts', name: 'Workspace Ungrouped Hosts', description: 'Where ungrouped systems will go.', parentId: 'ws-default', level: 2 },
   { id: 'ws-a', slug: 'workspace-a', name: 'Production', description: 'Workspace consisted of systems in the production environment.', parentId: 'ws-default', level: 2 },

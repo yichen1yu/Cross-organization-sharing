@@ -457,7 +457,7 @@ const WorkspacesList: React.FunctionComponent = () => {
               <DrawerContent
                 panelContent={
                   drawerWorkspace ? (
-                    <DrawerPanelContent widths={{ default: 'width_33' }}>
+                    <DrawerPanelContent hasNoBorder widths={{ default: 'width_33' }} style={{ boxShadow: drawerOpen ? '-10px 0 9px -8px rgba(41, 41, 41, 0.15)' : 'none' }}>
                       <DrawerHead>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
                           <Title headingLevel="h3" size="lg">{drawerWorkspace.name}</Title>
