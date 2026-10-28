@@ -2181,7 +2181,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         { label: 'Identity Provider Integration', path: '/organization/identity-provider-integration', isActive: location.pathname === '/organization/identity-provider-integration' },
       ]
     },
-    { label: 'Service Accounts & Tokens', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
+    { label: 'Service Accounts', path: '/service-accounts', isActive: location.pathname === '/service-accounts' },
     { label: 'Learning Resources', path: '/learning-resources-iam', isActive: location.pathname === '/learning-resources-iam' },
   ];
 

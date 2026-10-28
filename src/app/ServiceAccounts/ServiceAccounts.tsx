@@ -193,13 +193,13 @@ const ServiceAccounts: React.FunctionComponent = () => {
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
           <BreadcrumbItem>Identity & Access Management</BreadcrumbItem>
-          <BreadcrumbItem isActive>Service Accounts &amp; Tokens</BreadcrumbItem>
+          <BreadcrumbItem isActive>Service Accounts</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
 
       <PageSection hasBodyWrapper={false}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Title headingLevel="h1" size="2xl">Service Accounts &amp; Tokens</Title>
+          <Title headingLevel="h1" size="2xl">Service Accounts</Title>
           <Switch
             id="empty-state-toggle"
             label="Empty state"

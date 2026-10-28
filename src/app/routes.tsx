@@ -321,7 +321,7 @@ const routes: AppRouteConfig[] = [
     element: <ServiceAccounts />,
     exact: true,
     path: '/service-accounts',
-    title: 'Service Accounts & Tokens | Red Hat Hybrid Cloud Console',
+    title: 'Service Accounts | Red Hat Hybrid Cloud Console',
   },
   {
     element: <AIAgents />,
