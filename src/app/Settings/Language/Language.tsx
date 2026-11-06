@@ -1,5 +1,8 @@
 import * as React from 'react';
 import {
+  Alert,
+  AlertActionCloseButton,
+  AlertGroup,
   Breadcrumb,
   BreadcrumbItem,
   Button,
@@ -31,7 +34,7 @@ const regionalFormatOptions = [
 ];
 
 const Language: React.FunctionComponent = () => {
-  useDocumentTitle('Language | Settings');
+  useDocumentTitle('Language | User Preferences | Settings');
 
   const wrapperRef = React.useRef<HTMLDivElement>(null);
 
@@ -42,12 +45,18 @@ const Language: React.FunctionComponent = () => {
 
   const [savedLanguage, setSavedLanguage] = React.useState('en');
   const [savedRegionalFormat, setSavedRegionalFormat] = React.useState('default');
+  const [toast, setToast] = React.useState<{ id: number; title: string; description: string } | null>(null);
 
   const hasChanges = language !== savedLanguage || regionalFormat !== savedRegionalFormat;
 
   const onSave = () => {
     setSavedLanguage(language);
     setSavedRegionalFormat(regionalFormat);
+    setToast({
+      id: Date.now(),
+      title: 'Language and regional format preferences saved',
+      description: "Your preferences have been saved to your Red Hat account and will apply to other Red Hat properties where this language is supported.",
+    });
   };
 
   const onCancel = () => {
@@ -103,10 +112,28 @@ const Language: React.FunctionComponent = () => {
 
   return (
     <div ref={wrapperRef} style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+      <AlertGroup
+        isToast
+        isLiveRegion
+        aria-live="assertive"
+        style={{ position: 'fixed', top: 16, right: 16, zIndex: 9999 }}
+      >
+        {toast && (
+          <Alert
+            variant="success"
+            title={toast.title}
+            timeout={6000}
+            onTimeout={() => setToast(null)}
+            actionClose={<AlertActionCloseButton onClose={() => setToast(null)} />}
+          >
+            {toast.description}
+          </Alert>
+        )}
+      </AlertGroup>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
           <BreadcrumbItem component={Link} to="/">Red Hat Hybrid Cloud Console</BreadcrumbItem>
-          <BreadcrumbItem component={Link} to="/settings/integrations">Settings</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/settings/user-preferences">Settings</BreadcrumbItem>
           <BreadcrumbItem isActive>Language</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>

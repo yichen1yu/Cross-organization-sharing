@@ -1978,12 +1978,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </Button>
             </Tooltip>
 
-            {/* User dropdown - no Tooltip to avoid ghost overlay when any dropdown is open */}
+            {/* User dropdown - no Tooltip on the toggle, so it does not leave a ghost overlay */}
             <Dropdown
+              className="hcc-user-menu"
               isOpen={isUserDropdownOpen}
               onSelect={onUserDropdownSelect}
               onOpenChange={(isOpen: boolean) => setIsUserDropdownOpen(isOpen)}
-              popperProps={{ appendTo: 'inline' }}
+              popperProps={{ appendTo: 'inline', position: 'right' }}
               toggle={(toggleRef: React.Ref<any>) => (
                 <MenuToggle
                   ref={toggleRef}
@@ -1998,50 +1999,56 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               shouldFocusToggleOnSelect
             >
               <DropdownList>
-                <div style={{ padding: '16px' }}>
-                  <DescriptionList isCompact>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Username:</DescriptionListTerm>
-                      <DescriptionListDescription>Alex Admin</DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Account number:</DescriptionListTerm>
-                      <DescriptionListDescription>12345678</DescriptionListDescription>
-                    </DescriptionListGroup>
-                    <DescriptionListGroup>
-                      <DescriptionListTerm>Org ID:</DescriptionListTerm>
-                      <DescriptionListDescription>987654321</DescriptionListDescription>
-                    </DescriptionListGroup>
-                  </DescriptionList>
-                </div>
-                <div style={{ paddingBottom: '8px' }}>
-                  <Divider />
-                </div>
+                <Panel>
+                  <PanelMain>
+                    <PanelMainBody>
+                      <DescriptionList isCompact>
+                        <DescriptionListGroup>
+                          <DescriptionListTerm>Username:</DescriptionListTerm>
+                          <DescriptionListDescription>Alex Admin</DescriptionListDescription>
+                          <DescriptionListDescription>Org. Administrator</DescriptionListDescription>
+                        </DescriptionListGroup>
+                        <DescriptionListGroup>
+                          <DescriptionListTerm>
+                            Account number:
+                            <Tooltip content="Use this number when contacting Red Hat for support. If you've never had a subscription in your account, you may not see an account number here.">
+                              <button type="button" className="hcc-user-menu__help" aria-label="Account number help">
+                                <QuestionCircleIcon />
+                              </button>
+                            </Tooltip>
+                          </DescriptionListTerm>
+                          <DescriptionListDescription>540155</DescriptionListDescription>
+                          <DescriptionListDescription>Internal user</DescriptionListDescription>
+                        </DescriptionListGroup>
+                        <DescriptionListGroup>
+                          <DescriptionListTerm>Org ID:</DescriptionListTerm>
+                          <DescriptionListDescription>1979710</DescriptionListDescription>
+                        </DescriptionListGroup>
+                      </DescriptionList>
+                    </PanelMainBody>
+                  </PanelMain>
+                </Panel>
+                <Divider component="li" />
                 <DropdownItem
-                  component="a"
-                  href="https://console.redhat.com/settings/profile"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  My profile
-                </DropdownItem>
-                <DropdownItem
+                  className="hcc-user-menu__link"
                   onClick={() => {
-                    navigate('/my-user-access');
+                    navigate('/settings/profile');
                     setIsUserDropdownOpen(false);
                   }}
                 >
-                  My User Access
+                  Account details
                 </DropdownItem>
                 <DropdownItem
+                  className="hcc-user-menu__link"
                   onClick={() => {
-                    navigate('/settings/language');
+                    navigate('/settings/user-preferences');
                     setIsUserDropdownOpen(false);
                   }}
                 >
-                  Language
+                  User Preferences
                 </DropdownItem>
                 <DropdownItem
+                  className="hcc-user-menu__link"
                   onClick={() => {
                     navigate('/internal');
                     setIsUserDropdownOpen(false);
@@ -2049,12 +2056,8 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 >
                   Internal
                 </DropdownItem>
-                <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
-                  <Divider />
-                </div>
-                <DropdownItem>
-                  Log out
-                </DropdownItem>
+                <Divider component="li" />
+                <DropdownItem>Log out</DropdownItem>
               </DropdownList>
             </Dropdown>
         </div>
@@ -2189,11 +2192,20 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const settingsNavItems = [
     { label: 'Integrations', path: '/settings/integrations', isActive: location.pathname === '/settings/integrations' },
     { label: 'Notifications', path: '/settings/notifications', isActive: location.pathname === '/settings/notifications' },
-    { label: 'Language', path: '/settings/language', isActive: location.pathname === '/settings/language' },
+    {
+      label: 'User Preferences',
+      path: '/settings/user-preferences',
+      defaultPath: '/settings/user-preferences/language',
+      isActive: location.pathname.startsWith('/settings/user-preferences'),
+      isExpandable: true,
+      subItems: [
+        { label: 'Language', path: '/settings/user-preferences/language', isActive: location.pathname === '/settings/user-preferences/language' },
+      ],
+    },
     { label: 'Learning Resources', path: '/learning-resources', isActive: location.pathname === '/learning-resources' },
   ];
 
-  const renderBundleNav = (items: Array<{ label: string; path: string; isActive: boolean; isExpandable?: boolean; subItems?: Array<{ label: string; path: string; isActive: boolean }> }>, prefix: string) =>
+  const renderBundleNav = (items: Array<{ label: string; path: string; defaultPath?: string; isActive: boolean; isExpandable?: boolean; subItems?: Array<{ label: string; path: string; isActive: boolean }> }>, prefix: string) =>
     items.map((item, idx) =>
       item.isExpandable ? (
         <NavExpandable
@@ -2202,6 +2214,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           title={item.label}
           isActive={item.isActive}
           isExpanded={item.isActive}
+          buttonProps={item.defaultPath ? { onClick: () => navigate(item.defaultPath as string) } : undefined}
         >
           {item.subItems?.map((subItem, subIdx) => (
             <NavItem key={`${prefix}-sub-${idx}-${subIdx}`} id={`${prefix}-sub-${idx}-${subIdx}`} isActive={subItem.isActive}>

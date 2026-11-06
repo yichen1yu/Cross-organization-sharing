@@ -70,3 +70,41 @@ body { margin: 0; }
 .pf-v6-c-tabs.pf-m-animate-current .pf-v6-c-tabs__list {
   overflow: visible;
 }
+
+/* Profile menu matches the console user dropdown: link-colored actions, plain logout. */
+.hcc-user-menu {
+  min-width: 15rem;
+}
+
+.hcc-user-menu .pf-v6-c-description-list__group {
+  row-gap: var(--pf-t--global--spacer--xs);
+}
+
+.hcc-user-menu .pf-v6-c-description-list {
+  row-gap: var(--pf-t--global--spacer--md);
+}
+
+.hcc-user-menu__help {
+  display: inline-flex;
+  align-items: center;
+  margin-inline-start: var(--pf-t--global--spacer--sm);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--pf-t--global--icon--color--regular);
+  font-size: var(--pf-t--global--icon--size--sm);
+  line-height: 1;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.hcc-user-menu__link {
+  --pf-v6-c-menu__item--Color: var(--pf-t--global--text--color--link--default);
+  color: var(--pf-t--global--text--color--link--default);
+}
+
+.hcc-user-menu__link:hover,
+.hcc-user-menu__link:focus {
+  --pf-v6-c-menu__item--Color: var(--pf-t--global--text--color--link--hover);
+  color: var(--pf-t--global--text--color--link--hover);
+}

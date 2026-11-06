@@ -54,7 +54,6 @@ import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { Integrations } from '@app/Settings/Integrations/Integrations';
 import { Notifications } from '@app/Settings/Notifications/Notifications';
 import { Language } from '@app/Settings/Language/Language';
-import { UserPreferences } from '@app/UserPreferences/UserPreferences';
 import { NotFound } from '@app/NotFound/NotFound';
 export interface IAppRoute {
   label?: string; // Excluding the label will exclude the route from the nav sidebar in AppLayout
@@ -367,16 +366,22 @@ const routes: AppRouteConfig[] = [
     title: 'Notifications | Settings | Red Hat Hybrid Cloud Console',
   },
   {
+    element: <Navigate to="/settings/user-preferences/language" replace />,
+    exact: true,
+    path: '/settings/user-preferences',
+    title: 'User Preferences | Settings | Red Hat Hybrid Cloud Console',
+  },
+  {
     element: <Language />,
+    exact: true,
+    path: '/settings/user-preferences/language',
+    title: 'Language | User Preferences | Settings | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <Navigate to="/settings/user-preferences/language" replace />,
     exact: true,
     path: '/settings/language',
     title: 'Language | Settings | Red Hat Hybrid Cloud Console',
-  },
-  {
-    element: <UserPreferences />,
-    exact: true,
-    path: '/user-preferences',
-    title: 'User Preferences | Red Hat Hybrid Cloud Console',
   },
   {
     element: <Support />,
