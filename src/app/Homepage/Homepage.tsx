@@ -34,12 +34,14 @@ import {
   ShieldAltIcon
 } from '@patternfly/react-icons';
 import { useNavigate } from 'react-router-dom';
+import { useLocale } from '@app/utils/LocaleContext';
 
 const Homepage: React.FunctionComponent = () => {
   const navigate = useNavigate();
+  const { t } = useLocale();
   
   // Get user name (currently hardcoded, matching the username dropdown)
-  const userName = "Alex";
+  const userName = "Alex Admin";
 
   // CSS styles for explore capability cards hover effects and column spans
   const cardHoverStyle = `
@@ -184,12 +186,12 @@ const Homepage: React.FunctionComponent = () => {
                   <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsXs' }}>
                     <FlexItem>
                       <Title headingLevel="h1" size="2xl">
-                        Hi, {userName}
+                        {t(`Hi, ${userName}`)}
                       </Title>
                     </FlexItem>
                     <FlexItem>
                       <Title headingLevel="h2" size="lg">
-                        Welcome to your Hybrid Cloud Console.
+                        {t('Welcome to your Hybrid Cloud Console.')}
                       </Title>
                     </FlexItem>
                   </Flex>
@@ -198,12 +200,12 @@ const Homepage: React.FunctionComponent = () => {
                   <Flex spaceItems={{ default: 'spaceItemsSm' }}>
                     <FlexItem>
                       <Button variant="link">
-                        Reset to default
+                        {t('Reset to default')}
                       </Button>
                     </FlexItem>
                     <FlexItem>
                       <Button variant="primary">
-                        + Add widgets
+                        {t('+ Add widgets')}
                       </Button>
                     </FlexItem>
                   </Flex>
@@ -375,34 +377,34 @@ const Homepage: React.FunctionComponent = () => {
                   <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsSm' }}>
                     <FlexItem>
                       <Content>
-                        Quick access to your most recently visited services and resources.
+                        {t('Quick access to your most recently visited services and resources.')}
                       </Content>
                     </FlexItem>
                     <FlexItem flex={{ default: 'flex_1' }}>
                       <List isPlain>
                         <ListItem>
                           <Button variant="link" onClick={() => navigate('/dashboard')}>
-                            Dashboard
+                            {t('Dashboard')}
                           </Button>
                         </ListItem>
                         <ListItem>
                           <Button variant="link" onClick={() => navigate('/subscription-usage')}>
-                            Alert Manager
+                            {t('Alert Manager')}
                           </Button>
                         </ListItem>
                         <ListItem>
                           <Button variant="link" onClick={() => navigate('/data-integration')}>
-                            Data Integration
+                            {t('Data Integration')}
                           </Button>
                         </ListItem>
                         <ListItem>
                           <Button variant="link" onClick={() => navigate('/my-user-access')}>
-                            My User Access
+                            {t('My User Access')}
                           </Button>
                         </ListItem>
                         <ListItem>
                           <Button variant="link" onClick={() => navigate('/event-log')}>
-                            Event Log
+                            {t('Event Log')}
                           </Button>
                         </ListItem>
                       </List>
@@ -418,12 +420,12 @@ const Homepage: React.FunctionComponent = () => {
                       <Flex direction={{ default: 'column' }} spaceItems={{ default: 'spaceItemsNone' }}>
                         <FlexItem>
                           <Title headingLevel="h4" className="pf-v6-c-card__title">
-                            Settings
+                            {t('Settings')}
                           </Title>
                         </FlexItem>
                         <FlexItem>
                           <Button variant="link" size="sm" onClick={() => navigate('/overview')}>
-                            Manage settings
+                            {t('Manage settings')}
                           </Button>
                         </FlexItem>
                       </Flex>

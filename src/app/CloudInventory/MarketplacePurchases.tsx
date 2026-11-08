@@ -6,8 +6,10 @@ import { CheckCircleIcon, ExclamationCircleIcon, SyncAltIcon, EllipsisVIcon, Exc
 import { Link } from 'react-router-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { subscriptionsData } from '@app/Subscriptions/subscriptionsData';
+import { useLocale } from '@app/utils/LocaleContext';
 
 const MarketplacePurchases: React.FunctionComponent = () => {
+  const { formatDate } = useLocale();
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(50);
   type FilterType = 'Offering name' | 'Marketplace account' | 'Marketplace';
@@ -428,7 +430,7 @@ const MarketplacePurchases: React.FunctionComponent = () => {
                           <span><ExclamationCircleIcon color="#C9190B" style={{ marginRight: 8 }} />Alert</span>
                         )}
                       </Td>
-                      <Td dataLabel="Date added">{r.dateAdded}</Td>
+                      <Td dataLabel="Date added">{formatDate(r.dateAdded)}</Td>
                       <Td dataLabel="Actions" isActionCell>
                         <Dropdown
                           isOpen={openKebabFor === r.id}

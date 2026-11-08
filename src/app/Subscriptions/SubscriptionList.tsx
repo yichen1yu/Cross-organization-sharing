@@ -28,11 +28,13 @@ import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
 import { Link } from 'react-router-dom';
 import { useSchedulerWizard } from '@app/AppLayout/AppLayout';
 import { subscriptionsData } from './subscriptionsData';
+import { useLocale } from '@app/utils/LocaleContext';
 
 // Source of truth for rows
 const initialRows = subscriptionsData;
 
 const SubscriptionList: React.FunctionComponent = () => {
+  const { formatNumber } = useLocale();
   const [query, setQuery] = React.useState('');
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(10);
@@ -133,7 +135,7 @@ const SubscriptionList: React.FunctionComponent = () => {
             <Card>
               <CardBody>
                 <Title headingLevel="h3" size="md">Active</Title>
-                <div style={{ marginTop: 8 }}><Label color="green">{active.toLocaleString()}</Label></div>
+                <div style={{ marginTop: 8 }}><Label color="green">{formatNumber(active)}</Label></div>
               </CardBody>
             </Card>
           </GridItem>
@@ -141,7 +143,7 @@ const SubscriptionList: React.FunctionComponent = () => {
             <Card>
               <CardBody>
                 <Title headingLevel="h3" size="md">Expiring soon</Title>
-                <div style={{ marginTop: 8 }}><Label color="orange">{expiringSoon.toLocaleString()}</Label></div>
+                <div style={{ marginTop: 8 }}><Label color="orange">{formatNumber(expiringSoon)}</Label></div>
               </CardBody>
             </Card>
           </GridItem>
@@ -149,7 +151,7 @@ const SubscriptionList: React.FunctionComponent = () => {
             <Card>
               <CardBody>
                 <Title headingLevel="h3" size="md">Expired</Title>
-                <div style={{ marginTop: 8 }}><Label color="red">{expired.toLocaleString()}</Label></div>
+                <div style={{ marginTop: 8 }}><Label color="red">{formatNumber(expired)}</Label></div>
               </CardBody>
             </Card>
           </GridItem>
@@ -157,7 +159,7 @@ const SubscriptionList: React.FunctionComponent = () => {
             <Card>
               <CardBody>
                 <Title headingLevel="h3" size="md">Future dated</Title>
-                <div style={{ marginTop: 8 }}><Label color="grey">{futureDated.toLocaleString()}</Label></div>
+                <div style={{ marginTop: 8 }}><Label color="grey">{formatNumber(futureDated)}</Label></div>
               </CardBody>
             </Card>
           </GridItem>

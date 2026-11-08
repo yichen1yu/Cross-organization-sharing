@@ -8,6 +8,7 @@ import {
   Content,
 } from '@patternfly/react-core';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
+import { useLocale } from '@app/utils/LocaleContext';
 
 type AuditEntry = {
   date: string;
@@ -133,6 +134,7 @@ const auditData: AuditEntry[] = [
 ];
 
 const AuditLog: React.FunctionComponent = () => {
+  const { formatDate } = useLocale();
   return (
     <>
       <PageSection hasBodyWrapper={false}>
@@ -158,7 +160,7 @@ const AuditLog: React.FunctionComponent = () => {
           <Tbody>
             {auditData.map((entry, idx) => (
               <Tr key={idx}>
-                <Td dataLabel="Date">{entry.date}</Td>
+                <Td dataLabel="Date">{formatDate(entry.date)}</Td>
                 <Td dataLabel="Actor">
                   {entry.actorType === 'agent' ? (
                     <Label color="green" isCompact>{entry.agentLabel}</Label>

@@ -30,8 +30,10 @@ import {
 import { Table, Tbody, Td, Th, Thead, Tr, ThProps } from '@patternfly/react-table';
 import { EllipsisVIcon, FilterIcon, OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { allRoles, type RoleData } from '@app/utils/rolesData';
+import { useLocale } from '@app/utils/LocaleContext';
 
 const Roles: React.FunctionComponent = () => {
+  const { formatDate } = useLocale();
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(20);
   const [searchValue, setSearchValue] = React.useState('');
@@ -309,7 +311,7 @@ const Roles: React.FunctionComponent = () => {
                       <Td dataLabel="Name">{role.name}</Td>
                       <Td dataLabel="Description">{role.description}</Td>
                       <Td dataLabel="Permissions">{role.permissions}</Td>
-                      <Td dataLabel="Last modified">{role.lastModified}</Td>
+                      <Td dataLabel="Last modified">{formatDate(role.lastModified)}</Td>
                     </Tr>
                   ))}
                 </Tbody>

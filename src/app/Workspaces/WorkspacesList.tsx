@@ -48,6 +48,7 @@ import {
 import { Table, Thead, Tbody, Tr, Th, Td, ThProps, TreeRowWrapper, ExpandableRowContent } from '@patternfly/react-table';
 import { EllipsisVIcon, AngleRightIcon, AngleDownIcon } from '@patternfly/react-icons';
 import { useNavigate } from 'react-router-dom';
+import { useLocale } from '@app/utils/LocaleContext';
 import { allRoles as sharedRoles } from '@app/utils/rolesData';
 
 type WorkspaceNode = {
@@ -69,6 +70,7 @@ const allWorkspaces: WorkspaceNode[] = [
 ];
 
 const WorkspacesList: React.FunctionComponent = () => {
+  const { formatDate } = useLocale();
   const navigate = useNavigate();
   const [topTab, setTopTab] = React.useState<string | number>(0);
   const [searchValue, setSearchValue] = React.useState('');
@@ -556,7 +558,7 @@ const WorkspacesList: React.FunctionComponent = () => {
                                   {ws.roles.length}
                                 </Button>
                               </Td>
-                              <Td dataLabel="Shared date">{ws.sharedDate}</Td>
+                              <Td dataLabel="Shared date">{formatDate(ws.sharedDate)}</Td>
                             </Tr>
                           ))}
                         </Tbody>
@@ -632,7 +634,7 @@ const WorkspacesList: React.FunctionComponent = () => {
                                                       {ws.roles.length}
                                                     </Button>
                                                   </Td>
-                                                  <Td dataLabel="Shared date">{ws.sharedDate}</Td>
+                                                  <Td dataLabel="Shared date">{formatDate(ws.sharedDate)}</Td>
                                                 </Tr>
                                               ))}
                                             </Tbody>

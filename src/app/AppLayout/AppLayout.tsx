@@ -147,6 +147,7 @@ import {
 import { Table, Thead, Tbody, Tr, Th, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { AnnotationProvider, AnnotationOverlay, AnnotationPanel, AnnotationToggleBar, useAnnotations } from '@app/AnnotationOverlay/AnnotationOverlay';
 import { useWorkspace, allWorkspaces, WorkspaceNode } from '@app/utils/WorkspaceContext';
+import { useLocale } from '@app/utils/LocaleContext';
 import { Panel, PanelMain, PanelMainBody, PanelFooter } from '@patternfly/react-core';
 
 type SchedulerWizardOptions = { preselectedService?: string; preselectedTask?: string; preselectedFileType?: string; lockService?: boolean; lockTask?: boolean; lockFileType?: boolean };
@@ -840,6 +841,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   // Location and navigation
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLocale();
   
   // Check if we're on a page without navigation (homepage or all services)
   const isPageWithoutNav = location.pathname === '/' || location.pathname === '/all-services';
@@ -1882,7 +1884,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
             >
               <Menu>
                 <MenuList>
-                  <MenuGroup label="Settings">
+                  <MenuGroup label={t('Settings')}>
                     <MenuItem 
                       icon={<BellIcon />}
                       onClick={() => {
@@ -1890,7 +1892,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                         setIsUtilitiesDropdownOpen(false);
                       }}
                     >
-                      Alert Manager
+                      {t('Alert Manager')}
                     </MenuItem>
                     <MenuItem 
                       icon={<DatabaseIcon />}
@@ -1899,7 +1901,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                         setIsUtilitiesDropdownOpen(false);
                       }}
                     >
-                      Data Integration
+                      {t('Data Integration')}
                     </MenuItem>
                     <MenuItem 
                       icon={<ClockIcon />}
@@ -1908,10 +1910,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                         setIsUtilitiesDropdownOpen(false);
                       }}
                     >
-                      Scheduler
+                      {t('Scheduler')}
                     </MenuItem>
                   </MenuGroup>
-                  <MenuGroup label="Identity & Access Management">
+                  <MenuGroup label={t('Identity & Access Management')}>
                     <MenuItem 
                       icon={<UsersIcon />}
                       onClick={() => {
@@ -1919,7 +1921,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                         setIsUtilitiesDropdownOpen(false);
                       }}
                     >
-                      User Access
+                      {t('User Access')}
                     </MenuItem>
                     <MenuItem 
                       icon={<ShieldAltIcon />}
@@ -1928,7 +1930,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                         setIsUtilitiesDropdownOpen(false);
                       }}
                     >
-                      Authentication Policy
+                      {t('Authentication Policy')}
                     </MenuItem>
                     <MenuItem 
                       icon={<ServerIcon />}
@@ -1937,7 +1939,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                         setIsUtilitiesDropdownOpen(false);
                       }}
                     >
-                      Service Accounts
+                      {t('Service Accounts')}
                     </MenuItem>
                   </MenuGroup>
                 </MenuList>
@@ -1990,10 +1992,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   ref={toggleRef}
                   onClick={onUserDropdownToggle}
                   isExpanded={isUserDropdownOpen}
-                  aria-label="User menu"
+                  aria-label={t('User menu')}
                   icon={<UserIcon />}
                 >
-                  Alex Admin
+                  {t('Alex Admin')}
                 </MenuToggle>
               )}
               shouldFocusToggleOnSelect
@@ -2004,13 +2006,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     <PanelMainBody>
                       <DescriptionList isCompact>
                         <DescriptionListGroup>
-                          <DescriptionListTerm>Username:</DescriptionListTerm>
-                          <DescriptionListDescription>Alex Admin</DescriptionListDescription>
-                          <DescriptionListDescription>Org. Administrator</DescriptionListDescription>
+                          <DescriptionListTerm>{t('Username:')}</DescriptionListTerm>
+                          <DescriptionListDescription>{t('Alex Admin')}</DescriptionListDescription>
+                          <DescriptionListDescription>{t('Org. Administrator')}</DescriptionListDescription>
                         </DescriptionListGroup>
                         <DescriptionListGroup>
                           <DescriptionListTerm>
-                            Account number:
+                            {t('Account number:')}
                             <Tooltip content="Use this number when contacting Red Hat for support. If you've never had a subscription in your account, you may not see an account number here.">
                               <button type="button" className="hcc-user-menu__help" aria-label="Account number help">
                                 <QuestionCircleIcon />
@@ -2018,10 +2020,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                             </Tooltip>
                           </DescriptionListTerm>
                           <DescriptionListDescription>540155</DescriptionListDescription>
-                          <DescriptionListDescription>Internal user</DescriptionListDescription>
+                          <DescriptionListDescription>{t('Internal user')}</DescriptionListDescription>
                         </DescriptionListGroup>
                         <DescriptionListGroup>
-                          <DescriptionListTerm>Org ID:</DescriptionListTerm>
+                          <DescriptionListTerm>{t('Org ID:')}</DescriptionListTerm>
                           <DescriptionListDescription>1979710</DescriptionListDescription>
                         </DescriptionListGroup>
                       </DescriptionList>
@@ -2036,7 +2038,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     setIsUserDropdownOpen(false);
                   }}
                 >
-                  Account details
+                  {t('Account details')}
                 </DropdownItem>
                 <DropdownItem
                   className="hcc-user-menu__link"
@@ -2045,7 +2047,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     setIsUserDropdownOpen(false);
                   }}
                 >
-                  User Preferences
+                  {t('User Preferences')}
                 </DropdownItem>
                 <DropdownItem
                   className="hcc-user-menu__link"
@@ -2054,10 +2056,10 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     setIsUserDropdownOpen(false);
                   }}
                 >
-                  Internal
+                  {t('Internal')}
                 </DropdownItem>
                 <Divider component="li" />
-                <DropdownItem>Log out</DropdownItem>
+                <DropdownItem>{t('Log out')}</DropdownItem>
               </DropdownList>
             </Dropdown>
         </div>
@@ -2070,7 +2072,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       <NavLink
         to={route.path}
       >
-        {route.label}
+        {t(route.label || '')}
       </NavLink>
     </NavItem>
   );
@@ -2079,7 +2081,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     <NavExpandable
       key={`${group.label}-${groupIndex}`}
       id={`${group.label}-${groupIndex}`}
-      title={group.label}
+      title={t(group.label)}
       isActive={group.routes.some((route) => route.path === location.pathname)}
     >
       {group.routes.map((route, idx) => route.label && renderNavItem(route, idx))}
@@ -2211,7 +2213,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         <NavExpandable
           key={`${prefix}-expandable-${idx}`}
           id={`${prefix}-expandable-${idx}`}
-          title={item.label}
+          title={t(item.label)}
           isActive={item.isActive}
           isExpanded={item.isActive}
           buttonProps={item.defaultPath ? { onClick: () => navigate(item.defaultPath as string) } : undefined}
@@ -2219,7 +2221,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
           {item.subItems?.map((subItem, subIdx) => (
             <NavItem key={`${prefix}-sub-${idx}-${subIdx}`} id={`${prefix}-sub-${idx}-${subIdx}`} isActive={subItem.isActive}>
               <NavLink to={subItem.path}>
-                {subItem.label}
+                {t(subItem.label)}
               </NavLink>
             </NavItem>
           ))}
@@ -2227,7 +2229,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       ) : (
         <NavItem key={`${prefix}-${idx}`} id={`${prefix}-${idx}`} isActive={item.isActive}>
           <NavLink to={item.path}>
-            {item.label}
+            {t(item.label)}
           </NavLink>
         </NavItem>
       )
@@ -2263,7 +2265,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       <PageSidebarBody>
         {navigationType === 'settings' && (
           <div style={{ padding: '16px 16px 8px 16px', fontWeight: 400, fontSize: '16px' }}>
-            Console Settings
+            {t('Console Settings')}
           </div>
         )}
         {Navigation}

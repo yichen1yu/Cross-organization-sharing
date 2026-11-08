@@ -9,16 +9,20 @@ import {
   Content,
   Form,
   FormGroup,
+  FormGroupLabelHelp,
   MenuToggle,
   PageSection,
   Select,
   SelectList,
   SelectOption,
   Title,
+  Tooltip,
 } from '@patternfly/react-core';
 import type { MenuToggleElement } from '@patternfly/react-core';
 import { Link } from 'react-router-dom';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
+import { useLocale } from '@app/utils/LocaleContext';
+import type { TranslationKey } from '@app/utils/LocaleContext';
 
 const languageOptions = [
   { value: 'en', label: 'English' },
@@ -35,27 +39,30 @@ const regionalFormatOptions = [
 
 const Language: React.FunctionComponent = () => {
   useDocumentTitle('Language | User Preferences | Settings');
+  const { locale, setLocale, t } = useLocale();
 
   const wrapperRef = React.useRef<HTMLDivElement>(null);
 
-  const [language, setLanguage] = React.useState('en');
+  const [language, setLanguage] = React.useState<string>(locale);
   const [regionalFormat, setRegionalFormat] = React.useState('default');
   const [isLangOpen, setIsLangOpen] = React.useState(false);
   const [isRegionalOpen, setIsRegionalOpen] = React.useState(false);
 
-  const [savedLanguage, setSavedLanguage] = React.useState('en');
+  const [savedLanguage, setSavedLanguage] = React.useState<string>(locale);
   const [savedRegionalFormat, setSavedRegionalFormat] = React.useState('default');
-  const [toast, setToast] = React.useState<{ id: number; title: string; description: string } | null>(null);
+  const [toast, setToast] = React.useState<{ id: number; titleKey: TranslationKey; descriptionKey: TranslationKey } | null>(null);
 
   const hasChanges = language !== savedLanguage || regionalFormat !== savedRegionalFormat;
 
   const onSave = () => {
+    const nextLocale = language === 'zh' ? 'zh' : 'en';
     setSavedLanguage(language);
     setSavedRegionalFormat(regionalFormat);
+    setLocale(nextLocale);
     setToast({
       id: Date.now(),
-      title: 'Language and regional format preferences saved',
-      description: "Your preferences have been saved to your Red Hat account and will apply to other Red Hat properties where this language is supported.",
+      titleKey: 'Language and regional format preferences saved',
+      descriptionKey: 'Your preferences have been saved to your Red Hat account and will apply to other Red Hat properties where this language is supported.',
     });
   };
 
@@ -95,7 +102,7 @@ const Language: React.FunctionComponent = () => {
       isExpanded={isLangOpen}
       isFullWidth
     >
-      {getLangLabel(language)}
+      {t(getLangLabel(language))}
     </MenuToggle>
   );
 
@@ -106,7 +113,7 @@ const Language: React.FunctionComponent = () => {
       isExpanded={isRegionalOpen}
       isFullWidth
     >
-      {getRegionalLabel(regionalFormat)}
+      {t(getRegionalLabel(regionalFormat))}
     </MenuToggle>
   );
 
@@ -121,33 +128,44 @@ const Language: React.FunctionComponent = () => {
         {toast && (
           <Alert
             variant="success"
-            title={toast.title}
+            title={t(toast.titleKey)}
             timeout={6000}
             onTimeout={() => setToast(null)}
             actionClose={<AlertActionCloseButton onClose={() => setToast(null)} />}
           >
-            {toast.description}
+            {t(toast.descriptionKey)}
           </Alert>
         )}
       </AlertGroup>
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
-          <BreadcrumbItem component={Link} to="/">Red Hat Hybrid Cloud Console</BreadcrumbItem>
-          <BreadcrumbItem component={Link} to="/settings/user-preferences">Settings</BreadcrumbItem>
-          <BreadcrumbItem isActive>Language</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/">{t('Red Hat Hybrid Cloud Console')}</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/settings/user-preferences">{t('Settings')}</BreadcrumbItem>
+          <BreadcrumbItem isActive>{t('Language')}</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>
 
       <PageSection hasBodyWrapper={false} style={{ paddingBottom: 0 }}>
-        <Title headingLevel="h1" size="2xl" style={{ marginBottom: 0 }}>Language</Title>
+        <Title headingLevel="h1" size="2xl" style={{ marginBottom: 0 }}>{t('Language')}</Title>
         <Content component="p" style={{ marginTop: 0 }}>
-          Choose your language and the regional format that will influence how your date/time and currency will appear.
+          {t('Choose your language and the regional format that will influence how your date/time and currency will appear.')}
         </Content>
       </PageSection>
 
       <PageSection hasBodyWrapper={false} style={{ paddingTop: '32px' }}>
         <Form isHorizontal style={{ maxWidth: '500px', '--pf-v6-c-form--m-horizontal__group-label--md--GridColumnWidth': '120px', '--pf-v6-c-form--m-horizontal--Gap': '8px 8px' } as React.CSSProperties}>
-          <FormGroup label="Language" fieldId="language-select">
+          <FormGroup
+            label={t('Language')}
+            labelHelp={
+              <Tooltip
+                content={t('The language options listed here are supported by Red Hat Hybrid Cloud Console. Your selected language will be applied across Red Hat properties where it is supported; otherwise, the property will fall back to English.')}
+                position="top"
+              >
+                <FormGroupLabelHelp aria-label="Language availability information" />
+              </Tooltip>
+            }
+            fieldId="language-select"
+          >
             <Select
               id="language-select"
               isOpen={isLangOpen}
@@ -163,14 +181,14 @@ const Language: React.FunctionComponent = () => {
               <SelectList>
                 {languageOptions.map((option) => (
                   <SelectOption key={option.value} value={option.value}>
-                    {option.label}
+                    {t(option.label)}
                   </SelectOption>
                 ))}
               </SelectList>
             </Select>
           </FormGroup>
 
-          <FormGroup label="Regional format" fieldId="regional-format-select">
+          <FormGroup label={t('Regional format')} fieldId="regional-format-select">
             <Select
               id="regional-format-select"
               isOpen={isRegionalOpen}
@@ -186,7 +204,7 @@ const Language: React.FunctionComponent = () => {
               <SelectList>
                 {regionalFormatOptions.map((option) => (
                   <SelectOption key={option.value} value={option.value}>
-                    {option.label}
+                    {t(option.label)}
                   </SelectOption>
                 ))}
               </SelectList>
@@ -208,8 +226,8 @@ const Language: React.FunctionComponent = () => {
         }}
       >
         <div style={{ display: 'flex', gap: '8px' }}>
-          <Button variant="primary" isDisabled={!hasChanges} onClick={onSave}>Save</Button>
-          <Button variant="secondary" isDisabled={!hasChanges} onClick={onCancel}>Cancel</Button>
+          <Button variant="primary" isDisabled={!hasChanges} onClick={onSave}>{t('Save')}</Button>
+          <Button variant="secondary" isDisabled={!hasChanges} onClick={onCancel}>{t('Cancel')}</Button>
         </div>
       </PageSection>
     </div>

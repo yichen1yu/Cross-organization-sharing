@@ -4,8 +4,10 @@ import { Dropdown, DropdownItem, DropdownList } from '@patternfly/react-core';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
 import { CheckCircleIcon, ExclamationCircleIcon, WrenchIcon } from '@patternfly/react-icons';
 import { Link, useLocation } from 'react-router-dom';
+import { useLocale } from '@app/utils/LocaleContext';
 
 const CloudAccounts: React.FunctionComponent = () => {
+  const { formatDate } = useLocale();
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(50);
   type FilterType = 'Cloud account' | 'Cloud provider' | 'Auto-registration' | 'Gold image access';
@@ -300,7 +302,7 @@ const CloudAccounts: React.FunctionComponent = () => {
                     <Td dataLabel="Gold image access">
                       <StatusWithIcon status={r.goldAccess} />
                     </Td>
-                    <Td dataLabel="Date added">{r.dateAdded}</Td>
+                    <Td dataLabel="Date added">{formatDate(r.dateAdded)}</Td>
                     <Td dataLabel="Actions" style={{ textAlign: 'right' }}>
                       <Link to={`/cloud-inventory/marketplace-purchases?account=${encodeURIComponent(r.account)}`}>
                         View purchases

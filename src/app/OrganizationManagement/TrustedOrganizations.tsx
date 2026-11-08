@@ -35,8 +35,10 @@ import { EllipsisVIcon, FilterIcon, CheckCircleIcon, ExclamationCircleIcon, Sync
 import { Wizard, WizardStep, WizardHeader, Modal, ModalHeader, ModalBody, ModalFooter, Radio, TextInput, AlertGroup, Alert, AlertActionCloseButton, Form, FormGroup, FormGroupLabelHelp, Popover, HelperText, HelperTextItem, EmptyState, EmptyStateBody, EmptyStateFooter, EmptyStateActions, ToggleGroup, ToggleGroupItem, ExpandableSection } from '@patternfly/react-core';
 import { OutlinedQuestionCircleIcon } from '@patternfly/react-icons';
 import { useAccessRequest } from '@app/AppLayout/AppLayout';
+import { useLocale } from '@app/utils/LocaleContext';
 
 const TrustedOrganizations: React.FunctionComponent = () => {
+  const { formatDate } = useLocale();
   const location = useLocation();
   const { isAccessRequestHandled, setAccessRequestHandled } = useAccessRequest();
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
@@ -930,7 +932,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                                 <Label color="yellow" icon={<ExclamationTriangleIcon />}>Rejected</Label>
                               )}
                             </Td>
-                            <Td dataLabel="Connected date">{row.connectedDate}</Td>
+                            <Td dataLabel="Connected date">{formatDate(row.connectedDate)}</Td>
                             <Td isActionCell>
                               <Dropdown
                                 isOpen={openKebabKey === `conn-${row.orgId}`}
@@ -1075,7 +1077,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                           </Td>
                           <Td dataLabel="Org ID">{row.orgId}</Td>
                           <Td dataLabel="Requester">{row.requester}</Td>
-                          <Td dataLabel="Requested date">{row.requestedDate}</Td>
+                          <Td dataLabel="Requested date">{formatDate(row.requestedDate)}</Td>
                           <Td isActionCell>
                             <Button variant="secondary" size="sm" onClick={() => row.requestType === 'access' ? openAccessReviewWizard(row) : openPendingWizard(row)}>
                               Review request
@@ -1149,7 +1151,7 @@ const TrustedOrganizations: React.FunctionComponent = () => {
                           <Td dataLabel="Status">
                             <Label color="blue">Pending</Label>
                           </Td>
-                          <Td dataLabel="Requested date">{row.requestedDate}</Td>
+                          <Td dataLabel="Requested date">{formatDate(row.requestedDate)}</Td>
                           <Td isActionCell>
                             <Dropdown
                               isOpen={openKebabKey === `sent-${row.orgId}`}

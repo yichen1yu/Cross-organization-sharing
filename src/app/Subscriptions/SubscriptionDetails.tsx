@@ -18,8 +18,10 @@ import {
 } from '@patternfly/react-core';
 import { Table, Thead, Tbody, Tr, Th, Td } from '@patternfly/react-table';
 import { subscriptionsData } from './subscriptionsData';
+import { useLocale } from '@app/utils/LocaleContext';
 
 const SubscriptionDetails: React.FunctionComponent = () => {
+  const { formatDate, formatNumber } = useLocale();
   const { id } = useParams<{ id: string }>();
   const sub = subscriptionsData.find((s) => s.id === id);
 
@@ -178,9 +180,9 @@ const SubscriptionDetails: React.FunctionComponent = () => {
                   pageRows.map((c) => (
                     <Tr key={c.contractNumber}>
                       <Td>{c.contractNumber}</Td>
-                      <Td>{c.quantity}</Td>
-                      <Td>{c.startDate}</Td>
-                      <Td>{c.endDate}</Td>
+                      <Td>{formatNumber(c.quantity)}</Td>
+                      <Td>{formatDate(c.startDate)}</Td>
+                      <Td>{formatDate(c.endDate)}</Td>
                     </Tr>
                   ))
                 )}
