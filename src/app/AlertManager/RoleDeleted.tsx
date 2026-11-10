@@ -716,7 +716,7 @@ const RoleDeleted: React.FunctionComponent = () => {
       <PageSection hasBodyWrapper={false}>
         <Breadcrumb>
           <BreadcrumbItem component={Link} to="/overview">Settings</BreadcrumbItem>
-          <BreadcrumbItem component={Link} to="/subscription-usage">Alert Manager</BreadcrumbItem>
+          <BreadcrumbItem component={Link} to="/settings/alert-manager">Alert Manager</BreadcrumbItem>
           <BreadcrumbItem isActive>Role deleted</BreadcrumbItem>
         </Breadcrumb>
       </PageSection>

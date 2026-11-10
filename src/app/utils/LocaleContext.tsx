@@ -30,7 +30,7 @@ export type TranslationKey =
   | 'Internal user'
   | 'Language and regional format preferences saved'
   | 'Your preferences have been saved to your Red Hat account and will apply to other Red Hat properties where this language is supported.'
-  | 'The language options listed here are supported by Red Hat Hybrid Cloud Console. Your selected language will be applied across Red Hat properties where it is supported; otherwise, the property will fall back to English.'
+  | 'The language options shown are supported by Red Hat Hybrid Cloud Console. Your selection applies across supported Red Hat properties; others will default to English.'
   | 'Choose your language and the regional format that will influence how your date/time and currency will appear.'
   | 'Hi, Alex Admin'
   | 'Reset to default'
@@ -77,7 +77,7 @@ const chineseTranslations: Partial<Record<TranslationKey, string>> = {
   'Internal user': '内部用户',
   'Language and regional format preferences saved': '语言和区域格式偏好设置已保存',
   'Your preferences have been saved to your Red Hat account and will apply to other Red Hat properties where this language is supported.': '您的偏好设置已保存到红帽账户，并将在支持此语言的其他红帽产品中应用。',
-  'The language options listed here are supported by Red Hat Hybrid Cloud Console. Your selected language will be applied across Red Hat properties where it is supported; otherwise, the property will fall back to English.': '此处列出的语言选项受红帽混合云控制台支持。您选择的语言将在支持该语言的红帽产品中应用；如果某个产品不支持该语言，则会回退为英语。',
+  'The language options shown are supported by Red Hat Hybrid Cloud Console. Your selection applies across supported Red Hat properties; others will default to English.': '此处显示的语言选项受红帽混合云控制台支持。您的选择将应用于支持该语言的红帽产品；其他产品将默认使用英语。',
   'Choose your language and the regional format that will influence how your date/time and currency will appear.': '选择语言和区域格式，以决定日期、时间和货币的显示方式。',
   'Hi, Alex Admin': '您好，Alex Admin',
   'Reset to default': '恢复默认设置',

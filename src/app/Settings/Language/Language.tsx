@@ -158,7 +158,7 @@ const Language: React.FunctionComponent = () => {
             label={t('Language')}
             labelHelp={
               <Tooltip
-                content={t('The language options listed here are supported by Red Hat Hybrid Cloud Console. Your selected language will be applied across Red Hat properties where it is supported; otherwise, the property will fall back to English.')}
+                content={t('The language options shown are supported by Red Hat Hybrid Cloud Console. Your selection applies across supported Red Hat properties; others will default to English.')}
                 position="top"
               >
                 <FormGroupLabelHelp aria-label="Language availability information" />

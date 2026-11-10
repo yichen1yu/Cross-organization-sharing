@@ -850,7 +850,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const mockSearchData = [
     // Main Settings Bundle Pages
     { id: '1', title: 'Overview', description: 'View system overview and general information', category: 'Settings', route: '/overview' },
-    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/subscription-usage' },
+    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/settings/alert-manager' },
     { id: '3', title: 'Data Integration', description: 'Manage data integration workflows, connectors, and synchronization settings', category: 'Settings', route: '/data-integration' },
     { id: '3a', title: 'Scheduler', description: 'Configure and manage scheduled jobs and automation tasks', category: 'Settings', route: '/scheduler' },
     { id: '4', title: 'Event Log', description: 'View and configure system event logging and monitoring', category: 'Settings', route: '/event-log' },
@@ -877,7 +877,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   // Top 5 results for empty state
   const topResults = [
     { id: '1', title: 'Overview', description: 'View system overview and general information', category: 'Settings', route: '/overview' },
-    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/subscription-usage' },
+    { id: '2', title: 'Alert Manager', description: 'Configure and manage system alerts and notifications', category: 'Settings', route: '/settings/alert-manager' },
     { id: '6', title: 'My User Access', description: 'View and manage your personal access permissions and settings', category: 'IAM', route: '/my-user-access' },
     { id: '7', title: 'User Access', description: 'Manage user accounts, groups, and access permissions overview', category: 'IAM', route: '/user-access' },
     { id: '3', title: 'Data Integration', description: 'Manage data integration workflows, connectors, and synchronization settings', category: 'Settings', route: '/data-integration' },
@@ -1888,7 +1888,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                     <MenuItem 
                       icon={<BellIcon />}
                       onClick={() => {
-                        navigate('/settings/notifications');
+                        navigate('/settings/alert-manager');
                         setIsUtilitiesDropdownOpen(false);
                       }}
                     >
@@ -2115,6 +2115,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const settingsNavPages = [
     '/settings/integrations',
     '/settings/notifications',
+    '/settings/alert-manager',
     '/settings/language',
     '/settings/learning-resources',
   ];
@@ -2193,6 +2194,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   // Settings bundle navigation
   const settingsNavItems = [
     { label: 'Integrations', path: '/settings/integrations', isActive: location.pathname === '/settings/integrations' },
+    { label: 'Alert Manager', path: '/settings/alert-manager', isActive: location.pathname === '/settings/alert-manager' },
     { label: 'Notifications', path: '/settings/notifications', isActive: location.pathname === '/settings/notifications' },
     {
       label: 'User Preferences',
@@ -2370,7 +2372,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </DropdownItem>
               <DropdownItem
                 onClick={() => {
-                  navigate('/subscription-usage');
+                  navigate('/settings/alert-manager');
                   setIsNotificationActionsOpen(false);
                 }}
               >
@@ -2378,7 +2380,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
               </DropdownItem>
               <DropdownItem
                 onClick={() => {
-                  navigate('/subscription-usage');
+                  navigate('/settings/alert-manager');
                   setIsNotificationActionsOpen(false);
                 }}
               >
@@ -3969,7 +3971,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               description: 'Configure and manage system alerts and notifications',
                                               category: 'Console Settings',
                                               onClick: () => {
-                                                navigate('/subscription-usage');
+                                                navigate('/settings/alert-manager');
                                                 setIsLogoDropdownOpen(false);
                                               }
                                             },
@@ -4104,7 +4106,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                               description: 'Configure and manage system alerts and notifications',
                                               category: 'Console Settings',
                                               onClick: () => {
-                                                navigate('/subscription-usage');
+                                                navigate('/settings/alert-manager');
                                                 setIsLogoDropdownOpen(false);
                                               }
                                             },
@@ -4326,7 +4328,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                         itemId="alert-manager-settings"
                                         description="Mary to add a description here eventually"
                                         onClick={() => {
-                                          navigate('/subscription-usage');
+                                          navigate('/settings/alert-manager');
                                           setIsLogoDropdownOpen(false);
                                         }}
                                         actions={
@@ -4731,7 +4733,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                                                                                   itemId="console-alert-manager"
                                         description="Configure and manage system alerts, notifications, and escalation policies"
                                         onClick={() => {
-                                          navigate('/subscription-usage');
+                                          navigate('/settings/alert-manager');
                                           setIsLogoDropdownOpen(false);
                                         }}
                                         actions={

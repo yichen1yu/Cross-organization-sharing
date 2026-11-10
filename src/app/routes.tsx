@@ -53,6 +53,7 @@ import { GeneralSettings } from '@app/Settings/General/GeneralSettings';
 import { ProfileSettings } from '@app/Settings/Profile/ProfileSettings';
 import { Integrations } from '@app/Settings/Integrations/Integrations';
 import { Notifications } from '@app/Settings/Notifications/Notifications';
+import { AlertManagerSettings } from '@app/Settings/AlertManager/AlertManager';
 import { Language } from '@app/Settings/Language/Language';
 import { NotFound } from '@app/NotFound/NotFound';
 export interface IAppRoute {
@@ -364,6 +365,12 @@ const routes: AppRouteConfig[] = [
     exact: true,
     path: '/settings/notifications',
     title: 'Notifications | Settings | Red Hat Hybrid Cloud Console',
+  },
+  {
+    element: <AlertManagerSettings />,
+    exact: true,
+    path: '/settings/alert-manager',
+    title: 'Alert Manager | Settings | Red Hat Hybrid Cloud Console',
   },
   {
     element: <Navigate to="/settings/user-preferences/language" replace />,

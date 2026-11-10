@@ -65,6 +65,36 @@ body { margin: 0; }
   --pf-v6-c-content--hr--BackgroundColor: var(--pf-t--global--color--nonstatus--yellow--default);
 }
 
+.settings-alert-manager__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: var(--pf-t--global--border--width--main--default) solid var(--pf-t--global--border--color--default);
+  border-radius: var(--pf-t--global--border--radius--medium, 0.5rem);
+  background: var(--pf-t--global--background--color--secondary--default, #f2f2f2);
+  color: var(--pf-t--global--icon--color--regular);
+  font-size: 1.25rem;
+}
+
+.settings-alert-manager__description {
+  margin-block-start: var(--pf-t--global--spacer--sm);
+  color: var(--pf-t--global--text--color--subtle);
+}
+
+.settings-alert-manager__learn-more {
+  margin-block-start: var(--pf-t--global--spacer--sm);
+}
+
+.settings-alert-manager__search {
+  min-width: 18rem;
+}
+
+.settings-alert-manager__bottom-pagination {
+  margin-block-start: var(--pf-t--global--spacer--md);
+}
+
 /* Fix PF6 animated-tabs indicator clipping: the ::after on .pf-v6-c-tabs__list
    draws the blue active-tab underline but overflow:auto clips it. */
 .pf-v6-c-tabs.pf-m-animate-current .pf-v6-c-tabs__list {
