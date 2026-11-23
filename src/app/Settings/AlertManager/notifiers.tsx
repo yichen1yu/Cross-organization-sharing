@@ -23,7 +23,7 @@ const SlackMark: React.FunctionComponent = () => (
 const brandIcon = (src: string) => <img src={src} alt="" aria-hidden="true" className="alert-notifier-brand-icon" />;
 
 export const notifierMeta: Record<NotifierKind, { label: string; icon: React.ReactNode }> = {
-  email: { label: 'Email', icon: <EnvelopeIcon /> },
+  email: { label: 'Instant', icon: <EnvelopeIcon /> },
   'daily-digest': { label: 'Daily digest', icon: <EnvelopeIcon /> },
   drawer: { label: 'Drawer', icon: <OpenDrawerRightIcon /> },
   slack: { label: 'Slack', icon: <SlackMark /> },
