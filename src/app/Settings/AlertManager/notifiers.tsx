@@ -8,8 +8,8 @@ import serviceNowLogo from '@app/assets/bgimages/servicenow.svg';
 import splunkLogo from '@app/assets/bgimages/splunk.svg';
 import webhooksLogo from '@app/assets/bgimages/webhooks.svg';
 
-export type NotifierKind = 'email' | 'daily-digest' | 'drawer' | 'slack' | 'teams' | 'google-chat' | 'event-ansible' | 'pagerduty' | 'servicenow' | 'splunk' | 'webhooks';
-export type ThirdPartyKind = Exclude<NotifierKind, 'email' | 'daily-digest' | 'drawer'>;
+export type NotifierKind = 'email' | 'daily-digest' | 'monthly-report' | 'drawer' | 'slack' | 'teams' | 'google-chat' | 'event-ansible' | 'pagerduty' | 'servicenow' | 'splunk' | 'webhooks';
+export type ThirdPartyKind = Exclude<NotifierKind, 'email' | 'daily-digest' | 'monthly-report' | 'drawer'>;
 
 const SlackMark: React.FunctionComponent = () => (
   <svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true">
@@ -25,6 +25,7 @@ const brandIcon = (src: string) => <img src={src} alt="" aria-hidden="true" clas
 export const notifierMeta: Record<NotifierKind, { label: string; icon: React.ReactNode }> = {
   email: { label: 'Email', icon: <EnvelopeIcon /> },
   'daily-digest': { label: 'Daily digest', icon: <EnvelopeIcon /> },
+  'monthly-report': { label: 'Monthly', icon: <EnvelopeIcon /> },
   drawer: { label: 'Drawer', icon: <OpenDrawerRightIcon /> },
   slack: { label: 'Slack', icon: <SlackMark /> },
   teams: { label: 'Microsoft Teams', icon: brandIcon(teamsLogo) },
