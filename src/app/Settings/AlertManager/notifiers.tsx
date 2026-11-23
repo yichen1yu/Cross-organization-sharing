@@ -25,7 +25,7 @@ const brandIcon = (src: string) => <img src={src} alt="" aria-hidden="true" clas
 export const notifierMeta: Record<NotifierKind, { label: string; icon: React.ReactNode }> = {
   email: { label: 'Email', icon: <EnvelopeIcon /> },
   'daily-digest': { label: 'Daily digest', icon: <EnvelopeIcon /> },
-  drawer: { label: 'Drawer', icon: <OpenDrawerRightIcon /> },
+  drawer: { label: 'In-console', icon: <OpenDrawerRightIcon /> },
   slack: { label: 'Slack', icon: <SlackMark /> },
   teams: { label: 'Microsoft Teams', icon: brandIcon(teamsLogo) },
   'google-chat': { label: 'Google Chat', icon: brandIcon(googleChatLogo) },
