@@ -13,10 +13,15 @@ export type TranslationKey =
   | 'Save'
   | 'Cancel'
   | 'English'
-  | 'Français'
+  | 'Deutsch'
+  | 'español'
+  | 'français'
+  | 'italiano'
+  | 'português (Brasil)'
   | '한국어'
   | '日本語'
-  | '中文 (中国)'
+  | '中文（中国）'
+  | '中文（台湾）'
   | 'Notifications'
   | 'Integrations'
   | 'Learning Resources'
@@ -30,8 +35,9 @@ export type TranslationKey =
   | 'Internal user'
   | 'Language and regional format preferences saved'
   | 'Your preferences have been saved to your Red Hat account and will apply to other Red Hat properties where this language is supported.'
-  | 'The language options shown are supported by Red Hat Hybrid Cloud Console. Your selection applies across supported Red Hat properties; others will default to English.'
+  | 'Your selection applies across supported Red Hat properties; others will default to English.'
   | 'Choose your language and the regional format that will influence how your date/time and currency will appear.'
+  | 'Language not available for this Red Hat property'
   | 'Hi, Alex Admin'
   | 'Reset to default'
   | '+ Add widgets'
@@ -60,10 +66,15 @@ const chineseTranslations: Partial<Record<TranslationKey, string>> = {
   Save: '保存',
   Cancel: '取消',
   English: '英语',
-  Français: '法语',
+  Deutsch: '德语',
+  español: '西班牙语',
+  français: '法语',
+  italiano: '意大利语',
+  'português (Brasil)': '葡萄牙语（巴西）',
   한국어: '韩语',
   日本語: '日语',
-  '中文 (中国)': '中文（中国）',
+  '中文（中国）': '中文（中国）',
+  '中文（台湾）': '中文（台湾）',
   Notifications: '通知',
   Integrations: '集成',
   'Learning Resources': '学习资源',
@@ -77,8 +88,9 @@ const chineseTranslations: Partial<Record<TranslationKey, string>> = {
   'Internal user': '内部用户',
   'Language and regional format preferences saved': '语言和区域格式偏好设置已保存',
   'Your preferences have been saved to your Red Hat account and will apply to other Red Hat properties where this language is supported.': '您的偏好设置已保存到红帽账户，并将在支持此语言的其他红帽产品中应用。',
-  'The language options shown are supported by Red Hat Hybrid Cloud Console. Your selection applies across supported Red Hat properties; others will default to English.': '此处显示的语言选项受红帽混合云控制台支持。您的选择将应用于支持该语言的红帽产品；其他产品将默认使用英语。',
+  'Your selection applies across supported Red Hat properties; others will default to English.': '您的选择将应用于支持该语言的红帽产品；其他产品将默认使用英语。',
   'Choose your language and the regional format that will influence how your date/time and currency will appear.': '选择语言和区域格式，以决定日期、时间和货币的显示方式。',
+  'Language not available for this Red Hat property': '此红帽产品不支持该语言',
   'Hi, Alex Admin': '您好，Alex Admin',
   'Reset to default': '恢复默认设置',
   '+ Add widgets': '+ 添加小组件',

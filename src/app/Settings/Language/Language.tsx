@@ -24,15 +24,24 @@ import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 import { useLocale } from '@app/utils/LocaleContext';
 import type { TranslationKey } from '@app/utils/LocaleContext';
 
-const languageOptions = [
+type LocaleOption = { value: string; label: string; isDisabled?: boolean };
+
+const unavailableLanguageDescription = 'Language not available for this Red Hat property';
+
+const languageOptions: LocaleOption[] = [
   { value: 'en', label: 'English' },
-  { value: 'fr', label: 'Français' },
+  { value: 'fr', label: 'français' },
   { value: 'ko', label: '한국어' },
   { value: 'ja', label: '日本語' },
-  { value: 'zh', label: '中文 (中国)' },
+  { value: 'zh', label: '中文（中国）' },
+  { value: 'de', label: 'Deutsch', isDisabled: true },
+  { value: 'es', label: 'español', isDisabled: true },
+  { value: 'it', label: 'italiano', isDisabled: true },
+  { value: 'pt-BR', label: 'português (Brasil)', isDisabled: true },
+  { value: 'zh-TW', label: '中文（台湾）', isDisabled: true },
 ];
 
-const regionalFormatOptions = [
+const regionalFormatOptions: LocaleOption[] = [
   { value: 'default', label: 'Language default' },
   ...languageOptions,
 ];
@@ -158,7 +167,7 @@ const Language: React.FunctionComponent = () => {
             label={t('Language')}
             labelHelp={
               <Tooltip
-                content={t('The language options shown are supported by Red Hat Hybrid Cloud Console. Your selection applies across supported Red Hat properties; others will default to English.')}
+                content={t('Your selection applies across supported Red Hat properties; others will default to English.')}
                 position="top"
               >
                 <FormGroupLabelHelp aria-label="Language availability information" />
@@ -180,7 +189,12 @@ const Language: React.FunctionComponent = () => {
             >
               <SelectList>
                 {languageOptions.map((option) => (
-                  <SelectOption key={option.value} value={option.value}>
+                  <SelectOption
+                    key={option.value}
+                    value={option.value}
+                    isDisabled={option.isDisabled}
+                    description={option.isDisabled ? t(unavailableLanguageDescription) : undefined}
+                  >
                     {t(option.label)}
                   </SelectOption>
                 ))}
@@ -203,7 +217,12 @@ const Language: React.FunctionComponent = () => {
             >
               <SelectList>
                 {regionalFormatOptions.map((option) => (
-                  <SelectOption key={option.value} value={option.value}>
+                  <SelectOption
+                    key={option.value}
+                    value={option.value}
+                    isDisabled={option.isDisabled}
+                    description={option.isDisabled ? t(unavailableLanguageDescription) : undefined}
+                  >
                     {t(option.label)}
                   </SelectOption>
                 ))}
